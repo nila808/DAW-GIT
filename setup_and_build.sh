@@ -29,32 +29,31 @@ if ! pip show gitpython > /dev/null 2>&1; then
   pip install gitpython
 fi
 
-# Clean previous builds
-echo "🧹 Cleaning old builds..."
-rm -rf build/ dist/ daw_git_gui.spec
+#!/bin/bash
 
-# Build app
-echo "🚀 Building app..."
-if pyinstaller --noconfirm --windowed --name "DAW Git" --icon=icon.icns \
---add-data "icon.png:." \
---hidden-import PyQt6 --hidden-import PyQt6.QtWidgets --hidden-import PyQt6.QtGui --hidden-import PyQt6.QtCore \
---hidden-import git \
---target-architecture x86_64 \
---osx-bundle-identifier com.example.dawgit \
-daw_git_gui.py; then
+echo "🧹 Cleaning previous builds..."
+rm -rf build/ dist/ __pycache__/ DAW\ Git.spec
 
-    echo "✅ Build succeeded."
+echo "🚀 Building the DAW Git app..."
+pyinstaller \
+  --noconfirm \
+  --windowed \
+  --name "DAW Git" \
+  --icon=icon.icns \
+  --add-data "styles:styles" \
+  --add-data "icon.png:." \
+  daw_git_gui.py
 
-    # Copy styles manually into the correct place inside Contents/MacOS/
-    echo "✅ Copying styles folder..."
-    cp -R styles dist/DAW\ Git.app/Contents/MacOS/
+echo "✅ Build complete!"
 
-    # Launch app automatically
-    echo "🚀 Launching app..."
-    open "dist/DAW Git.app"
+# --- Copy styles manually into app bundle if needed ---
+echo "📂 Copying styles folder into the app..."
+cp -R styles/ "dist/DAW Git.app/Contents/MacOS/styles/"
 
-else
-    echo "❌ Build failed. No styles copied. App not launched."
-fi
+echo "✅ Styles copied!"
 
-echo "🎉 All done!"
+# --- Optional: Auto-launch app after build ---
+echo "🚀 Launching the app..."
+open "dist/DAW Git.app"
+
+echo "🎉 Build and launch complete!"
