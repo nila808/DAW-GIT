@@ -1,0 +1,67 @@
+QWidget {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: 'Arial';
+    font-size: 14px;
+}
+QPushButton#reloadButton {
+    background-color: #1ca6e6;
+    color: rgb(255, 255, 255);
+    height: 40px;
+}
+QPushButton#setupButton {
+    background-color: #1ce663;
+    color: rgb(255, 136, 0);
+    height: 40px;
+    font-weight: bolder;
+}
+QPushButton#commitButton {
+    background-color: hsl(33, 95%, 49%);
+    color: white;
+    height: 40px;
+}
+
+QPushButton#viewChangesButton {
+    background-color: hsl(195, 53%, 39%);
+    color: white;
+    height: 20px;
+    min-width: 200px;   /* minimum width */
+    max-width: 200px;   /* maximum width */
+}
+
+QPushButton#viewStagedChangesButton {
+    background-color: hsl(195, 53%, 39%);
+    color: white;
+    height: 20px;
+    min-width: 200px;   /* minimum width */
+    max-width: 200px;   /* maximum width */
+}
+
+
+QPushButton#checkoutButton {
+    background-color: #821ef4;
+    color: white;
+    height: 40px;
+}
+QPushButton#returnButton {
+    background-color: #ff2672;
+    color: white;
+    height: 40px;
+}
+QPushButton:hover {
+    opacity: 0.85;
+}
+QTextEdit, QTableWidget {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #333;
+    border-radius: 5px;
+}
+QCheckBox {
+    padding: 5px;
+}
+QComboBox {
+    background-color: #252526;
+    color: #ffffff;
+    border: 1px solid #555;
+}
