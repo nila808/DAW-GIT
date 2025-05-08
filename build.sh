@@ -1,24 +1,63 @@
 #!/bin/bash
 
-# Go to project directory (same folder as build.sh)
-cd "$(dirname "$0")"
+APP_NAME="DAW Git"
+APP_BUNDLE="dist/$APP_NAME.app"
 
-# Clean previous builds
-rm -rf build/ dist/ daw_git_gui.spec
+echo "🧹 Cleaning old build files..."
+rm -rf build/ dist/ __pycache__/ "$APP_NAME.spec"
 
-# Build the app
-pyinstaller --noconfirm --windowed --name "DAW Git" --icon=icon.icns \
---add-data "icon.png:." \
---hidden-import PyQt6 \
---hidden-import PyQt6.QtWidgets \
---hidden-import PyQt6.QtGui \
---hidden-import PyQt6.QtCore \
---hidden-import git \
-daw_git_gui.py
+echo "🚀 Building binary with PyInstaller..."
+pyinstaller \
+    --noconfirm \
+    --onedir \
+    --windowed \
+    --name "$APP_NAME" \
+    --icon=icon.icns \
+    --add-data "styles:styles" \
+    --add-data "icon.png:." \
+    daw_git_gui.py
 
+echo "📦 Creating proper macOS .app bundle..."
 
-# ✅ After building, manually copy styles/ into app
-echo "Copying styles/ into the .app bundle..."
-cp -R styles dist/DAW\ Git.app/Contents/MacOS/
+# Create .app folder structure manually
+mkdir -p "$APP_BUNDLE/Contents/MacOS"
+mkdir -p "$APP_BUNDLE/Contents/Resources"
 
-echo "✅ Build complete!"
+# Move built binary into MacOS
+mv "dist/$APP_NAME/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+
+# Move styles and icon into Resources
+cp -R styles "$APP_BUNDLE/Contents/Resources/"
+cp icon.png "$APP_BUNDLE/Contents/Resources/"
+cp icon.icns "$APP_BUNDLE/Contents/Resources/"
+
+# Create minimal Info.plist
+cat > "$APP_BUNDLE/Contents/Info.plist" <<EOL
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>$APP_NAME</string>
+    <key>CFBundleDisplayName</key>
+    <string>$APP_NAME</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.niccavendish.dawgit</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleIconFile</key>
+    <string>icon.icns</string>
+    <key>CFBundleExecutable</key>
+    <string>$APP_NAME</string>
+</dict>
+</plist>
+EOL
+
+echo "✅ App bundle created: $APP_BUNDLE"
+
+# (Optional) Open dist/ folder
+open dist/
+
+echo "🎉 Done! You can now double-click your app!"

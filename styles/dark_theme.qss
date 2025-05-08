@@ -1,6 +1,6 @@
 /* Main Window */
 QWidget {
-    background-color: #121212;
+    background-color: #1c1c1c;
     color: #e0e0e0;
     font-family: 'Arial', sans-serif;
     font-size: 14px;
@@ -26,7 +26,7 @@ QLabel {
 
 /* Buttons */
 QPushButton {
-    background-color: #1e88e5;
+    background-color: #3a1e77;
     color: white;
     border-radius: 5px;
     height: 35px;
@@ -39,7 +39,8 @@ QPushButton:pressed {
 }
 
 /* Theme-specific buttons */
-QPushButton#reloadButton,
+
+/* QPushButton#reloadButton,
 QPushButton#setupButton,
 QPushButton#commitButton,
 QPushButton#viewChangesButton,
@@ -49,7 +50,23 @@ QPushButton#returnButton,
 QPushButton#switchBranchButton,
 QPushButton#setRemoteButton {
     font-weight: bold;
+} */
+
+QPushButton#reloadButton {
+    background-color: #3521cc;
 }
+
+QPushButton#setupButton {
+    background-color: #19ff5b;
+}
+
+QPushButton#commitButton {
+    background-color: #d90fcf;
+}
+
+
+
+
 
 /* ComboBox */
 QComboBox {

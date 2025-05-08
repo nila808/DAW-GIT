@@ -2,22 +2,31 @@
 import os
 import sys
 import subprocess
-
-# --- PyQt6 ---
+import signal
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
     QPushButton, QTextEdit, QLabel, QFileDialog, QMessageBox,
-    QTableWidget, QTableWidgetItem, QCheckBox, QComboBox, QLineEdit
+    QTableWidget, QTableWidgetItem, QCheckBox, QComboBox
 )
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import Qt
-
-# --- GitPython ---
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 
-# --- PATH FIX for Bundled Apps ---
+# --- Developer Mode Switch ---
+DEVELOPER_MODE = True  # Set to False when building final app
+
+# --- Force Correct Working Directory ---
 if getattr(sys, 'frozen', False):
-    os.environ["PATH"] = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
+    os.chdir(os.path.dirname(sys.executable))
+elif '__file__' in globals():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+# --- Path Helper ---
+def resource_path(relative_path):
+    """Get absolute path to resource"""
+    if getattr(sys, '_MEIPASS', False):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.getcwd(), relative_path)
 
 class DAWGitGUI(QWidget):
     def __init__(self):
@@ -25,28 +34,27 @@ class DAWGitGUI(QWidget):
         self.repo = None
         self.project_path = os.getcwd()
 
-        if getattr(sys, 'frozen', False):
-            self.base_path = sys._MEIPASS
-        else:
-            self.base_path = os.path.dirname(os.path.abspath(__file__))
-
-        icon_path = os.path.join(self.base_path, "icon.png")
-
-        # --- Window Settings ---
         self.setWindowTitle("DAW Git Version Control")
-        self.setGeometry(300, 300, 900, 800)
-        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowIcon(QIcon(resource_path("icon.png")))
+        self.resize(1200, 700)   # width, height
+        self.move(300, 200)      # x, y screen position
 
-        # --- Main Layout ---
         main_layout = QVBoxLayout()
 
         # --- Logo ---
+        # --- Logo Label ---
         self.logo_label = QLabel()
-        self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.logo_label.setPixmap(QPixmap(icon_path).scaled(180, 180, Qt.AspectRatioMode.KeepAspectRatio))
-        main_layout.addWidget(self.logo_label)
+        self.logo_label.setPixmap(QPixmap(resource_path("icon.png")).scaled(180, 180, Qt.AspectRatioMode.KeepAspectRatio))
 
-        # --- Theme Section ---
+        # --- Logo Layout ---
+        logo_layout = QHBoxLayout()
+        logo_layout.addStretch()  # Push everything to the right
+        logo_layout.addWidget(self.logo_label)
+
+        main_layout.addLayout(logo_layout)
+
+
+        # --- Theme Settings ---
         theme_group = QGroupBox("Theme Settings")
         theme_layout = QVBoxLayout()
 
@@ -58,24 +66,24 @@ class DAWGitGUI(QWidget):
         self.theme_picker.currentTextChanged.connect(self.change_theme)
         theme_layout.addWidget(self.theme_picker)
 
+        # Reload Style BTN
         self.reload_style_button = QPushButton("Reload Style")
-        self.reload_style_button.setObjectName("reloadButton")
         self.reload_style_button.clicked.connect(self.reload_styles)
-        self.reload_style_button.setMinimumHeight(40)
-        self.reload_style_button.setMinimumWidth(200)
+        self.reload_style_button.setObjectName("reloadButton")
         theme_layout.addWidget(self.reload_style_button)
+        
 
         theme_group.setLayout(theme_layout)
-        theme_group.setMinimumHeight(150)
         main_layout.addWidget(theme_group)
 
-        # --- Project Setup Section ---
+        # --- Project Setup ---
         setup_group = QGroupBox("Project Setup")
         setup_layout = QVBoxLayout()
 
+        # Setup BTN
         self.setup_button = QPushButton("Setup Project")
-        self.setup_button.setObjectName("setupButton")
         self.setup_button.clicked.connect(self.run_setup_wizard)
+        self.setup_button.setObjectName("setupButton")
         setup_layout.addWidget(self.setup_button)
 
         self.remote_checkbox = QCheckBox("Enable remote push (cloud sync)")
@@ -84,39 +92,9 @@ class DAWGitGUI(QWidget):
         setup_group.setLayout(setup_layout)
         main_layout.addWidget(setup_group)
 
-        # --- NEW Advanced Git Tools Section ---
-        advanced_group = QGroupBox("Advanced Git Tools")
-        advanced_layout = QVBoxLayout()
-
-        # Git Status
-        self.status_label = QLabel("Repository Status: Unknown")
-        advanced_layout.addWidget(self.status_label)
-
-        # Branch Selector
-        self.branch_combo = QComboBox()
-        advanced_layout.addWidget(self.branch_combo)
-
-        self.switch_branch_button = QPushButton("Switch Branch")
-        self.switch_branch_button.clicked.connect(self.switch_branch)
-        advanced_layout.addWidget(self.switch_branch_button)
-
-        # Remote Setup
-        self.remote_url_input = QLineEdit()
-        self.remote_url_input.setPlaceholderText("Enter remote repository URL")
-        advanced_layout.addWidget(self.remote_url_input)
-
-        self.set_remote_button = QPushButton("Set Remote URL")
-        self.set_remote_button.clicked.connect(self.set_remote)
-        advanced_layout.addWidget(self.set_remote_button)
-
-        advanced_group.setLayout(advanced_layout)
-        main_layout.addWidget(advanced_group)
-
-        # --- Status Display ---
+        # --- Status Label ---
         self.status = QLabel("Initializing...")
         main_layout.addWidget(self.status)
-
-        # --- Commit Section (will continue in Part 2) ---
 
         # --- Commit Section ---
         commit_group = QGroupBox("Commit Changes")
@@ -137,20 +115,23 @@ class DAWGitGUI(QWidget):
         self.tag_input.setMaximumHeight(40)
         commit_layout.addWidget(self.tag_input)
 
+        # Commit BTN
         self.commit_button = QPushButton("Commit Changes")
-        self.commit_button.setObjectName("commitButton")
         self.commit_button.clicked.connect(self.commit_changes)
+        self.commit_button.setObjectName("commitButton")
         commit_layout.addWidget(self.commit_button)
 
+        # View Unstaged Changes BTN
         self.view_changes_button = QPushButton("View Unstaged Changes")
-        self.view_changes_button.setObjectName("viewChangesButton")
         self.view_changes_button.clicked.connect(self.view_changes)
         commit_layout.addWidget(self.view_changes_button)
+        # your_button.setObjectName("yourButtonName")
 
+        # View Staged Change BTN
         self.view_staged_changes_button = QPushButton("View Staged Changes")
-        self.view_staged_changes_button.setObjectName("viewStagedChangesButton")
         self.view_staged_changes_button.clicked.connect(self.view_staged_changes)
         commit_layout.addWidget(self.view_staged_changes_button)
+        # your_button.setObjectName("yourButtonName")
 
         commit_group.setLayout(commit_layout)
         main_layout.addWidget(commit_group)
@@ -165,26 +146,32 @@ class DAWGitGUI(QWidget):
 
         buttons_layout = QHBoxLayout()
 
+        # Checkout Selected Version BTN
         self.checkout_button = QPushButton("Checkout Selected Version")
-        self.checkout_button.setObjectName("checkoutButton")
         self.checkout_button.clicked.connect(self.checkout_selected_commit)
         buttons_layout.addWidget(self.checkout_button)
+        # your_button.setObjectName("yourButtonName")
 
+        # Return to Latest Version BTN
         self.return_latest_button = QPushButton("Return to Latest Version")
-        self.return_latest_button.setObjectName("returnButton")
         self.return_latest_button.clicked.connect(self.return_to_latest)
         buttons_layout.addWidget(self.return_latest_button)
+        # your_button.setObjectName("yourButtonName")
 
         history_layout.addLayout(buttons_layout)
         history_group.setLayout(history_layout)
         main_layout.addWidget(history_group)
 
-        # --- Set Main Layout ---
+        # --- Finish Layout ---
         self.setLayout(main_layout)
 
-        # --- Initial Setup ---
+        # --- Theme + Git Init ---
         self.apply_theme("Dark")
         self.init_git()
+
+        # --- Force app to quit cleanly ---
+        self.destroyed.connect(QApplication.instance().quit)
+
 
     # --- Theme Applying ---
     def apply_theme(self, theme_name="Dark"):
@@ -198,11 +185,10 @@ class DAWGitGUI(QWidget):
         theme_file = file_mapping.get(theme_name)
 
         if theme_file:
-            if getattr(sys, 'frozen', False):
-                bundle_dir = os.path.abspath(os.path.dirname(sys.executable))
-                base_path = os.path.join(bundle_dir, "styles")
+            if DEVELOPER_MODE:
+                base_path = os.path.join(os.path.dirname(__file__), 'styles')
             else:
-                base_path = os.path.join(os.path.dirname(__file__), "styles")
+                base_path = resource_path('styles')
 
             qss_path = os.path.join(base_path, theme_file)
             print(f"Loading QSS from: {qss_path}")
@@ -211,7 +197,8 @@ class DAWGitGUI(QWidget):
                 try:
                     with open(qss_path, "r") as f:
                         qss = f.read()
-                    QApplication.instance().setStyleSheet(qss)
+                    app = QApplication.instance()
+                    app.setStyleSheet(qss)
                     self.setStyleSheet(qss)
                     print("✅ Stylesheet applied.")
                 except Exception as e:
@@ -219,84 +206,39 @@ class DAWGitGUI(QWidget):
             else:
                 print(f"❗ Theme file not found: {qss_path}")
 
+
+    def change_theme(self, text):
+        self.apply_theme(text)
+
     def reload_styles(self):
-        print("Reloading styles...")
+        print("🔄 Reloading styles...")
         app = QApplication.instance()
+
+        # Clear all styles first
         app.setStyleSheet("")
         self.setStyleSheet("")
-        QApplication.processEvents()
+
+        # Re-apply from updated external file
         self.apply_theme(self.theme_picker.currentText())
-        self.style().polish(self)
+
         self.update()
         self.repaint()
         QApplication.processEvents()
-        QMessageBox.information(self, "Reloaded", "✅ Styles reloaded successfully.")
 
-    # --- Git Initialization ---
+        QMessageBox.information(self, "Reloaded", "✅ Styles reloaded successfully!")
+
+
+
+    # --- Git Functions ---
     def init_git(self):
         try:
             self.repo = Repo(self.project_path)
             self.status.setText(f"Git repository detected at: {self.project_path}")
-            self.update_branches()
             self.update_log()
-            self.update_repo_status()
         except (InvalidGitRepositoryError, NoSuchPathError):
             self.repo = None
             self.status.setText("No Git repository found. Please run setup.")
 
-    # --- Git Branch Handling ---
-    def update_branches(self):
-        if not self.repo:
-            return
-        self.branch_combo.clear()
-        for branch in self.repo.branches:
-            self.branch_combo.addItem(branch.name)
-
-    def switch_branch(self):
-        if not self.repo:
-            return
-        selected_branch = self.branch_combo.currentText()
-        try:
-            self.repo.git.checkout(selected_branch)
-            self.status.setText(f"Switched to branch {selected_branch}")
-            self.update_log()
-            self.update_repo_status()
-        except Exception as e:
-            QMessageBox.critical(self, "Branch Switch Failed", str(e))
-
-    # --- Set Remote URL ---
-    def set_remote(self):
-        if not self.repo:
-            return
-        url = self.remote_url_input.text().strip()
-        if not url:
-            QMessageBox.warning(self, "Missing URL", "Please enter a remote repository URL.")
-            return
-        try:
-            if 'origin' in self.repo.remotes:
-                self.repo.delete_remote('origin')
-            self.repo.create_remote('origin', url)
-            self.status.setText(f"Remote set to {url}")
-        except Exception as e:
-            QMessageBox.critical(self, "Remote Setup Failed", str(e))
-
-    # --- Update Repo Status ---
-    def update_repo_status(self):
-        if not self.repo:
-            return
-        if self.repo.is_dirty(untracked_files=True):
-            staged = self.repo.git.diff('--cached')
-            if staged:
-                self.status_label.setText("Repository Status: ❗️ Staged but Uncommitted Changes")
-                self.status_label.setStyleSheet("color: red;")
-            else:
-                self.status_label.setText("Repository Status: ⚠️ Unstaged Changes Present")
-                self.status_label.setStyleSheet("color: orange;")
-        else:
-            self.status_label.setText("Repository Status: ✅ Clean")
-            self.status_label.setStyleSheet("color: green;")
-
-    # --- Git Setup Wizard ---
     def run_setup_wizard(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Project Folder")
         if folder:
@@ -318,7 +260,6 @@ class DAWGitGUI(QWidget):
             f.write("""*.als~\n*.logicx~\n*.asd\n*.bak\n*.tmp\nBackup/\nBounces/\nFreeze Files/\nRender/\nCache/\nAudio Files/\nSamples/\n.DS_Store\nThumbs.db\n""")
         QMessageBox.information(self, "Setup Complete", "Git + LFS Initialized!")
 
-    # --- Git Commit ---
     def commit_changes(self):
         if not self.repo:
             QMessageBox.warning(self, "Error", "This folder is not a Git repository.")
@@ -346,12 +287,10 @@ class DAWGitGUI(QWidget):
             self.update_log()
             self.commit_message.clear()
             self.tag_input.clear()
-            self.update_repo_status()
             self.status.setText("Committed successfully.")
         except Exception as e:
             QMessageBox.critical(self, "Commit Failed", str(e))
 
-    # --- View Changes ---
     def view_changes(self):
         if not self.repo:
             QMessageBox.warning(self, "Error", "No Git repository found.")
@@ -391,7 +330,6 @@ class DAWGitGUI(QWidget):
 
         self.diff_popup = diff_popup
 
-    # --- Update Commit History ---
     def update_log(self):
         self.history_table.setRowCount(0)
         if not self.repo:
@@ -405,7 +343,6 @@ class DAWGitGUI(QWidget):
             self.history_table.setItem(i, 1, QTableWidgetItem(commit.hexsha[:7]))
             self.history_table.setItem(i, 2, QTableWidgetItem(commit.message.strip()))
 
-    # --- Checkout Commit ---
     def checkout_selected_commit(self):
         if not self.repo:
             return
@@ -420,7 +357,6 @@ class DAWGitGUI(QWidget):
         try:
             self.repo.git.checkout(selected_commit_id)
             self.update_log()
-            self.update_repo_status()
             self.status.setText(f"Checked out {selected_commit_id}")
         except Exception as e:
             QMessageBox.critical(self, "Checkout Failed", str(e))
@@ -440,12 +376,14 @@ class DAWGitGUI(QWidget):
                 QMessageBox.warning(self, "No Branch", "No 'main' or 'master' branch.")
                 return
             self.update_log()
-            self.update_repo_status()
             self.status.setText("Returned to latest version.")
         except Exception as e:
             QMessageBox.critical(self, "Checkout Failed", str(e))
 
-# --- Main Program Launcher ---
+# --- Proper App Exit ---
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+# --- Run App ---
 if __name__ == "__main__":
     app = QApplication([])
     window = DAWGitGUI()
