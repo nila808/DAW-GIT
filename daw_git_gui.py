@@ -302,27 +302,37 @@ class DAWGitGUI(QWidget):
         if not msg:
             QMessageBox.warning(self, "Missing Message", "Please enter a commit message.")
             return
+
+        # Explicitly set environment PATH for Git subprocess
+        custom_env = os.environ.copy()
+        custom_env["PATH"] = "/usr/local/bin:/opt/homebrew/bin:" + custom_env["PATH"]
+
         try:
-            self.repo.git.add(A=True)
+            self.repo.git.add(A=True, env=custom_env)  # ← explicitly use custom_env
             if not self.repo.is_dirty(index=True, working_tree=True, untracked_files=True):
                 QMessageBox.information(self, "No Changes", "No new changes to commit.")
                 return
             new_commit = self.repo.index.commit(msg)
+
             if tag:
                 self.repo.create_tag(tag, ref=new_commit.hexsha)
+
             if self.remote_checkbox.isChecked():
                 try:
                     origin = self.repo.remote(name='origin')
-                    origin.push()
-                    origin.push("--tags")
+                    origin.push(env=custom_env)  # ← also explicitly pass env here
+                    origin.push("--tags", env=custom_env)
                 except Exception as e:
                     self.status.setText(f"Push failed: {e}")
+
             self.update_log()
             self.commit_message.clear()
             self.tag_input.clear()
             self.status.setText("Committed successfully.")
+            QMessageBox.information(self, "Committed", "✅ Changes committed successfully.")
         except Exception as e:
             QMessageBox.critical(self, "Commit Failed", str(e))
+
 
     def view_changes(self):
         if not self.repo:
