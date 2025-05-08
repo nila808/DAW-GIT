@@ -26,10 +26,11 @@ QLabel {
 
 /* Buttons */
 QPushButton {
-    background-color: #3a1e77;
+    background-color: #7acbcc;
     color: rgb(182, 182, 182);
     border-radius: 5px;
     height: 35px;
+    color: #1c1c1c;
 }
 QPushButton:hover {
     background-color: #1565c0;
@@ -62,7 +63,7 @@ QPushButton#reloadButton {
 
 QPushButton#setupButton {
     padding: 5px;
-    background-color: #aaffc2;
+    background-color: #46ff7b;
     color: #1c1c1c;
 }
 

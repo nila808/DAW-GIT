@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
-import os
-import sys
+import os, sys
+
+# --- Explicit PATH Fix for Git LFS ---
+if getattr(sys, 'frozen', False):
+    os.environ["PATH"] = "/usr/local/bin/git-lfs" + os.environ["PATH"]
+    # Add any other explicit paths if needed
+
+# Verify git-lfs is found at startup (optional but recommended):
+print("Using PATH:", os.environ["PATH"])
+print("git-lfs location:", os.popen("which git-lfs").read().strip())
 import subprocess
 import signal
 from PyQt6.QtWidgets import (
@@ -13,7 +21,7 @@ from PyQt6.QtCore import Qt
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 
 # --- Developer Mode Switch ---
-DEVELOPER_MODE = True  # Set to False when building final app
+DEVELOPER_MODE = False  # Set to False when building final app
 
 # --- Force Correct Working Directory ---
 if getattr(sys, 'frozen', False):
@@ -45,6 +53,9 @@ class DAWGitGUI(QWidget):
         theme_group = QGroupBox("Theme Settings")
         theme_layout = QVBoxLayout()
 
+
+        # Coomet this blcok out when not in dev mode -----
+
         # self.theme_label = QLabel("Select Theme:")
         # theme_layout.addWidget(self.theme_label)
 
@@ -57,6 +68,8 @@ class DAWGitGUI(QWidget):
         # self.reload_style_button.clicked.connect(self.reload_styles)
         # self.reload_style_button.setObjectName("reloadButton")
         # theme_layout.addWidget(self.reload_style_button)
+
+        # Comment out end  -----
 
         theme_group.setLayout(theme_layout)
 
@@ -81,8 +94,14 @@ class DAWGitGUI(QWidget):
 
         # --- Top Row Layout (Theme, Setup, Logo) ---
         top_row = QHBoxLayout()
+
+        # Commet out this when not in dev mode - this to show the reload button ---
+        
         # top_row.addWidget(theme_group)
         # top_row.addStretch()
+        
+        # Commet out END ---
+               
         top_row.addWidget(setup_widget)
         top_row.addStretch()
         top_row.addWidget(self.logo_label)
@@ -188,6 +207,7 @@ class DAWGitGUI(QWidget):
 
         # --- Force app to quit properly ---
         self.destroyed.connect(QApplication.instance().quit)
+        
 
     # --- Theme Applying ---
     def apply_theme(self, theme_name="Dark"):
@@ -440,7 +460,12 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # --- Run App ---
 if __name__ == "__main__":
-    app = QApplication([])
+    app = QApplication(sys.argv)
     window = DAWGitGUI()
     window.show()
+    
+    # --- DEV MODE --- (Comment this line when bundling)
+    # sys.exit(app.exec())
+
+    # --- FINAL BUNDLE MODE ---
     app.exec()
