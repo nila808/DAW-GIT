@@ -1,0 +1,61 @@
+
+
+
+
+WHEN IND DEV MODE:
+Open app via Terminal using 
+niccavendish@Nics-Mac-Pro DAWGitApp
+
+source daw-git-env/bin/activate
+
+RUN:
+python daw_git_gui.py
+
+
+
+
+Building Final >>>
+
+
+App Name: 
+
+DAW Git
+
+
+Script Type: 
+			
+/Users/niccavendish/Projects/DAWGitApp/daw-git-env/bin/python
+
+
+Script Path: 
+			
+/Users/niccavendish/Projects/DAWGitApp/daw_git_gui.py
+
+
+
+
+
+
+
+🚨 THEREFORE:
+✅ After you updated daw_git_gui.py today (fixed reload_styles, fixed apply_theme) —
+you need to run it manually like this:
+
+bash
+Copy
+Edit
+cd /path/to/your/DAWGitApp
+
+
+source daw-git-env/bin/activate
+python daw_git_gui.py
+
+
+
+✅ Then you are running LIVE CODE.
+
+✅ Then when you click Reload Styles, it will reload your new updated .qss.
+
+✅ No rebuild needed.
+
+✅ When you're fully finished and happy, then you rebuild .app via Platypus.
