@@ -78,10 +78,13 @@ class DAWGitApp(QWidget):
         checkout_btn.clicked.connect(self.checkout_commit)
         latest_btn = QPushButton("Return to Latest Version")
         latest_btn.clicked.connect(self.checkout_latest)
+        current_btn = QPushButton("What commit am I on?")
+        current_btn.clicked.connect(self.highlight_current_commit)
 
         history_layout.addWidget(self.history_table)
         history_layout.addWidget(checkout_btn)
         history_layout.addWidget(latest_btn)
+        history_layout.addWidget(current_btn)
 
         history_group.setLayout(history_layout)
         main_layout.addWidget(history_group)
@@ -210,6 +213,15 @@ class DAWGitApp(QWidget):
         self.status_message(f"Checked out commit: {commit_id}")
         self.history_table.selectRow(row)
         QMessageBox.information(self, "Checkout Complete", f"✅ Now viewing commit {commit_id}")
+
+    def highlight_current_commit(self):
+        try:
+            current_commit = self.repo.head.commit.hexsha[:7]
+            self.current_commit_id = current_commit
+            self.update_log()
+            QMessageBox.information(self, "Current Commit", f"✅ You are on commit: {current_commit}")
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Could not determine current commit: {e}")
 
     def clear_highlight_on_click(self):
         self.current_commit_id = None
