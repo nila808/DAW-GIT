@@ -29,6 +29,11 @@ class DAWGitApp(QWidget):
         self.init_git()
 
     def setup_ui(self):
+        # Create export/import buttons
+        export_btn = QPushButton("Export Project Snapshot")
+        export_btn.clicked.connect(self.export_snapshot)
+        import_btn = QPushButton("Import Snapshot Into Branch")
+        import_btn.clicked.connect(self.import_snapshot)
         self.setWindowTitle("DAW Git Version Control")
         self.setWindowIcon(QIcon(str(self.resource_path("icon.png"))))
         self.resize(800, 900)
@@ -71,6 +76,9 @@ class DAWGitApp(QWidget):
         history_group = QGroupBox("Commit History")
         history_layout = QVBoxLayout()
         self.history_table = QTableWidget(0, 3)
+        self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.history_table.horizontalHeader().setStretchLastSection(True)
+        self.history_table.resizeColumnsToContents()
         self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message"])
         self.history_table.cellClicked.connect(self.clear_highlight_on_click)
 
@@ -88,6 +96,11 @@ class DAWGitApp(QWidget):
 
         history_group.setLayout(history_layout)
         main_layout.addWidget(history_group)
+        # Add snapshot controls
+        snapshot_controls = QHBoxLayout()
+        snapshot_controls.addWidget(export_btn)
+        snapshot_controls.addWidget(import_btn)
+        main_layout.addLayout(snapshot_controls)
 
         self.setLayout(main_layout)
 
@@ -100,6 +113,7 @@ class DAWGitApp(QWidget):
         try:
             self.repo = Repo(self.project_path)
             print(f"✅ Git repository found at {self.project_path}")
+            self.current_commit_id = self.repo.head.commit.hexsha
             self.update_log()
         except (InvalidGitRepositoryError, NoSuchPathError):
             print(f"❌ No Git repository at {self.project_path}")
@@ -184,26 +198,72 @@ class DAWGitApp(QWidget):
 
     def update_log(self):
         self.history_table.setRowCount(0)
+        mint_green = Qt.GlobalColor.green
         for i, commit in enumerate(self.repo.iter_commits(max_count=50)):
             self.history_table.insertRow(i)
             tag = next((t.name for t in self.repo.tags if t.commit == commit), '')
-            self.history_table.setItem(i, 0, QTableWidgetItem(tag))
-            self.history_table.setItem(i, 1, QTableWidgetItem(commit.hexsha[:7]))
-            self.history_table.setItem(i, 2, QTableWidgetItem(commit.message.strip()))
+            tag_item = QTableWidgetItem(tag)
+            commit_id_item = QTableWidgetItem(f"[{i}] {commit.hexsha[:7]} ({commit.committed_datetime.strftime('%Y-%m-%d')} by {commit.author.name})")
+            message_item = QTableWidgetItem(commit.message.strip())
+            self.history_table.setItem(i, 0, tag_item)
+            self.history_table.setItem(i, 1, commit_id_item)
+            self.history_table.setItem(i, 2, message_item)
+
+            # Ensure full visibility of tag and commit ID
+            tag_item.setToolTip(tag)
+            commit_id_item.setToolTip(commit.hexsha)
+            message_item.setToolTip(commit.message.strip())
+
+            self.history_table.resizeColumnsToContents()
+
+            # Apply mint green background if this is the current commit
+            if self.current_commit_id and commit.hexsha.startswith(self.current_commit_id[:7]):
+                for col in range(self.history_table.columnCount()):
+                    item = self.history_table.item(i, col)
+                    if item:
+                        item.setBackground(mint_green)
 
         # Reselect previously checked out commit if applicable
         if self.current_commit_id:
             for i in range(self.history_table.rowCount()):
-                if self.history_table.item(i, 1).text() == self.current_commit_id[:7]:
+                if self.current_commit_id[:7] in self.history_table.item(i, 1).text():
                     self.history_table.selectRow(i)
                     break
 
+    def has_unsaved_changes(self):
+        return self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
+
+    def backup_unsaved_changes(self):
+        from datetime import datetime
+        backup_dir = self.project_path.parent / f"Backup_{self.project_path.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        backup_dir.mkdir(parents=True, exist_ok=True)
+
+        for file in self.project_path.glob("*.*"):
+            if file.is_file():
+                shutil.copy(file, backup_dir / file.name)
+        print(f"🔒 Unsaved changes backed up to: {backup_dir}")
+
+    def export_snapshot(self):
+        folder = QFileDialog.getExistingDirectory(self, "Choose folder to export snapshot")
+        if folder:
+            for file in self.project_path.glob("*.*"):
+                if file.is_file():
+                    shutil.copy(file, Path(folder) / file.name)
+            QMessageBox.information(self, "Snapshot Exported", f"✅ Project snapshot saved to: {folder}")
+
+    def import_snapshot(self):
+        folder = QFileDialog.getExistingDirectory(self, "Choose snapshot folder to import")
+        if folder:
+            for file in Path(folder).glob("*.*"):
+                if file.is_file():
+                    shutil.copy(file, self.project_path / file.name)
+            QMessageBox.information(self, "Snapshot Imported", f"✅ Files imported from: {folder}")
+
     def checkout_commit(self):
-        row = self.history_table.currentRow()
-        if row == -1:
-            QMessageBox.warning(self, "No Selection", "Select a commit first.")
-            return
-        commit_id = self.history_table.item(row, 1).text()
+        if self.has_unsaved_changes():
+            if QMessageBox.question(self, "Unsaved Changes Detected", "You have unsaved changes. Backup before switching?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
+                self.backup_unsaved_changes()
+
         self.repo.git.checkout(commit_id)
         self.current_commit_id = commit_id
         print(f"🔄 Checked out commit {commit_id}")
@@ -227,6 +287,10 @@ class DAWGitApp(QWidget):
         self.current_commit_id = None
 
     def checkout_latest(self):
+        if self.has_unsaved_changes():
+            if QMessageBox.question(self, "Unsaved Changes Detected", "You have unsaved changes. Backup before switching?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
+                self.backup_unsaved_changes()
+
         self.repo.git.checkout("main")
         # Get latest commit ID after checking out main
         latest_commit = next(self.repo.iter_commits('main', max_count=1))
