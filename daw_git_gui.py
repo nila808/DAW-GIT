@@ -415,13 +415,16 @@ class DAWGitApp(QWidget):
             commit = self.repo.index.commit(message)
 
             if tag:
-                self.repo.create_tag(tag, ref=commit.hexsha)
+                if tag in [t.name for t in self.repo.tags]:
+                    print(f"⚠️ Tag '{tag}' already exists. Skipping tag creation.")
+                else:
+                    self.repo.create_tag(tag, ref=commit.hexsha)
 
             if self.remote_checkbox.isChecked():
                 subprocess.run(["git", "push", "origin", "main", "--tags"], cwd=self.project_path, env=self.custom_env(), check=True)
 
             self.update_log()
-            msg = f"✅ Auto-commit successful: {message}"
+            msg = f"✅ Auto-commit successful:{message}"
             QMessageBox.information(self, "Auto Commit", msg)
             print(f"✅ Auto-committed: {message}")
         except subprocess.CalledProcessError as e:
