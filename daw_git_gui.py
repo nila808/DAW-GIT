@@ -43,6 +43,15 @@ class DAWGitApp(QWidget):
 
         main_layout = QVBoxLayout()
 
+        # Change indicator for uncommitted changes
+        self.unsaved_indicator = QLabel("● Uncommitted Changes")
+        self.unsaved_indicator.setStyleSheet("color: orange; font-weight: bold;")
+        self.unsaved_indicator.setVisible(False)
+        self.unsaved_flash = False
+
+        self.unsaved_timer = self.startTimer(800)
+        main_layout.addWidget(self.unsaved_indicator)
+
         # Project Path Display
         self.project_label = QLabel()
         self.project_label.setText(f"Tracking: {self.project_path}")
@@ -150,6 +159,8 @@ class DAWGitApp(QWidget):
             print(f"✅ Git repository found at {self.project_path}")
             self.current_commit_id = self.repo.head.commit.hexsha
             self.update_log()
+            self.update_unsaved_indicator()
+            self.update_unsaved_indicator()
         except (InvalidGitRepositoryError, NoSuchPathError):
             print(f"❌ No Git repository at {self.project_path}")
 
@@ -222,6 +233,7 @@ class DAWGitApp(QWidget):
                 subprocess.run(["git", "push", "origin", "main", "--tags"], cwd=self.project_path, env=self.custom_env(), check=True)
 
             self.update_log()
+            self.update_unsaved_indicator()
             self.commit_message.clear()
             self.commit_tag.clear()
 
@@ -235,6 +247,19 @@ class DAWGitApp(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Commit Failed", f"Unexpected error: {e}")
             print(f"❌ Unexpected error during commit: {e}")
+
+    def timerEvent(self, event):
+        if self.repo and self.repo.is_dirty(index=True, working_tree=True, untracked_files=True):
+            self.unsaved_flash = not self.unsaved_flash
+            color = "orange" if self.unsaved_flash else "transparent"
+            self.unsaved_indicator.setStyleSheet(f"color: {color}; font-weight: bold;")
+        else:
+            self.unsaved_indicator.setStyleSheet("color: transparent; font-weight: bold;")
+            self.unsaved_flash = False
+
+    def update_unsaved_indicator(self):
+        if self.repo:
+            self.unsaved_indicator.setVisible(self.repo.is_dirty(index=True, working_tree=True, untracked_files=True))
 
     def update_log(self):
         self.history_table.setRowCount(0)
@@ -424,7 +449,8 @@ class DAWGitApp(QWidget):
                 subprocess.run(["git", "push", "origin", "main", "--tags"], cwd=self.project_path, env=self.custom_env(), check=True)
 
             self.update_log()
-            msg = f"✅ Auto-commit successful:{message}"
+            msg = f"✅ Auto-commit successful:\n{message}"
+
             QMessageBox.information(self, "Auto Commit", msg)
             print(f"✅ Auto-committed: {message}")
         except subprocess.CalledProcessError as e:
