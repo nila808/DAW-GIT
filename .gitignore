@@ -1,0 +1,29 @@
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+daw-git-env/
+env/
+venv/
+
+# macOS junk files
+.DS_Store
+
+# Build artifacts
+build/
+dist/
+*.spec
+
+# Test files
+*.log
+coverage/
+htmlcov/
+
+# Snapshots or backups
+Backup_*/
+
+# Settings and user-specific config
+.dawgit_settings
