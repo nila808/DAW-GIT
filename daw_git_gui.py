@@ -36,7 +36,6 @@ class DAWGitApp(QWidget):
         self.setWindowTitle("DAW Git Version Control")
         self.setWindowIcon(QIcon(str(self.resource_path("icon.png"))))
         self.resize(800, 900)
-
         main_layout = QVBoxLayout()
 
         # 🔁 Uncommitted changes indicator
@@ -56,26 +55,10 @@ class DAWGitApp(QWidget):
         self.project_label.setWordWrap(True)
         main_layout.addWidget(self.project_label)
 
-        # 📝 Commit inputs
-        self.commit_message = QTextEdit(placeholderText="Enter commit message")
-        self.commit_tag = QTextEdit(placeholderText="Enter tag (optional)")
-        self.commit_tag.setMaximumHeight(40)
-
-        commit_btn = QPushButton("COMMIT CHANGES")
-        commit_btn.clicked.connect(self.commit_changes)
-
-        commit_layout = QVBoxLayout()
-        commit_layout.addWidget(QLabel("Commit Message:"))
-        commit_layout.addWidget(self.commit_message)
-        commit_layout.addWidget(QLabel("Tag:"))
-        commit_layout.addWidget(self.commit_tag)
-        commit_layout.addWidget(commit_btn)
-        main_layout.addLayout(commit_layout)
-
-        auto_commit_btn = QPushButton("AUTO COMMIT")
-        auto_commit_btn.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
-        commit_layout.addWidget(auto_commit_btn)
-
+        # Project Setup button
+        setup_btn = QPushButton("Setup Project")
+        setup_btn.clicked.connect(self.run_setup)
+        main_layout.addWidget(setup_btn)
 
         # 🧰 Control buttons row
         controls_layout = QHBoxLayout()
@@ -103,15 +86,48 @@ class DAWGitApp(QWidget):
 
         main_layout.addLayout(controls_layout)
 
+        # 📝 Commit inputs
+        self.commit_message = QTextEdit(placeholderText="Enter commit message")
+        self.commit_tag = QTextEdit(placeholderText="Enter tag (optional)")
+        self.commit_tag.setMaximumHeight(40)
+
+        commit_btn = QPushButton("COMMIT CHANGES")
+        commit_btn.clicked.connect(self.commit_changes)
+
+        auto_commit_btn = QPushButton("AUTO COMMIT")
+        auto_commit_btn.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
+
+
+        commit_layout = QVBoxLayout()
+        commit_layout.addWidget(QLabel("Commit Message:"))
+        commit_layout.addWidget(self.commit_message)
+        commit_layout.addWidget(QLabel("Tag:"))
+        commit_layout.addWidget(self.commit_tag)
+        commit_layout.addWidget(commit_btn)
+        commit_layout.addWidget(auto_commit_btn)
+
+        main_layout.addLayout(commit_layout)
+
+        checkout_layout = QHBoxLayout()
+        checkout_latest_btn = QPushButton("Checkout Latest Commit")
+        checkout_latest_btn.clicked.connect(self.checkout_latest)
+
+        checkout_selected_btn = QPushButton("Checkout Selected Commit")
+        checkout_selected_btn.clicked.connect(self.checkout_selected_commit)
+
+        # 🔍 "What commit am I on?" button
+        show_commit_btn = QPushButton("Show Current Commit")
+        show_commit_btn.clicked.connect(self.highlight_current_commit)
+
+        # Checkout buttons
+        checkout_layout.addWidget(checkout_latest_btn)
+        checkout_layout.addWidget(checkout_selected_btn)
+        checkout_layout.addWidget(show_commit_btn)
+        main_layout.addLayout(checkout_layout)
+
         # ✅ Remote push option
         self.remote_checkbox = QCheckBox("Push to remote after commit")
         main_layout.addWidget(self.remote_checkbox)
-
-        # 🔍 "What commit am I on?" button
-        highlight_btn = QPushButton("Show Current Commit")
-        highlight_btn.clicked.connect(self.highlight_current_commit)
-        main_layout.addWidget(highlight_btn)
-
 
         # 🧾 History table
         history_group = QGroupBox("Commit History")
@@ -216,54 +232,6 @@ class DAWGitApp(QWidget):
             except Exception as e:
                 QMessageBox.critical(self, "Setup Failed", f"Unexpected error: {e}")
 
-
-    # def setup_ui(self):
-    #     self.setWindowTitle("DAW Git Version Control")
-    #     self.setWindowIcon(QIcon(str(self.resource_path("icon.png"))))
-    #     self.resize(800, 900)
-
-    #     main_layout = QVBoxLayout()
-
-    #     # 🔁 Uncommitted changes indicator (flashing)
-    #     self.unsaved_indicator = QLabel("● Uncommitted Changes")
-    #     self.unsaved_indicator.setStyleSheet("color: orange; font-weight: bold;")
-    #     self.unsaved_indicator.setVisible(False)
-    #     self.unsaved_flash = False
-    #     self.unsaved_timer = self.startTimer(800)
-    #     main_layout.addWidget(self.unsaved_indicator)
-
-    #     # 📁 Project tracking label
-    #     self.project_label = QLabel()
-    #     self.project_label.setText(f"Tracking: {self.project_path}")
-    #     self.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
-    #     self.project_label.setOpenExternalLinks(True)
-    #     self.project_label.setToolTip("Click to open in Finder")
-    #     self.project_label.setWordWrap(True)
-    #     main_layout.addWidget(self.project_label)
-
-    #     # 📝 Commit message + tag input
-    #     self.commit_message = QTextEdit(placeholderText="Enter commit message")
-    #     self.commit_tag = QTextEdit(placeholderText="Enter tag (optional)")
-    #     self.commit_tag.setMaximumHeight(40)
-
-    #     # 💾 Commit button
-    #     commit_btn = QPushButton("COMMIT CHANGES")
-    #     commit_btn.clicked.connect(self.commit_changes)
-
-    #     # 🔀 Layout for commit area
-    #     commit_layout = QVBoxLayout()
-    #     commit_layout.addWidget(QLabel("Commit Message:"))
-    #     commit_layout.addWidget(self.commit_message)
-    #     commit_layout.addWidget(QLabel("Tag:"))
-    #     commit_layout.addWidget(self.commit_tag)
-    #     commit_layout.addWidget(commit_btn)
-
-    #     main_layout.addLayout(commit_layout)
-
-    #     # 🔚 Final layout
-    #     self.setLayout(main_layout)
-
-
     def commit_changes(self):
         if not self.repo:
             QMessageBox.warning(self, "No Repo", "Initialize the repository first.")
@@ -330,6 +298,18 @@ class DAWGitApp(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Auto Commit Failed", f"Unexpected error: {e}")
 
+    def checkout_selected_commit(self):
+        try:
+            selected_row = self.history_table.currentRow()
+            if selected_row == -1:
+                QMessageBox.warning(self, "No Selection", "Please select a commit to check out.")
+                return
+            commit_id = self.history_table.item(selected_row, 1).toolTip()
+            subprocess.run(["git", "checkout", commit_id], cwd=self.project_path, env=self.custom_env(), check=True)
+            self.init_git()
+            QMessageBox.information(self, "Checked Out", f"✅ Now on commit {commit_id}")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to checkout selected commit: {e}")
 
    
     def has_unsaved_changes(self):
