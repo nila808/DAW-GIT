@@ -19,20 +19,107 @@ from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 DEVELOPER_MODE = True
 
 class DAWGitApp(QWidget):
-
-    def __init__(self):
-        self.settings_path = Path.home() / ".dawgit_settings"
+    def __init__(self, build_ui=True):
         super().__init__()
+
+        self.settings_path = Path.home() / ".dawgit_settings"
         self.repo = None
         self.project_path = self.load_last_project_path() or Path.cwd()
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
         self.current_commit_id = None
-        
-        self.setup_ui()
+
+        if build_ui:
+            self.setup_ui()
         self.init_git()
 
+    def init_git(self):
+        self.save_last_project_path()
+        if hasattr(self, 'project_label'):
+            self.project_label.setText(f"Tracking: {self.project_path}")
+        try:
+            self.repo = Repo(self.project_path)
+            print(f"✅ Git repository found at {self.project_path}")
+
+            if self.repo.head.is_valid():
+                self.current_commit_id = self.repo.head.commit.hexsha
+            else:
+                self.current_commit_id = None
+                print("⚠️ Repo exists but has no commits yet.")
+
+            self.update_unsaved_indicator()
+            self.update_log()
+        except (InvalidGitRepositoryError, NoSuchPathError):
+            self.repo = None
+            print(f"❌ No Git repository at {self.project_path}")
+
+    def update_log(self):
+        self.history_table.setRowCount(0)
+
+        if not self.repo or not self.repo.head.is_valid():
+            print("ℹ️ Skipping update_log — no commits found.")
+            return
+
+        for i, commit in enumerate(self.repo.iter_commits(max_count=50)):
+            self.history_table.insertRow(i)
+            tag = next((t.name for t in self.repo.tags if t.commit == commit), '')
+            tag_item = QTableWidgetItem(tag)
+            commit_id_item = QTableWidgetItem(f"[{i}] {commit.hexsha[:7]} ({commit.committed_datetime.strftime('%Y-%m-%d')} by {commit.author.name})")
+            message_item = QTableWidgetItem(commit.message.strip())
+            self.history_table.setItem(i, 0, tag_item)
+            self.history_table.setItem(i, 1, commit_id_item)
+            self.history_table.setItem(i, 2, message_item)
+
+            tag_item.setToolTip(tag)
+            commit_id_item.setToolTip(commit.hexsha)
+            message_item.setToolTip(commit.message.strip())
+
+            self.history_table.resizeColumnsToContents()
+
+            if self.current_commit_id and commit.hexsha.startswith(self.current_commit_id[:7]):
+                for col in range(self.history_table.columnCount()):
+                    item = self.history_table.item(i, col)
+                    if item:
+                        item.setBackground(Qt.GlobalColor.green)
+
+        if self.current_commit_id:
+            for i in range(self.history_table.rowCount()):
+                if self.history_table.item(i, 1) and self.current_commit_id[:7] in self.history_table.item(i, 1).text():
+                    self.history_table.selectRow(i)
+                    break
+
+    def run_setup(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Project Folder")
+        if folder:
+            try:
+                self.project_path = Path(folder)
+                os.chdir(self.project_path)
+
+                if (self.project_path / ".git").exists():
+                    print("ℹ️ Existing Git repo found — skipping init.")
+                    self.init_git()
+                    return
+
+                print(f"🚀 Initializing Git at: {self.project_path}")
+                subprocess.run(["git", "init"], cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(["git", "lfs", "install"], cwd=self.project_path, env=self.custom_env(), check=True)
+
+                (self.project_path / ".gitignore").write_text("*.als~\n*.logicx~\n*.asd\n*.tmp\n.DS_Store\n", encoding='utf-8')
+                (self.project_path / ".gitattributes").write_text("*.als filter=lfs diff=lfs merge=lfs -text\n", encoding='utf-8')
+
+                subprocess.run(["git", "add", "."], cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(["git", "branch", "-M", "main"], cwd=self.project_path, env=self.custom_env(), check=True)
+
+                QMessageBox.information(self, "Setup Complete", "✅ Git repository initialized.")
+                self.init_git()
+
+            except subprocess.CalledProcessError as e:
+                QMessageBox.critical(self, "Git Setup Failed", f"Subprocess error: {e}")
+            except Exception as e:
+                QMessageBox.critical(self, "Setup Failed", f"Unexpected error: {e}")
+
+
     def setup_ui(self):
-        # Create export/import buttons
         export_btn = QPushButton("Export Project Snapshot")
         export_btn.clicked.connect(self.export_snapshot)
         import_btn = QPushButton("Import Snapshot Into Branch")
@@ -43,7 +130,6 @@ class DAWGitApp(QWidget):
 
         main_layout = QVBoxLayout()
 
-        # Change indicator for uncommitted changes
         self.unsaved_indicator = QLabel("● Uncommitted Changes")
         self.unsaved_indicator.setStyleSheet("color: orange; font-weight: bold;")
         self.unsaved_indicator.setVisible(False)
@@ -52,7 +138,6 @@ class DAWGitApp(QWidget):
         self.unsaved_timer = self.startTimer(800)
         main_layout.addWidget(self.unsaved_indicator)
 
-        # Project Path Display
         self.project_label = QLabel()
         self.project_label.setText(f"Tracking: {self.project_path}")
         self.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
@@ -62,7 +147,6 @@ class DAWGitApp(QWidget):
         self.project_label.setWordWrap(True)
         main_layout.addWidget(self.project_label)
 
-        # Manual Change Project Button
         change_project_btn = QPushButton("Change Project Folder")
         change_project_btn.clicked.connect(self.change_project_folder)
         clear_project_btn = QPushButton("Clear Saved Project")
@@ -72,7 +156,6 @@ class DAWGitApp(QWidget):
         project_btns.addWidget(clear_project_btn)
         main_layout.addLayout(project_btns)
 
-        # Project Setup
         setup_btn = QPushButton("SETUP PROJECT")
         setup_btn.clicked.connect(self.run_setup)
         remote_checkbox = QCheckBox("Remote push")
@@ -81,10 +164,8 @@ class DAWGitApp(QWidget):
         setup_layout = QHBoxLayout()
         setup_layout.addWidget(setup_btn)
         setup_layout.addWidget(remote_checkbox)
-
         main_layout.addLayout(setup_layout)
 
-        # Commit Controls
         commit_group = QGroupBox("Commit Changes")
         commit_layout = QVBoxLayout()
 
@@ -104,7 +185,6 @@ class DAWGitApp(QWidget):
         commit_group.setLayout(commit_layout)
         main_layout.addWidget(commit_group)
 
-        # Commit History
         history_group = QGroupBox("Commit History")
         history_layout = QVBoxLayout()
         self.history_table = QTableWidget(0, 3)
@@ -128,7 +208,7 @@ class DAWGitApp(QWidget):
 
         history_group.setLayout(history_layout)
         main_layout.addWidget(history_group)
-        # Add snapshot controls
+
         restore_btn = QPushButton("Restore Last Backup")
         restore_btn.clicked.connect(self.restore_last_backup)
         quick_commit_btn = QPushButton("Quick Auto Commit")
@@ -145,63 +225,6 @@ class DAWGitApp(QWidget):
 
         self.setLayout(main_layout)
 
-    def resource_path(self, relative_path):
-        if getattr(sys, '_MEIPASS', False):
-            return Path(sys._MEIPASS) / relative_path
-        return Path(__file__).parent / relative_path
-
-    def init_git(self):
-        self.save_last_project_path()
-        if hasattr(self, 'project_label'):
-            self.project_label.setText(f"Tracking: {self.project_path}")
-        try:
-            self.repo = Repo(self.project_path)
-            print(f"✅ Git repository found at {self.project_path}")
-            self.current_commit_id = self.repo.head.commit.hexsha
-            self.update_log()
-            self.update_unsaved_indicator()
-            self.update_unsaved_indicator()
-        except (InvalidGitRepositoryError, NoSuchPathError):
-            print(f"❌ No Git repository at {self.project_path}")
-
-    def run_setup(self):
-        if hasattr(self, 'project_label'):
-            self.project_label.setText("Tracking: <not set>")
-        folder = QFileDialog.getExistingDirectory(self, "Select Project Folder")
-        if folder:
-            try:
-                self.project_path = Path(folder)
-                os.chdir(self.project_path)
-
-                if (self.project_path / ".git").exists():
-                    print("ℹ️ Existing Git repo found — skipping init.")
-                    self.init_git()
-                    return
-
-                print(f"🚀 Initializing Git at: {self.project_path}")
-
-                subprocess.run(["git", "init"], env=self.custom_env(), check=True)
-                subprocess.run(["git", "lfs", "install"], env=self.custom_env(), check=True)
-
-                (self.project_path / ".gitignore").write_text("*.als~\n*.logicx~\n*.asd\n*.tmp\n.DS_Store\n", encoding='utf-8')
-                (self.project_path / ".gitattributes").write_text("*.als filter=lfs diff=lfs merge=lfs -text\n", encoding='utf-8')
-
-                subprocess.run(["git", "add", "."], env=self.custom_env(), check=True)
-                subprocess.run(["git", "commit", "-m", "Initial commit"], env=self.custom_env(), check=True)
-                subprocess.run(["git", "branch", "-M", "main"], env=self.custom_env(), check=True)
-
-                QMessageBox.information(self, "Setup Complete", "✅ Git repository initialized.")
-                print("🎉 Git setup completed and initial commit made successfully.")
-                self.init_git()
-
-            except subprocess.CalledProcessError as e:
-                QMessageBox.critical(self, "Git Setup Failed", f"Subprocess error: {e}")
-                print(f"❌ Subprocess failed: {e}")
-
-            except Exception as e:
-                QMessageBox.critical(self, "Setup Failed", f"Unexpected error: {e}")
-                print(f"❌ Unexpected error during setup: {e}")
-
     def commit_changes(self):
         if not self.repo:
             QMessageBox.warning(self, "No Repo", "Initialize the repository first.")
@@ -217,7 +240,6 @@ class DAWGitApp(QWidget):
 
             if not self.repo.is_dirty(index=True, working_tree=True, untracked_files=True):
                 QMessageBox.information(self, "No Changes", "There are no new changes to commit.")
-                print("ℹ️ No changes to commit.")
                 return
 
             commit = self.repo.index.commit(msg)
@@ -242,64 +264,13 @@ class DAWGitApp(QWidget):
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "Commit Failed", f"Subprocess error: {e}")
-            print(f"❌ Subprocess error during commit: {e}")
-
         except Exception as e:
             QMessageBox.critical(self, "Commit Failed", f"Unexpected error: {e}")
-            print(f"❌ Unexpected error during commit: {e}")
-
-    def timerEvent(self, event):
-        if self.repo and self.repo.is_dirty(index=True, working_tree=True, untracked_files=True):
-            self.unsaved_flash = not self.unsaved_flash
-            color = "orange" if self.unsaved_flash else "transparent"
-            self.unsaved_indicator.setStyleSheet(f"color: {color}; font-weight: bold;")
-        else:
-            self.unsaved_indicator.setStyleSheet("color: transparent; font-weight: bold;")
-            self.unsaved_flash = False
-
-    def update_unsaved_indicator(self):
-        if self.repo:
-            self.unsaved_indicator.setVisible(self.repo.is_dirty(index=True, working_tree=True, untracked_files=True))
-
-    def update_log(self):
-        self.history_table.setRowCount(0)
-        mint_green = Qt.GlobalColor.green
-        for i, commit in enumerate(self.repo.iter_commits(max_count=50)):
-            self.history_table.insertRow(i)
-            tag = next((t.name for t in self.repo.tags if t.commit == commit), '')
-            tag_item = QTableWidgetItem(tag)
-            commit_id_item = QTableWidgetItem(f"[{i}] {commit.hexsha[:7]} ({commit.committed_datetime.strftime('%Y-%m-%d')} by {commit.author.name})")
-            message_item = QTableWidgetItem(commit.message.strip())
-            self.history_table.setItem(i, 0, tag_item)
-            self.history_table.setItem(i, 1, commit_id_item)
-            self.history_table.setItem(i, 2, message_item)
-
-            # Ensure full visibility of tag and commit ID
-            tag_item.setToolTip(tag)
-            commit_id_item.setToolTip(commit.hexsha)
-            message_item.setToolTip(commit.message.strip())
-
-            self.history_table.resizeColumnsToContents()
-
-            # Apply mint green background if this is the current commit
-            if self.current_commit_id and commit.hexsha.startswith(self.current_commit_id[:7]):
-                for col in range(self.history_table.columnCount()):
-                    item = self.history_table.item(i, col)
-                    if item:
-                        item.setBackground(mint_green)
-
-        # Reselect previously checked out commit if applicable
-        if self.current_commit_id:
-            for i in range(self.history_table.rowCount()):
-                if self.current_commit_id[:7] in self.history_table.item(i, 1).text():
-                    self.history_table.selectRow(i)
-                    break
 
     def has_unsaved_changes(self):
-        return self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
+        return self.repo and self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
 
     def backup_unsaved_changes(self):
-        from datetime import datetime
         backup_dir = self.project_path.parent / f"Backup_{self.project_path.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         backup_dir.mkdir(parents=True, exist_ok=True)
 
@@ -328,7 +299,6 @@ class DAWGitApp(QWidget):
             QMessageBox.information(self, "Snapshot Imported", f"✅ Files imported from: {folder}")
 
     def checkout_commit(self):
-        import subprocess
         row = self.history_table.currentRow()
         if row == -1:
             QMessageBox.warning(self, "No Selection", "Please select a commit first.")
@@ -389,7 +359,6 @@ class DAWGitApp(QWidget):
                 self.backup_unsaved_changes()
 
         self.repo.git.checkout("main")
-        # Get latest commit ID after checking out main
         latest_commit = next(self.repo.iter_commits('main', max_count=1))
         self.current_commit_id = latest_commit.hexsha
         print("🔄 Returned to main branch.")
@@ -487,7 +456,25 @@ class DAWGitApp(QWidget):
 
         QMessageBox.information(self, "Backup Restored", f"✅ Restored files from: {latest_backup}")
 
+    def timerEvent(self, event):
+        if self.repo and self.repo.is_dirty(index=True, working_tree=True, untracked_files=True):
+            self.unsaved_flash = not self.unsaved_flash
+            color = "orange" if self.unsaved_flash else "transparent"
+            self.unsaved_indicator.setStyleSheet(f"color: {color}; font-weight: bold;")
+        else:
+            self.unsaved_indicator.setStyleSheet("color: transparent; font-weight: bold;")
+            self.unsaved_flash = False
 
+    def update_unsaved_indicator(self):
+        if self.repo:
+            self.unsaved_indicator.setVisible(self.repo.is_dirty(index=True, working_tree=True, untracked_files=True))
+
+    def resource_path(self, relative_path):
+        if getattr(sys, '_MEIPASS', False):
+            return Path(sys._MEIPASS) / relative_path
+        return Path(__file__).parent / relative_path
+
+# Handle Ctrl+C gracefully
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 if __name__ == "__main__":
@@ -495,5 +482,3 @@ if __name__ == "__main__":
     win = DAWGitApp()
     win.show()
     sys.exit(app.exec())
-
-

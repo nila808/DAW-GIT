@@ -1,15 +1,14 @@
 import os
-import shutil
-import sys
-import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import tempfile
 from daw_git_gui import DAWGitApp
 
-def test_auto_commit_creates_tag(tmp_path):
-    os.chdir(tmp_path)
-    shutil.copytree("tests_dawgit/test_fixtures/sample_repo", tmp_path, dirs_exist_ok=True)
-    gui = DAWGitApp()
-    gui.project_path = tmp_path
-    gui.quick_auto_commit()
-    assert (tmp_path / ".git").exists()
+def test_auto_commit_creates_tag(qtbot):
+    temp_dir = tempfile.mkdtemp()
+    os.chdir(temp_dir)
+    os.system("git init")
+    app = DAWGitApp()
+    app.project_path = temp_dir
+    app.repo = app.init_git()
+    app.auto_commit("Test commit", "v-test")
+    tags = [t.name for t in app.repo.tags]
+    assert "v-test" in tags
