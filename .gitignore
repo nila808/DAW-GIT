@@ -1,29 +1,47 @@
-# Python cache and compiled files
+# Python cache
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
 
 # Virtual environments
-daw-git-env/
 env/
 venv/
+daw-git-env/
 
-# macOS junk files
+# macOS system files
 .DS_Store
+.AppleDouble
+.LSOverride
 
-# Build artifacts
+# macOS Finder settings
+Icon?
+.Spotlight-V100
+.Trashes
+
+# PyInstaller build folders
 build/
 dist/
 *.spec
 
-# Test files
-*.log
-coverage/
-htmlcov/
+# App bundles (macOS .app)
+*.app/
 
-# Snapshots or backups
+# Git backups and snapshots
 Backup_*/
+*.bak
+*.tmp
 
-# Settings and user-specific config
+# VSCode / IDE config
+.vscode/
+.idea/
+*.swp
+
+# Logs and test outputs
+*.log
+htmlcov/
+coverage/
+
+# Project-specific config
 .dawgit_settings
+daw_git_config.json
