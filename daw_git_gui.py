@@ -4,6 +4,7 @@ import sys
 import subprocess
 import signal
 import shutil
+import traceback
 from datetime import datetime
 from pathlib import Path
 from PyQt6.QtWidgets import (
@@ -325,23 +326,71 @@ class DAWGitApp(QWidget):
         print(f"🔒 Unsaved changes backed up to: {backup_dir}")
 
     def export_snapshot(self):
-        folder = QFileDialog.getExistingDirectory(self, "Choose folder to export snapshot")
-        if folder:
-            destination = Path(folder) / f"{self.project_path.name}_snapshot"
-            shutil.copytree(self.project_path, destination, dirs_exist_ok=True)
-            QMessageBox.information(self, "Snapshot Exported", f"✅ Project snapshot saved to: {destination}")
+        import traceback
+        try:
+            if not self.project_path or not self.project_path.exists():
+                QMessageBox.warning(self, "No Project", "No project folder selected.")
+                return
+
+            target_dir = QFileDialog.getExistingDirectory(self, "Select Folder to Save Snapshot")
+            if not target_dir:
+                return
+
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            snapshot_name = f"{self.project_path.name}_snapshot_{timestamp}"
+            dest = os.path.join(target_dir, snapshot_name)
+
+            # Avoid exporting .git folder
+            for item in os.listdir(self.project_path):
+                if item == ".git":
+                    continue
+                src = os.path.join(self.project_path, item)
+                dst = os.path.join(dest, item)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    os.makedirs(os.path.dirname(dst), exist_ok=True)
+                    shutil.copy2(src, dst)
+
+            QMessageBox.information(self, "Export Complete", f"Snapshot saved to:\n{dest}")
+
+        except Exception as e:
+            print("❌ Error during snapshot export:")
+            traceback.print_exc()
+            QMessageBox.critical(self, "Export Failed", f"Error: {e}")
+
 
     def import_snapshot(self):
-        folder = QFileDialog.getExistingDirectory(self, "Choose snapshot folder to import")
-        if folder:
-            source = Path(folder)
-            for item in source.rglob("*"):
-                if item.is_file():
-                    relative_path = item.relative_to(source)
-                    target_path = self.project_path / relative_path
-                    target_path.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy(item, target_path)
-            QMessageBox.information(self, "Snapshot Imported", f"✅ Files imported from: {folder}")
+        import traceback
+        try:
+            src_folder = QFileDialog.getExistingDirectory(self, "Select Snapshot Folder to Import")
+            if not src_folder:
+                return
+
+            target_path = self.project_path
+            if not target_path or not target_path.exists():
+                QMessageBox.warning(self, "Invalid Project", "Target project folder is not set.")
+                return
+
+            for item in os.listdir(src_folder):
+                if item == ".git":
+                    continue  # 🚫 Never import .git folder
+
+                s = os.path.join(src_folder, item)
+                d = os.path.join(target_path, item)
+
+                if os.path.isdir(s):
+                    shutil.copytree(s, d, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(s, d)
+
+            QMessageBox.information(self, "Import Complete", f"Snapshot imported into:\n{target_path}")
+            self.init_git()
+
+        except Exception as e:
+            print("❌ Error during snapshot import:")
+            traceback.print_exc()
+            QMessageBox.critical(self, "Import Failed", f"Error: {e}")
 
     def checkout_commit(self):
         row = self.history_table.currentRow()
