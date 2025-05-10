@@ -267,6 +267,78 @@ class DAWGitApp(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Commit Failed", f"Unexpected error: {e}")
 
+    def auto_commit(self, message: str, tag: str = ""):
+        if not self.repo:
+            QMessageBox.warning(self, "No Repo", "Initialize the repository first.")
+            return
+
+        try:
+            subprocess.run(["git", "add", "-A"], cwd=self.project_path, env=self.custom_env(), check=True)
+
+            if not self.repo.is_dirty(index=True, working_tree=True, untracked_files=True):
+                print("ℹ️ No changes to commit.")
+                return
+
+            commit = self.repo.index.commit(message)
+            print(f"✅ Commit: {commit.hexsha[:7]} - {message}")
+
+            # Show branch info and latest commit
+            head_result = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                cwd=self.project_path,
+                env=self.custom_env(),
+                stdout=subprocess.PIPE,
+                text=True
+            )
+            print("🧠 Current branch:", head_result.stdout.strip())
+
+            log_result = subprocess.run(
+                ["git", "log", "--oneline", "-1"],
+                cwd=self.project_path,
+                env=self.custom_env(),
+                stdout=subprocess.PIPE,
+                text=True
+            )
+            print("📜 Latest commit:", log_result.stdout.strip())
+
+            if tag:
+                try:
+                    print(f"⚙️ Running: git tag {tag} {commit.hexsha}")
+                    result = subprocess.run(
+                        ["git", "tag", tag, commit.hexsha],
+                        cwd=self.project_path,
+                        env=self.custom_env(),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True
+                    )
+                    print("🔧 stdout:", result.stdout.strip())
+                    print("🔧 stderr:", result.stderr.strip())
+                    print("🔧 returncode:", result.returncode)
+
+                    list_result = subprocess.run(
+                        ["git", "tag", "-l"],
+                        cwd=self.project_path,
+                        env=self.custom_env(),
+                        stdout=subprocess.PIPE,
+                        text=True
+                    )
+                    print("🐛 git tag -l output:", list_result.stdout.strip())
+
+                except subprocess.CalledProcessError as e:
+                    print(f"❌ subprocess failed to create tag: {e}")
+
+            self.update_log()
+            self.update_unsaved_indicator()
+            print(f"✅ Auto-commit complete.")
+
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Subprocess error during auto_commit: {e}")
+        except Exception as e:
+            print(f"❌ Unexpected error during auto_commit: {e}")
+
+
+   
     def has_unsaved_changes(self):
         return self.repo and self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
 
