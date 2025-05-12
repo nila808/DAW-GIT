@@ -174,6 +174,9 @@ class DAWGitApp(QWidget):
         self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message"])
         self.history_table.resizeColumnsToContents()
         history_layout.addWidget(self.history_table)
+        self.history_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.history_table.customContextMenuRequested.connect(self.show_commit_context_menu)
+
         history_group.setLayout(history_layout)
         main_layout.addWidget(history_group)
 
@@ -386,51 +389,69 @@ class DAWGitApp(QWidget):
         QMessageBox.information(self, "Current Commit", body)
 
 
-    def show_commit_context_menu(self, pos):
+    def show_commit_context_menu(self, position):
+        row = self.history_table.rowAt(position.y())
+        if row == -1:
+            return
+
+        self.history_table.selectRow(row)
+
         menu = QMenu(self)
-        delete_action = menu.addAction("🗑 Delete This Commit")
-        action = menu.exec(self.history_table.viewport().mapToGlobal(pos))
-        if action == delete_action:
-            self.delete_selected_commit()
+        delete_action = QAction("🗑️ Delete This Snapshot", self)
+        delete_action.triggered.connect(self.delete_selected_commit)
+
+        menu.addAction(delete_action)
+        menu.exec(self.history_table.viewport().mapToGlobal(position))
+
 
     def delete_selected_commit(self):
+        if not self.repo:
+            QMessageBox.warning(self, "No Project Loaded", "You need to load or set up a project first.")
+            return
+
+        row = self.history_table.currentRow()
+        if row == -1:
+            QMessageBox.warning(self, "No Snapshot Selected", "Click on a snapshot in the history to delete it.")
+            return
+
+        commit_id = self.history_table.item(row, 1).toolTip()
         try:
-            row = self.history_table.currentRow()
-            if row == -1:
-                QMessageBox.warning(self, "No Selection", "Please select a commit to delete.")
-                return
+            selected_commit = self.repo.commit(commit_id)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Could not locate the selected snapshot:\n{e}")
+            return
 
-            commit_id_tooltip = self.history_table.item(row, 1).toolTip()
-            if not commit_id_tooltip:
-                QMessageBox.critical(self, "Error", "Commit ID not found.")
-                return
+        confirm = QMessageBox.question(
+            self,
+            "🗑️ Delete This Snapshot?",
+            f"Are you sure you want to delete this version of your project?\n\n🎼 {selected_commit.summary} ({commit_id[:7]})\n\nThis action is permanent and will remove the selected snapshot from your version history.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
+        )
 
-            ret = QMessageBox.question(
-                self,
-                "Confirm Delete",
-                "⚠️ Deleting this snapshot may rewrite history and affect future versions. Are you sure you want to continue?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
-            )
-            if ret != QMessageBox.StandardButton.Yes:
-                return
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
 
-            # Make a backup
+        try:
+            # 🎧 Find the previous version in the timeline
+            parent_commit = selected_commit.parents[0]
+
+            # 🔒 Backup your current project folder before making changes
             self.backup_unsaved_changes()
 
-            # Create a temporary rebase todo file
-            rebase_script = f"drop {commit_id_tooltip}\n"
-            todo_path = self.project_path / ".git" / "rebase-todo"
-            todo_path.write_text(rebase_script)
+            # 🛠️ Create a safe branch in case something goes wrong
+            tmp_branch = f"_temp_edit_{datetime.now().strftime('%H%M%S')}"
+            self.repo.git.checkout("-b", tmp_branch)
 
-            subprocess.run(["git", "rebase", "-i", "--autosquash", "--keep-empty", "--root"],
-                           cwd=self.project_path, env=self.custom_env(), check=True)
+            # ✂️ Remove the selected snapshot cleanly from the timeline
+            self.repo.git.rebase("--onto", parent_commit.hexsha, selected_commit.hexsha)
 
+            # ✅ Reload UI with updated version history
             self.init_git()
-            QMessageBox.information(self, "Deleted", "✅ Commit deleted and history updated.")
-        except subprocess.CalledProcessError as e:
-            QMessageBox.critical(self, "Delete Failed", f"Git error: {e}")
+            QMessageBox.information(self, "Snapshot Deleted", f"🎛️ That version ({commit_id[:7]}) has been removed from your history.")
+
         except Exception as e:
-            QMessageBox.critical(self, "Unexpected Error", str(e))
+            QMessageBox.critical(self, "Deletion Failed", f"Something went wrong while trying to remove that snapshot:\n{e}")
+
 
     def show_commit_checkout_info(self, commit):
         if not self.repo or not commit:
