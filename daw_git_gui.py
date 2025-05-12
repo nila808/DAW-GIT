@@ -151,6 +151,13 @@ class DAWGitApp(QWidget):
         self.new_version_line_button.clicked.connect(self.start_new_version_line)
         main_layout.addWidget(self.new_version_line_button)
 
+        # 🎚️ Current branch indicator
+        self.version_line_label = QLabel()
+        self.version_line_label.setText("🎚️ No active version line")
+        self.version_line_label.setStyleSheet("color: #999; font-style: italic;")
+        main_layout.addWidget(self.version_line_label)
+
+
         # ✅ Remote push option
         self.remote_checkbox = QCheckBox("Push to remote after commit")
         main_layout.addWidget(self.remote_checkbox)
@@ -161,11 +168,6 @@ class DAWGitApp(QWidget):
         self.history_table = QTableWidget(0, 3)
         self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
 
-
-        self.history_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.history_table.customContextMenuRequested.connect(self.show_commit_context_menu)
-
-
         # Set stretch + autosize behavior
         self.history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.history_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -174,9 +176,6 @@ class DAWGitApp(QWidget):
         self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message"])
         self.history_table.resizeColumnsToContents()
         history_layout.addWidget(self.history_table)
-        self.history_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.history_table.customContextMenuRequested.connect(self.show_commit_context_menu)
-
         history_group.setLayout(history_layout)
         main_layout.addWidget(history_group)
 
@@ -404,6 +403,17 @@ class DAWGitApp(QWidget):
         menu.exec(self.history_table.viewport().mapToGlobal(position))
 
 
+    def update_version_line_label(self):
+        if not hasattr(self, "version_line_label"):
+            return
+
+        try:
+            branch_name = self.repo.active_branch.name
+            self.version_line_label.setText(f"🎚️ You’re working on version line: {branch_name}")
+        except Exception:
+            self.version_line_label.setText("🎧 Snapshot mode: no active version line")
+
+
     def delete_selected_commit(self):
         row = self.history_table.currentRow()
         if row == -1:
@@ -463,6 +473,7 @@ class DAWGitApp(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Delete Failed", f"Failed to delete commit:\n{e}")
 
+
     def open_latest_daw_project(self):
         """🎛️ Reopen the main DAW project file from the working directory."""
         try:
@@ -482,6 +493,23 @@ class DAWGitApp(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "Open Project Failed", f"Couldn’t open the project file:\n{e}")
+
+
+    def rebase_delete_commit(self, commit_id):
+        try:
+            subprocess.run(
+                ["git", "rebase", "--onto", f"{commit_id}^", commit_id],
+                cwd=self.project_path,
+                env=self.custom_env(),
+                check=True
+            )
+
+            self.init_git()
+            self.update_log()
+            self.open_latest_daw_project()
+
+        except subprocess.CalledProcessError as e:
+            QMessageBox.critical(self, "Rebase Failed", f"Git error:\n{e}")
 
 
     def show_commit_checkout_info(self, commit):
