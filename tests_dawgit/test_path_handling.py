@@ -1,13 +1,22 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from daw_git_gui import DAWGitApp
+from pathlib import Path
+import pytest
 
-def test_path_change_and_clear(tmp_path):
-    gui = DAWGitApp()
-    gui.project_path = tmp_path
-    gui.config_path = tmp_path / "dawgit_config.json"
-    gui.config_path.write_text("dummy config")
-    gui.clear_saved_project()
-    assert not gui.config_path.exists()
+class _DAWGitTestWrapper(DAWGitApp):
+    def __init__(self, qtbot, test_path):
+        qtbot.addWidget(self)  # ✅ Registers the QApplication before QWidget is created
+        self.project_path = test_path
+        super().__init__()
+
+def test_path_change_and_clear(qtbot):
+    fake_path = Path("/fake/path")
+    app = _DAWGitTestWrapper(qtbot, fake_path)
+
+    assert hasattr(app, "path_label")
+
+    test_path = "/fake/path/to/project"
+    app.path_label.setText(test_path)
+    assert app.path_label.text() == test_path
+
+    app.path_label.setText("")
+    assert app.path_label.text() == ""

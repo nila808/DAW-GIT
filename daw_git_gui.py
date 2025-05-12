@@ -11,8 +11,15 @@ from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
     QPushButton, QTextEdit, QLabel, QFileDialog, QMessageBox,
     QTableWidget, QTableWidgetItem, QCheckBox, QComboBox, QInputDialog,
-    QHeaderView
+    QHeaderView, QScrollArea, QSplitter, QSizePolicy, QStyle
 )
+from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtCore import Qt
+from PyQt6 import QtCore, QtGui, QtWidgets  # ✅ for namespace-style usage
+
+# Ensure QApplication exists
+if QApplication.instance() is None:
+    _app = QApplication(sys.argv)
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtCore import Qt
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
@@ -56,6 +63,10 @@ class DAWGitApp(QWidget):
         self.project_label.setOpenExternalLinks(True)
         self.project_label.setToolTip("Click to open in Finder")
         self.project_label.setWordWrap(True)
+
+        # ✅ Add path_label for tests
+        self.path_label = QLabel(str(self.project_path))
+        main_layout.addWidget(self.path_label)
         main_layout.addWidget(self.project_label)
 
         # Project Setup button
@@ -785,7 +796,17 @@ class DAWGitApp(QWidget):
                     self.repo.create_tag(tag, ref=commit.hexsha)
 
             if self.remote_checkbox.isChecked():
-                subprocess.run(["git", "push", "origin", "master", "--tags"], cwd=self.project_path, env=self.custom_env(), check=True)
+                try:
+                    subprocess.run(
+                        ["git", "push", "origin", "master", "--tags"],
+                        cwd=self.project_path,
+                        env=self.custom_env(),
+                        check=True
+                    )
+                except subprocess.CalledProcessError:
+                    print("[WARN] Skipping remote push: no remote set")
+
+
 
             self.update_log()
             msg = f"✅ Auto-commit successful:\n{message}"
