@@ -405,26 +405,18 @@ class DAWGitApp(QWidget):
 
 
     def delete_selected_commit(self):
-        if not self.repo:
-            QMessageBox.warning(self, "No Project Loaded", "You need to load or set up a project first.")
-            return
-
         row = self.history_table.currentRow()
         if row == -1:
-            QMessageBox.warning(self, "No Snapshot Selected", "Click on a snapshot in the history to delete it.")
+            QMessageBox.warning(self, "No Selection", "Please select a snapshot to delete.")
             return
 
         commit_id = self.history_table.item(row, 1).toolTip()
-        try:
-            selected_commit = self.repo.commit(commit_id)
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Could not locate the selected snapshot:\n{e}")
-            return
+        commit_msg = self.history_table.item(row, 2).text()
 
         confirm = QMessageBox.question(
             self,
-            "🗑️ Delete This Snapshot?",
-            f"Are you sure you want to delete this version of your project?\n\n🎼 {selected_commit.summary} ({commit_id[:7]})\n\nThis action is permanent and will remove the selected snapshot from your version history.",
+            "Delete Snapshot?",
+            f"Are you sure you want to delete this snapshot?\n\n“{commit_msg}”\n\nThis action can’t be undone.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
         )
 
@@ -432,25 +424,64 @@ class DAWGitApp(QWidget):
             return
 
         try:
-            # 🎧 Find the previous version in the timeline
-            parent_commit = selected_commit.parents[0]
+            # Backup first (optional but recommended)
+            if self.has_unsaved_changes():
+                self.backup_unsaved_changes()
 
-            # 🔒 Backup your current project folder before making changes
-            self.backup_unsaved_changes()
+            # Rebase interactively to drop the selected commit
+            all_commits = list(self.repo.iter_commits("HEAD", max_count=50))
+            target_commit = next((c for c in all_commits if c.hexsha.startswith(commit_id[:7])), None)
 
-            # 🛠️ Create a safe branch in case something goes wrong
-            tmp_branch = f"_temp_edit_{datetime.now().strftime('%H%M%S')}"
-            self.repo.git.checkout("-b", tmp_branch)
+            if not target_commit:
+                raise Exception("Commit not found in history.")
 
-            # ✂️ Remove the selected snapshot cleanly from the timeline
-            self.repo.git.rebase("--onto", parent_commit.hexsha, selected_commit.hexsha)
+            base = all_commits[all_commits.index(target_commit) + 1]  # commit just after the one being deleted
+            subprocess.run(
+                ["git", "rebase", "--onto", base.hexsha, target_commit.hexsha],
+                cwd=self.project_path,
+                env=self.custom_env(),
+                check=True
+            )
 
-            # ✅ Reload UI with updated version history
+            # Refresh UI
             self.init_git()
-            QMessageBox.information(self, "Snapshot Deleted", f"🎛️ That version ({commit_id[:7]}) has been removed from your history.")
+
+            # Auto-select nearest commit (base), scroll to it
+            self.current_commit_id = base.hexsha
+            self.update_log()
+            self.history_table.scrollToItem(self.history_table.item(0, 0), QTableWidget.ScrollHint.PositionAtTop)
+
+            # Automatically check out that commit
+            self.repo.git.checkout(base.hexsha)
+            self.current_commit_id = base.hexsha
+            self.status_message(f"Snapshot deleted. Now viewing: {base.hexsha[:7]}")
+            self.show_commit_checkout_info(self.repo.commit(base.hexsha))
+
+            # Open the DAW project
+            self.open_latest_daw_project()
 
         except Exception as e:
-            QMessageBox.critical(self, "Deletion Failed", f"Something went wrong while trying to remove that snapshot:\n{e}")
+            QMessageBox.critical(self, "Delete Failed", f"Failed to delete commit:\n{e}")
+
+    def open_latest_daw_project(self):
+        """🎛️ Reopen the main DAW project file from the working directory."""
+        try:
+            # Look for common DAW project files
+            daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
+            if not daw_files:
+                QMessageBox.information(
+                    self,
+                    "No Project Found",
+                    "🎵 No Ableton or Logic project found in this version."
+                )
+                return
+
+            daw_file = daw_files[0]  # Open the first matching file
+            subprocess.run(["open", str(daw_file)])
+            print(f"🎼 Reopened DAW project: {daw_file.name}")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Open Project Failed", f"Couldn’t open the project file:\n{e}")
 
 
     def show_commit_checkout_info(self, commit):
