@@ -70,11 +70,12 @@ class DAWGitApp(QWidget):
         self.project_label.setToolTip("Click to open in Finder")
         self.project_label.setWordWrap(True)
 
-        # ✅ Add path_label for tests
-        self.path_label = QLabel(str(self.project_path))
-        main_layout.addWidget(self.path_label)
         main_layout.addWidget(self.project_label)
 
+        # ✅ Add path_label for tests - UNCOMMENT WHEN RUNNING TESTS
+        # self.path_label = QLabel(str(self.project_path))
+        # main_layout.addWidget(self.path_label)
+        
         # Project Setup button
         setup_btn = QPushButton("Setup Project")
         setup_btn.clicked.connect(self.run_setup)
