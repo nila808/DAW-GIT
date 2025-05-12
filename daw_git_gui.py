@@ -52,6 +52,12 @@ class DAWGitApp(QWidget):
         self.unsaved_indicator = QLabel("● Uncommitted Changes")
         self.unsaved_indicator.setStyleSheet("color: orange; font-weight: bold;")
         self.unsaved_indicator.setVisible(False)
+        # 🔒 Detached HEAD warning
+        self.snapshot_label = QLabel("🔒 Viewing Historical Snapshot — changes may be unsafe to save directly")
+        self.snapshot_label.setStyleSheet("color: red; font-weight: bold;")
+        self.snapshot_label.setVisible(self.repo.head.is_detached if self.repo else False)
+        main_layout.addWidget(self.snapshot_label)
+
         self.unsaved_flash = False
         self.unsaved_timer = self.startTimer(800)
         main_layout.addWidget(self.unsaved_indicator)
@@ -303,14 +309,21 @@ class DAWGitApp(QWidget):
                 return
             elif box.clickedButton() == return_main_btn:
                 try:
-                    subprocess.run(["git", "checkout", "master"], cwd=self.project_path, env=self.custom_env(), check=True)
+                    # 🔍 Auto-detect main branch name
+                    repo_heads = [head.name for head in self.repo.heads]
+                    default_branch = "main" if "main" in repo_heads else "master" if "master" in repo_heads else None
+
+                    if not default_branch:
+                        raise Exception("Could not detect a main branch (tried 'main' and 'master')")
+
+                    subprocess.run(["git", "checkout", default_branch], cwd=self.project_path, env=self.custom_env(), check=True)
                     self.init_git()
                     return
-                except subprocess.CalledProcessError as e:
+                except Exception as e:
                     QMessageBox.critical(self, "Failed to Return", f"Could not return to main branch:\n{e}")
                     return
             elif box.clickedButton() == save_new_btn:
-                # 🔜 Next step: implement stash + new branch creation here
+                # 🔜 Future: create new branch here from current commit
                 pass
 
         try:
@@ -321,7 +334,7 @@ class DAWGitApp(QWidget):
                 return
 
             commit = self.repo.index.commit(msg)
-            self.current_commit_id = commit.hexsha  # ✅ Set current commit immediately
+            self.current_commit_id = commit.hexsha
 
             tag = self.commit_tag.toPlainText().strip()
             if tag:
@@ -331,7 +344,15 @@ class DAWGitApp(QWidget):
                     self.repo.create_tag(tag, ref=commit.hexsha)
 
             if self.remote_checkbox.isChecked():
-                subprocess.run(["git", "push", "origin", "master", "--tags"], cwd=self.project_path, env=self.custom_env(), check=True)
+                try:
+                    subprocess.run(
+                        ["git", "push", "origin", "master", "--tags"],
+                        cwd=self.project_path,
+                        env=self.custom_env(),
+                        check=True
+                    )
+                except subprocess.CalledProcessError:
+                    print("[WARN] Remote push skipped: no remote or incorrect config")
 
             self.update_log()
             self.update_unsaved_indicator()
@@ -345,6 +366,7 @@ class DAWGitApp(QWidget):
             QMessageBox.critical(self, "Commit Failed", f"Subprocess error: {e}")
         except Exception as e:
             QMessageBox.critical(self, "Commit Failed", f"Unexpected error: {e}")
+
 
 
     def show_current_commit(self):
@@ -442,14 +464,32 @@ class DAWGitApp(QWidget):
                 ) == QMessageBox.StandardButton.Yes:
                     self.backup_unsaved_changes()
 
-                subprocess.run(["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
-                            cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(
+                    ["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
 
             # ✅ Perform checkout
-            subprocess.run(["git", "checkout", commit_id_tooltip],
-                        cwd=self.project_path, env=self.custom_env(), check=True)
+            subprocess.run(
+                ["git", "checkout", commit_id_tooltip],
+                cwd=self.project_path,
+                env=self.custom_env(),
+                check=True
+            )
 
             self.init_git()
+
+            # 🔒 Mark ALS files read-only if in detached HEAD
+            if self.repo.head.is_detached:
+                for als_file in self.project_path.glob("*.als"):
+                    try:
+                        os.chmod(als_file, 0o444)
+                        print(f"[INFO] Made read-only: {als_file}")
+                    except Exception as e:
+                        print(f"[WARN] Could not change permissions for {als_file}: {e}")
+
             commit = self.repo.commit(commit_id_tooltip)
             self.show_commit_checkout_info(commit)
 
@@ -457,6 +497,7 @@ class DAWGitApp(QWidget):
             QMessageBox.critical(self, "Checkout Error", f"Git error: {e}")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Unexpected error: {e}")
+
 
     def switch_version_line(self):
         if not self.repo:
@@ -632,22 +673,53 @@ class DAWGitApp(QWidget):
 
 
     def start_new_version_line(self):
-        branch_name, ok = QInputDialog.getText(self, "Start New Version Line", "Enter new branch name:")
+        # 🎹 Intro modal for producers
+        QMessageBox.information(
+            self,
+            "Start New Version Line",
+            "🎼 A version line is like saving a new branch of your track.\n\n"
+            "Use this when you're experimenting with a new direction, remix idea, or arrangement.\n\n"
+            "🔤 Tip: Use simple names like:\n"
+            "• verse_idea_1\n"
+            "• breakdown_experiment\n"
+            "• remix_140bpm\n\n"
+            "Avoid spaces or special characters — we'll convert spaces to underscores automatically."
+        )
+
+        branch_name, ok = QInputDialog.getText(self, "New Version Name", "Enter a name for this version:")
         if ok and branch_name:
+            branch_name = branch_name.strip().replace(" ", "_")
+
+            import re
+            if not re.match(r"^[\w\-/]+$", branch_name):
+                QMessageBox.warning(
+                    self,
+                    "Invalid Name",
+                    "❌ Version names can only use letters, numbers, dashes (-), underscores (_), or slashes (/).\n\n"
+                    "Try something like: 'drop_rework' or 'vocal_fx_take1'"
+                )
+                return
+
             try:
-                # Create and switch to the new branch
-                subprocess.run(["git", "checkout", "-b", branch_name], check=True)
-                
-                # Optional: Make an initial commit to mark the new version line
-                marker_file = ".dawgit_version_stamp"
-                with open(marker_file, "w") as f:
-                    f.write(f"Start of {branch_name}")
-                subprocess.run(["git", "add", marker_file], check=True)
-                subprocess.run(["git", "commit", "-m", f"Start new version line: {branch_name}"], check=True)
-                
-                QMessageBox.information(self, "Success", f"New version line '{branch_name}' created and checked out.")
+                if branch_name in [h.name for h in self.repo.heads]:
+                    QMessageBox.warning(self, "Already Exists", f"A version called '{branch_name}' already exists.")
+                    return
+
+                # ✅ Switch to a new branch (even from detached HEAD)
+                subprocess.run(["git", "switch", "-c", branch_name],
+                            cwd=self.project_path, env=self.custom_env(), check=True)
+
+                # 📝 Add marker file
+                marker_file = self.project_path / ".dawgit_version_stamp"
+                marker_file.write_text(f"Start of {branch_name}", encoding="utf-8")
+                subprocess.run(["git", "add", str(marker_file.name)], cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(["git", "commit", "-m", f"Start new version line: {branch_name}"], cwd=self.project_path, env=self.custom_env(), check=True)
+
+                QMessageBox.information(self, "Version Line Created", f"🎉 You're now working on '{branch_name}'!")
+
             except subprocess.CalledProcessError as e:
                 QMessageBox.critical(self, "Error", f"Failed to create new version line:\n{e}")
+
 
 
 
