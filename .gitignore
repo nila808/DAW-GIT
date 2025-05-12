@@ -1,0 +1,16 @@
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+
+# macOS system files
+.DS_Store
+
+# PyInstaller or build artifacts
+*.spec
+dist/
+build/
+
+# VSCode and JetBrains project folders (optional)
+.vscode/
+.idea/
+
