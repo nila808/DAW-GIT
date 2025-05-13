@@ -380,6 +380,24 @@ class DAWGitApp(QWidget):
             # Fallback in case we're detached
             return self.repo.heads[0].name if self.repo.heads else "main"
 
+    def safe_switch_branch(self, target_branch):
+        if self.repo.is_dirty(untracked_files=True):
+            return {"status": "warning", "message": "Uncommitted changes present"}
+        
+        try:
+            subprocess.run(
+                ["git", "checkout", target_branch],
+                cwd=self.project_path,
+                env=self.custom_env(),
+                check=True
+            )
+            self.repo = Repo(self.project_path)
+            self.init_git()
+            self.update_log()
+            return {"status": "ok"}
+        except subprocess.CalledProcessError as e:
+            return {"status": "error", "message": str(e)}
+
 
     def commit_changes(self):
         if not self.repo:
