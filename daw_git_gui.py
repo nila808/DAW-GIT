@@ -169,6 +169,13 @@ class DAWGitApp(QWidget):
         self.history_table = QTableWidget(0, 3)
         self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
 
+        # 🎧 Launch Ableton button (hidden by default)
+        self.open_als_button = QPushButton("🎧 Open This Version in Ableton")
+        self.open_als_button.setVisible(False)
+        self.open_als_button.clicked.connect(self.open_latest_daw_project)
+
+        main_layout.addWidget(self.open_als_button)
+
         # Set stretch + autosize behavior
         self.history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.history_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -292,18 +299,55 @@ class DAWGitApp(QWidget):
                     print("ℹ️ Existing Git repo found — skipping init.")
                     self.init_git()
                     return
+                self.open_als_button.setVisible(False)
 
                 print(f"🚀 Initializing Git at: {self.project_path}")
                 subprocess.run(["git", "init"], cwd=self.project_path, env=self.custom_env(), check=True)
+
+                # ✅ Auto-ignore backup and temp files
+                ignore_entries = [
+                    "*.als~",
+                    "*.logicx~",
+                    "*.asd",
+                    "*.tmp",
+                    ".DS_Store",
+                    "Backup/"
+                ]
+
+                gitignore_path = self.project_path / ".gitignore"
+                existing = []
+
+                if gitignore_path.exists():
+                    existing = gitignore_path.read_text().splitlines()
+
+                added_entries = []
+                with open(gitignore_path, "a", encoding="utf-8") as f:
+                    for entry in ignore_entries:
+                        if entry not in existing:
+                            f.write(entry + "\n")
+                            added_entries.append(entry)
+
+                if added_entries:
+                    QMessageBox.information(
+                        self,
+                        "Ignore Rules Updated",
+                        "📂 Backup folder and temporary files are now safely excluded from version control.\n\n"
+                        "You’ll only see changes that matter to your music project."
+                    )
+                    print("[DEBUG] Added to .gitignore:", added_entries)
+                else:
+                    print("[DEBUG] .gitignore already up to date. No entries added.")
+
                 subprocess.run(["git", "lfs", "install"], cwd=self.project_path, env=self.custom_env(), check=True)
 
-                # Write ignore rules and LFS config
-                (self.project_path / ".gitignore").write_text("*.als~\n*.logicx~\n*.asd\n*.tmp\n.DS_Store\n", encoding='utf-8')
-                (self.project_path / ".gitattributes").write_text("*.als filter=lfs diff=lfs merge=lfs -text\n", encoding='utf-8')
+                # ✅ Only write LFS config if .gitattributes doesn’t exist
+                gitattributes_path = self.project_path / ".gitattributes"
+                if not gitattributes_path.exists():
+                    gitattributes_path.write_text("*.als filter=lfs diff=lfs merge=lfs -text\n", encoding="utf-8")
 
                 subprocess.run(["git", "add", "."], cwd=self.project_path, env=self.custom_env(), check=True)
                 subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=self.project_path, env=self.custom_env(), check=True)
-                subprocess.run(["git", "branch", "-M", "master"], cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(["git", "branch", "-M", "main"], cwd=self.project_path, env=self.custom_env(), check=True)
 
                 QMessageBox.information(
                     self,
@@ -312,6 +356,8 @@ class DAWGitApp(QWidget):
                     "You’re ready to loop, branch, and explore your musical ideas safely."
                 )
                 self.init_git()
+
+                self.open_als_button.setVisible(False)
 
             except subprocess.CalledProcessError as e:
                 QMessageBox.critical(
@@ -325,6 +371,14 @@ class DAWGitApp(QWidget):
                     "Setup Error",
                     f"⚠️ Something went wrong while preparing your session:\n\n{e}"
                 )
+
+
+    def get_default_branch(self):
+        try:
+            return self.repo.head.reference.name
+        except Exception:
+            # Fallback in case we're detached
+            return self.repo.heads[0].name if self.repo.heads else "main"
 
 
     def commit_changes(self):
@@ -371,8 +425,17 @@ class DAWGitApp(QWidget):
                 return
             elif box.clickedButton() == return_main_btn:
                 try:
-                    subprocess.run(["git", "checkout", "master"], cwd=self.project_path, env=self.custom_env(), check=True)
+                    subprocess.run(
+                        ["git", "checkout", self.get_default_branch()],
+                        cwd=self.project_path,
+                        env=self.custom_env(),
+                        check=True
+                    )
+                    self.repo = Repo(self.project_path)  # ✅ Refresh repo object
+                    self.current_commit_id = self.repo.head.commit.hexsha
                     self.init_git()
+                    self.update_log()
+                    self.project_label.setText(f"Tracking: {self.project_path}")  # ✅ Refresh path display
                     return
                 except subprocess.CalledProcessError as e:
                     QMessageBox.critical(
@@ -381,6 +444,7 @@ class DAWGitApp(QWidget):
                         f"⚠️ We couldn’t switch back to the main version:\n\n{e}"
                     )
                     return
+
             elif box.clickedButton() == save_new_btn:
                 new_branch_name, ok = QInputDialog.getText(
                     self,
@@ -417,7 +481,7 @@ class DAWGitApp(QWidget):
                     self.repo.create_tag(tag, ref=commit.hexsha)
 
             if self.remote_checkbox.isChecked():
-                subprocess.run(["git", "push", "origin", "master", "--tags"], cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(["git", "push", "origin", self.get_default_branch(), "--tags"], cwd=self.project_path, env=self.custom_env(), check=True)
 
             self.update_log()
             self.update_unsaved_indicator()
@@ -733,7 +797,7 @@ class DAWGitApp(QWidget):
             if self.remote_checkbox.isChecked():
                 try:
                     subprocess.run(
-                        ["git", "push", "origin", "master", "--tags"],
+                        ["git", "push", "origin", self.get_default_branch(), "--tags"],
                         cwd=self.project_path,
                         env=self.custom_env(),
                         check=True
@@ -794,56 +858,69 @@ class DAWGitApp(QWidget):
         commit_sha = commit_item.toolTip()
 
         try:
-            # 🔐 Safety check: unsaved work
+            # 🔐 Ask about unsaved changes
             if self.has_unsaved_changes():
                 choice = QMessageBox.question(
                     self,
                     "Unsaved Changes Detected",
-                    "🎚️ You have unsaved work. Would you like to back up your current project before switching versions?",
+                    "🎚️ You have unsaved or modified files.\n\n"
+                    "Would you like to back up your project before switching versions?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                 )
                 if choice == QMessageBox.StandardButton.Yes:
                     self.backup_unsaved_changes()
-                subprocess.run(["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
-                            cwd=self.project_path, env=self.custom_env(), check=True)
 
-            # 🔁 Checkout commit (may be detached)
-            subprocess.run(["git", "checkout", commit_sha],
-                        cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(
+                    ["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
 
-            self.init_git()
-
-            # 🎧 Snapshot mode: lock .als files
+            # ✅ SAFETY CHECK: Only reset if detached
             if self.repo.head.is_detached:
-                for als_file in self.project_path.glob("*.als"):
-                    try:
-                        os.chmod(als_file, 0o444)  # read-only
-                        print(f"[INFO] Made read-only: {als_file}")
-                    except Exception as e:
-                        print(f"[WARN] Could not lock {als_file}: {e}")
+                subprocess.run(
+                    ["git", "reset", "--hard", commit_sha],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
             else:
-                for als_file in self.project_path.glob("*.als"):
-                    try:
-                        os.chmod(als_file, 0o644)  # restore write
-                    except:
-                        pass
+                subprocess.run(
+                    ["git", "checkout", commit_sha],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
 
+            subprocess.run(
+                ["git", "lfs", "checkout"],
+                cwd=self.project_path,
+                env=self.custom_env(),
+                check=True
+            )
+
+            self.repo = Repo(self.project_path)
+            self.current_commit_id = self.repo.head.commit.hexsha
+            self.init_git()
             self.update_log()
             self.show_commit_checkout_info(self.repo.commit(commit_sha))
 
-        except subprocess.CalledProcessError as e:
-            QMessageBox.critical(
+            QMessageBox.information(
                 self,
-                "Checkout Failed",
-                f"❌ Could not switch to the selected version:\n\n{e}"
-            )
-        except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Unexpected Error",
-                f"⚠️ Something unexpected happened while loading this version:\n\n{e}"
+                "Project Restored",
+                "✅ This version of your project has been restored.\n\n"
+                "📂 Please re-open the .als file in Ableton to view the changes."
             )
 
+            self.open_als_button.setVisible(True)
+
+
+        except subprocess.CalledProcessError as e:
+            QMessageBox.critical(self, "Checkout Failed", f"❌ Could not switch to the selected version:\n\n{e}")
+        except Exception as e:
+            QMessageBox.critical(self, "Unexpected Error", f"⚠️ Something unexpected happened:\n\n{e}")
+          
 
     def switch_version_line(self):
         if not self.repo:
@@ -1329,13 +1406,13 @@ class DAWGitApp(QWidget):
 
             # ✅ Checkout main branch
             subprocess.run(
-                ["git", "checkout", "master"],
+                ["git", "checkout", self.get_default_branch()],
                 cwd=self.project_path,
                 env=self.custom_env(),
                 check=True
             )
 
-            latest_commit = next(self.repo.iter_commits("master", max_count=1))
+            latest_commit = next(self.repo.iter_commits(self.get_default_branch(), max_count=1))
             self.current_commit_id = latest_commit.hexsha
 
             self.update_log()
@@ -1416,7 +1493,7 @@ class DAWGitApp(QWidget):
             if self.remote_checkbox.isChecked():
                 try:
                     subprocess.run(
-                        ["git", "push", "origin", "master", "--tags"],
+                        ["git", "push", "origin", self.get_default_branch(), "--tags"],
                         cwd=self.project_path,
                         env=self.custom_env(),
                         check=True
