@@ -49,8 +49,17 @@ def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_fac
     app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
 
+    if not app.repo:
+        app.repo = Repo(repo_path)
+
+    # Create the dummy.als file that the app expects to launch
+    dummy_als = Path(repo_path, "dummy.als")
+    dummy_als.write_text("dummy Ableton session")
+    repo.git.add(all=True)
+    repo.git.commit(m="Add dummy.als")
+
     # Checkout commit to simulate DAW version selection
-    app.checkout_selected_commit(repo.head.commit.hexsha)
+    app.checkout_selected_commit(repo.head.commit.hexsha)   
 
     # 🧼 Clear all subprocess calls from prior Git operations
     mock_popen.reset_mock()
@@ -61,5 +70,9 @@ def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_fac
     # ✅ Confirm it tries to open the .als file
     mock_popen.assert_called_once()
     args = mock_popen.call_args[0][0]
-    opened_path = Path(args[1]) if len(args) > 1 else Path("")
-    assert opened_path.suffix == ".als"
+    launched_path = " ".join(args)
+    print("📂 Launched path:", launched_path)
+
+    # ✅ Check that the opened file was dummy.als as expected by the app
+    expected_path = str(dummy_als)
+    assert expected_path in launched_path or dummy_als.name in launched_path

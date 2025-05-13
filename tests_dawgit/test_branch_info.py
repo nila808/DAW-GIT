@@ -22,5 +22,5 @@ def test_create_new_branch_from_commit(temp_repo_factory, qtbot):
     qtbot.addWidget(app)
     app.create_new_version_line("test_branch")
 
-    repo = Repo(repo_path)  # Re-initialize to refresh HEAD
-    assert not repo.head.is_detached
+    # ✅ Use updated app.repo here
+    assert not app.repo.head.is_detached
