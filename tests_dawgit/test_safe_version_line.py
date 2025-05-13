@@ -15,5 +15,6 @@ def test_autocommit_marker_before_version_branch(tmp_path):
 
     app.create_new_version_line("MyNewIdea")
 
-    assert repo.active_branch.name == "MyNewIdea"
-    assert "🎼 Start New Version Line" in repo.head.commit.message
+    # ✅ This is the correct assertion — use updated repo reference
+    assert app.repo.active_branch.name == "MyNewIdea"
+    assert "🎼 Start New Version Line" in app.repo.head.commit.message

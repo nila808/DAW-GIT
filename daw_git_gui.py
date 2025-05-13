@@ -554,31 +554,31 @@ class DAWGitApp(QWidget):
 
     def create_new_version_line(self, branch_name):
         try:
-            current_commit = self.repo.head.commit.hexsha
-
+            # Prevent duplicate branch creation
             if branch_name in [b.name for b in self.repo.branches]:
                 self._show_warning(f"Branch '{branch_name}' already exists.")
                 return {"status": "error", "message": f"Branch '{branch_name}' already exists."}
 
-            # Create new branch from current commit and switch to it
-            self.repo.git.checkout("-b", branch_name, current_commit)
+            # ✅ Create and switch to new branch (from current commit)
+            self.repo.git.checkout("-B", branch_name)
 
-            # ✅ Reload repo to refresh HEAD properly
+            # ✅ Refresh repo to ensure HEAD is now attached to the new branch
             self.repo = Repo(self.project_path)
 
-            # Create and commit a marker file to start the version line
-            marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
+            # ✅ Add marker file and commit it
+            marker_path = Path(self.project_path) / ".version_marker"
             marker_path.write_text(f"Version line started: {branch_name}")
-            self.repo.index.add([str(marker_path.relative_to(self.repo.working_tree_dir))])
-            self.repo.index.commit(f"🎼 Start New Version Line '{branch_name}'")
+            self.repo.index.add([str(marker_path.relative_to(self.project_path))])
+            commit = self.repo.index.commit(f"🎼 Start New Version Line '{branch_name}'")
 
             self.refresh_commit_table()
             self._show_info(f"🎼 New version line '{branch_name}' created.")
-            return {"status": "success"}
+            return {"status": "success", "commit_message": commit.message.strip()}
 
         except Exception as e:
             self._show_error(f"Failed to create version line: {e}")
             return {"status": "error", "message": str(e)}
+
 
 
     def show_commit_context_menu(self, position):
