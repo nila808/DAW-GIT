@@ -1,15 +1,25 @@
-from unittest import mock
+import os
+import pytest
+from pathlib import Path
 from daw_git_gui import DAWGitApp
+from git import Repo
 
-def test_version_line_info(qtbot):
-    app = DAWGitApp(build_ui=False)
-    app.setup_ui()
+@pytest.mark.parametrize("temp_repo_factory", [True], indirect=True)
+def test_create_new_branch_from_commit(temp_repo_factory, qtbot):
+    repo_path = temp_repo_factory()
+    repo = Repo(repo_path)
+
+    # Create initial commit
+    als_file = Path(repo_path) / "project.als"
+    als_file.write_text("Dummy ALS content")
+    repo.git.add(all=True)
+    repo.git.commit(m="Initial commit")
+
+    # Detach HEAD
+    repo.git.checkout(repo.head.commit.hexsha)
+
+    app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
+    app.create_new_version_line("test_branch")
 
-    app.repo = mock.MagicMock()
-    app.repo.active_branch.name = "version/0.0.1"
-
-    app.update_version_line_label()  # <== Add this before checking the label
-    label = app.version_line_label.text()
-    assert "version/0.0.1" in label
-
+    assert not repo.head.is_detached

@@ -1,33 +1,31 @@
 import os
+import pytest
 from pathlib import Path
-from git import Repo
 from daw_git_gui import DAWGitApp
+from git import Repo
 
-def test_auto_commit_creates_tag(tmp_path):
-    # Create a real Git repo in the temp path
-    repo_path = tmp_path / "repo"
-    repo_path.mkdir()
-    os.chdir(repo_path)
-    repo = Repo.init(repo_path)
+@pytest.mark.parametrize("temp_repo_factory", [True], indirect=True)
+def test_commit_requires_als_file(temp_repo_factory, qtbot):
+    repo_path = temp_repo_factory()
+    repo = Repo(repo_path)
 
-    # Add a dummy file but do NOT commit — let auto_commit do it
-    dummy_file = repo_path / "dummy.txt"
-    dummy_file.write_text("test data")
+    Path(repo_path, "readme.txt").write_text("This is not a project")
 
-    # Instantiate the app with correct project_path and repo
-    gui = DAWGitApp()
-    gui.project_path = repo_path
-    gui.repo = repo
+    app = DAWGitApp(repo_path)
+    qtbot.addWidget(app)
+    result = app.commit_changes()
+    status = app.status_label.text().lower()
+    assert result is False or "als" in status
 
-    # Disable remote push during test
-    if hasattr(gui, "remote_checkbox"):
-        gui.remote_checkbox.setChecked(False)
+@pytest.mark.parametrize("temp_repo_factory", [True], indirect=True)
+def test_commit_requires_logicx_file(temp_repo_factory, qtbot):
+    repo_path = temp_repo_factory()
+    repo = Repo(repo_path)
 
-    # Perform the test commit with a tag
-    gui.auto_commit("Test commit", tag="v_test_1")
+    Path(repo_path, "notes.txt").write_text("Not a DAW project")
 
-    # 🔁 Force GitPython to refresh tag info
-    gui.repo.refs
-
-    # ✅ Check that the tag exists
-    assert "v_test_1" in [tag.name for tag in repo.tags]
+    app = DAWGitApp(repo_path)
+    qtbot.addWidget(app)
+    result = app.commit_changes()
+    status = app.status_label.text().lower()
+    assert result is False or "logicx" in status
