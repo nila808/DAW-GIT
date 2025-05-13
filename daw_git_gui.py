@@ -6,6 +6,7 @@ import signal
 import shutil
 import traceback
 from datetime import datetime
+from git.exc import GitCommandError
 from pathlib import Path
 
 # Qt Widgets and core modules
@@ -69,6 +70,11 @@ class DAWGitApp(QWidget):
         self.project_label.setOpenExternalLinks(True)
         self.project_label.setToolTip("Click to open in Finder")
         self.project_label.setWordWrap(True)
+
+        self.status_label = QLabel("Status: Ready")
+        self.status_label.setObjectName("status_label")
+        main_layout.addWidget(self.status_label)
+
 
         main_layout.addWidget(self.project_label)
 
@@ -289,89 +295,82 @@ class DAWGitApp(QWidget):
 
 
     def run_setup(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select Project Folder")
-        if folder:
-            try:
-                self.project_path = Path(folder)
-                os.chdir(self.project_path)
+        if not self.project_path or not self.project_path.exists():
+            folder = QFileDialog.getExistingDirectory(self, "Select Project Folder")
+            if not folder:
+                return
+            self.project_path = Path(folder)
 
-                if (self.project_path / ".git").exists():
-                    print("ℹ️ Existing Git repo found — skipping init.")
-                    self.init_git()
-                    return
-                self.open_als_button.setVisible(False)
+        try:
+            os.chdir(self.project_path)
 
-                print(f"🚀 Initializing Git at: {self.project_path}")
-                subprocess.run(["git", "init"], cwd=self.project_path, env=self.custom_env(), check=True)
+            if (self.project_path / ".git").exists():
+                print("ℹ️ Existing Git repo found — skipping init.")
+                self.init_git()
+                return
 
-                # ✅ Auto-ignore backup and temp files
-                ignore_entries = [
-                    "*.als~",
-                    "*.logicx~",
-                    "*.asd",
-                    "*.tmp",
-                    ".DS_Store",
-                    "Backup/"
-                ]
+            self.open_als_button.setVisible(False)
+            print(f"🚀 Initializing Git at: {self.project_path}")
 
-                gitignore_path = self.project_path / ".gitignore"
-                existing = []
+            subprocess.run(["git", "init"], cwd=self.project_path, env=self.custom_env(), check=True)
 
-                if gitignore_path.exists():
-                    existing = gitignore_path.read_text().splitlines()
+            # ✅ Auto-ignore backup and temp files
+            ignore_entries = [
+                "*.als~", "*.logicx~", "*.asd", "*.tmp", ".DS_Store", "Backup/"
+            ]
+            gitignore_path = self.project_path / ".gitignore"
+            existing = gitignore_path.read_text().splitlines() if gitignore_path.exists() else []
 
-                added_entries = []
-                with open(gitignore_path, "a", encoding="utf-8") as f:
-                    for entry in ignore_entries:
-                        if entry not in existing:
-                            f.write(entry + "\n")
-                            added_entries.append(entry)
+            added_entries = []
+            with open(gitignore_path, "a", encoding="utf-8") as f:
+                for entry in ignore_entries:
+                    if entry not in existing:
+                        f.write(entry + "\n")
+                        added_entries.append(entry)
 
-                if added_entries:
-                    QMessageBox.information(
-                        self,
-                        "Ignore Rules Updated",
-                        "📂 Backup folder and temporary files are now safely excluded from version control.\n\n"
-                        "You’ll only see changes that matter to your music project."
-                    )
-                    print("[DEBUG] Added to .gitignore:", added_entries)
-                else:
-                    print("[DEBUG] .gitignore already up to date. No entries added.")
-
-                subprocess.run(["git", "lfs", "install"], cwd=self.project_path, env=self.custom_env(), check=True)
-
-                # ✅ Only write LFS config if .gitattributes doesn’t exist
-                gitattributes_path = self.project_path / ".gitattributes"
-                if not gitattributes_path.exists():
-                    gitattributes_path.write_text("*.als filter=lfs diff=lfs merge=lfs -text\n", encoding="utf-8")
-
-                subprocess.run(["git", "add", "."], cwd=self.project_path, env=self.custom_env(), check=True)
-                subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=self.project_path, env=self.custom_env(), check=True)
-                subprocess.run(["git", "branch", "-M", "main"], cwd=self.project_path, env=self.custom_env(), check=True)
-
+            if added_entries:
                 QMessageBox.information(
                     self,
-                    "Setup Complete",
-                    "🎶 Your project is now tracked with version control!\n\n"
-                    "You’re ready to loop, branch, and explore your musical ideas safely."
+                    "Ignore Rules Updated",
+                    "📂 Backup folder and temporary files are now safely excluded from version control.\n\n"
+                    "You’ll only see changes that matter to your music project."
                 )
-                self.init_git()
+                print("[DEBUG] Added to .gitignore:", added_entries)
+            else:
+                print("[DEBUG] .gitignore already up to date. No entries added.")
 
-                self.open_als_button.setVisible(False)
+            subprocess.run(["git", "lfs", "install"], cwd=self.project_path, env=self.custom_env(), check=True)
 
-            except subprocess.CalledProcessError as e:
-                QMessageBox.critical(
-                    self,
-                    "Git Setup Failed",
-                    f"❌ We hit a glitch while setting up Git:\n\n{e}"
-                )
-            except Exception as e:
-                QMessageBox.critical(
-                    self,
-                    "Setup Error",
-                    f"⚠️ Something went wrong while preparing your session:\n\n{e}"
-                )
+            # ✅ Only write LFS config if .gitattributes doesn’t exist
+            gitattributes_path = self.project_path / ".gitattributes"
+            if not gitattributes_path.exists():
+                gitattributes_path.write_text("*.als filter=lfs diff=lfs merge=lfs -text\n", encoding="utf-8")
 
+            subprocess.run(["git", "add", "."], cwd=self.project_path, env=self.custom_env(), check=True)
+            subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=self.project_path, env=self.custom_env(), check=True)
+            subprocess.run(["git", "branch", "-M", "main"], cwd=self.project_path, env=self.custom_env(), check=True)
+
+            QMessageBox.information(
+                self,
+                "Setup Complete",
+                "🎶 Your project is now tracked with version control!\n\n"
+                "You’re ready to loop, branch, and explore your musical ideas safely."
+            )
+            self.init_git()
+            self.open_als_button.setVisible(False)
+
+        except subprocess.CalledProcessError as e:
+            QMessageBox.critical(
+                self,
+                "Git Setup Failed",
+                f"❌ We hit a glitch while setting up Git:\n\n{e}"
+            )
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Setup Error",
+                f"⚠️ Something went wrong while preparing your session:\n\n{e}"
+            )
 
     def get_default_branch(self):
         try:
@@ -401,13 +400,15 @@ class DAWGitApp(QWidget):
 
     def commit_changes(self):
         if not self.repo:
-            QMessageBox.warning(
-                self,
-                "Project Not Set Up",
-                "🎛️ Please set up your project before saving changes.\n\n"
-                "You can do this via the Setup button."
-            )
-            return
+            self.show_status_message("⚠️ No Git repository found.")
+            return False
+
+        has_als = any(f.suffix == ".als" for f in self.project_path.glob("*.als"))
+        has_logicx = any(f.suffix == ".logicx" for f in self.project_path.glob("*.logicx"))
+
+        if not has_als and not has_logicx:
+            self.show_status_message("⚠️ No .als or .logicx file found to commit.")
+            return False
 
         msg = self.commit_message.toPlainText().strip()
         if not msg:
@@ -691,7 +692,7 @@ class DAWGitApp(QWidget):
                 return
 
             daw_file = daw_files[0]  # Open the first matching file
-            subprocess.run(["open", str(daw_file)])
+            subprocess.Popen(["open", str(daw_file)])
             print(f"🎼 Reopened DAW project: {daw_file.name}")
 
         except Exception as e:
@@ -858,7 +859,31 @@ class DAWGitApp(QWidget):
             return False
             
 
-    def checkout_selected_commit(self):
+    def checkout_selected_commit(self, commit_sha=None):
+        if commit_sha:
+            try:
+                subprocess.run(
+                    ["git", "reset", "--hard", commit_sha],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
+                subprocess.run(
+                    ["git", "lfs", "checkout"],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
+                self.repo = Repo(self.project_path)
+                self.current_commit_id = self.repo.head.commit.hexsha
+                self.init_git()
+                self.update_log()
+                self.show_commit_checkout_info(self.repo.commit(commit_sha))
+            except Exception as e:
+                QMessageBox.critical(self, "Checkout Failed", f"❌ Checkout failed:\n\n{e}")
+            return
+
+        # GUI-based selection
         selected_row = self.history_table.currentRow()
         if selected_row < 0:
             return
@@ -924,9 +949,7 @@ class DAWGitApp(QWidget):
                 "✅ This version of your project has been restored.\n\n"
                 "📂 Please re-open the .als file in Ableton to view the changes."
             )
-
             self.open_als_button.setVisible(True)
-
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "Checkout Failed", f"❌ Could not switch to the selected version:\n\n{e}")
@@ -1628,6 +1651,25 @@ class DAWGitApp(QWidget):
                 print(f"🎼 Opening DAW file: {daw_file.name}")
             except Exception as e:
                 print(f"❌ Failed to open DAW project file: {e}")
+
+    def show_status_message(self, message):
+        """🎵 Display a status message to the user in the status label."""
+        if hasattr(self, 'status_label'):
+            self.status_label.setText(f"Status: {message}")
+        else:
+            print(f"[STATUS] {message}")
+            
+
+    def _show_info(self, message):
+        QMessageBox.information(self, "Heads up", message)
+
+
+    def _show_warning(self, message):
+        QMessageBox.warning(self, "Heads up", message)
+
+
+    def _show_error(self, message):
+        QMessageBox.critical(self, "Something went wrong", message)
 
 
 
