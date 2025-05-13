@@ -407,7 +407,7 @@ class DAWGitApp(QWidget):
         has_logicx = any(f.suffix == ".logicx" for f in self.project_path.glob("*.logicx"))
 
         if not has_als and not has_logicx:
-            self.show_status_message("⚠️ No .als or .logicx file found to commit.")
+            self.status_label.setText("⚠️ No .als or .logicx file found to commit.")  # ✅ Needed for test
             return False
 
         msg = self.commit_message.toPlainText().strip()
@@ -417,9 +417,9 @@ class DAWGitApp(QWidget):
                 "Missing Message",
                 "📝 Please enter a short note describing what’s changed in this version."
             )
-            return
+            return False
 
-        # 🎧 Snapshot safety: warn if working on a detached commit
+        # 🎧 Snapshot safety
         if self.repo.head.is_detached:
             current_branch = "(Snapshot View – no version line active)"
             box = QMessageBox(self)
@@ -441,7 +441,7 @@ class DAWGitApp(QWidget):
             box.exec()
 
             if box.clickedButton() == cancel_btn:
-                return
+                return False
             elif box.clickedButton() == return_main_btn:
                 try:
                     subprocess.run(
@@ -450,19 +450,19 @@ class DAWGitApp(QWidget):
                         env=self.custom_env(),
                         check=True
                     )
-                    self.repo = Repo(self.project_path)  # ✅ Refresh repo object
+                    self.repo = Repo(self.project_path)
                     self.current_commit_id = self.repo.head.commit.hexsha
                     self.init_git()
                     self.update_log()
-                    self.project_label.setText(f"Tracking: {self.project_path}")  # ✅ Refresh path display
-                    return
+                    self.project_label.setText(f"Tracking: {self.project_path}")
+                    return False
                 except subprocess.CalledProcessError as e:
                     QMessageBox.critical(
                         self,
                         "Couldn’t Return to Main",
                         f"⚠️ We couldn’t switch back to the main version:\n\n{e}"
                     )
-                    return
+                    return False
 
             elif box.clickedButton() == save_new_btn:
                 new_branch_name, ok = QInputDialog.getText(
@@ -474,9 +474,9 @@ class DAWGitApp(QWidget):
                     result = self.create_new_version_line(new_branch_name)
                     if result["status"] == "error":
                         QMessageBox.critical(self, "Error", result["message"])
-                        return
+                        return False
                 else:
-                    return
+                    return False
 
         try:
             subprocess.run(["git", "add", "-A"], cwd=self.project_path, env=self.custom_env(), check=True)
@@ -487,7 +487,7 @@ class DAWGitApp(QWidget):
                     "No Changes",
                     "✅ No changes to commit — your project is already up to date!"
                 )
-                return
+                return False
 
             commit = self.repo.index.commit(msg)
             self.current_commit_id = commit.hexsha
@@ -500,7 +500,8 @@ class DAWGitApp(QWidget):
                     self.repo.create_tag(tag, ref=commit.hexsha)
 
             if self.remote_checkbox.isChecked():
-                subprocess.run(["git", "push", "origin", self.get_default_branch(), "--tags"], cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(["git", "push", "origin", self.get_default_branch(), "--tags"],
+                            cwd=self.project_path, env=self.custom_env(), check=True)
 
             self.update_log()
             self.update_unsaved_indicator()
@@ -513,13 +514,14 @@ class DAWGitApp(QWidget):
                 f"✅ Your changes have been saved as a new version:\n\n{msg}"
             )
             print(f"✅ Commit '{msg}' completed.")
+            return True
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "Commit Failed", f"❌ Git command failed:\n{e}")
+            return False
         except Exception as e:
             QMessageBox.critical(self, "Commit Failed", f"⚠️ Something unexpected went wrong:\n{e}")
-
-
+            return False
 
 
     def show_current_commit(self):
@@ -551,27 +553,32 @@ class DAWGitApp(QWidget):
 
 
     def create_new_version_line(self, branch_name):
-            try:
-                current_commit = self.repo.head.commit.hexsha
-                # Check if branch already exists
-                if branch_name in [b.name for b in self.repo.branches]:
-                    self._show_warning(f"Branch '{branch_name}' already exists.")
-                    return
+        try:
+            current_commit = self.repo.head.commit.hexsha
 
-                # Create and switch to new branch
-                self.repo.git.branch(branch_name, current_commit)
-                self.repo.git.checkout(branch_name)
+            if branch_name in [b.name for b in self.repo.branches]:
+                self._show_warning(f"Branch '{branch_name}' already exists.")
+                return {"status": "error", "message": f"Branch '{branch_name}' already exists."}
 
-                # Create a marker commit so the branch has a unique tip
-                marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
-                marker_path.write_text(f"Version line started: {branch_name}")
-                self.repo.index.add([str(marker_path.relative_to(self.repo.working_tree_dir))])
-                self.repo.index.commit(f"[Version Line] Start '{branch_name}'")
+            # Create new branch from current commit and switch to it
+            self.repo.git.checkout("-b", branch_name, current_commit)
 
-                self.refresh_commit_table()
-                self._show_info(f"🎼 New version line '{branch_name}' created.")
-            except Exception as e:
-                self._show_error(f"Failed to create version line: {e}")
+            # ✅ Reload repo to refresh HEAD properly
+            self.repo = Repo(self.project_path)
+
+            # Create and commit a marker file to start the version line
+            marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
+            marker_path.write_text(f"Version line started: {branch_name}")
+            self.repo.index.add([str(marker_path.relative_to(self.repo.working_tree_dir))])
+            self.repo.index.commit(f"🎼 Start New Version Line '{branch_name}'")
+
+            self.refresh_commit_table()
+            self._show_info(f"🎼 New version line '{branch_name}' created.")
+            return {"status": "success"}
+
+        except Exception as e:
+            self._show_error(f"Failed to create version line: {e}")
+            return {"status": "error", "message": str(e)}
 
 
     def show_commit_context_menu(self, position):
@@ -680,7 +687,6 @@ class DAWGitApp(QWidget):
     def open_latest_daw_project(self):
         """🎛️ Reopen the main DAW project file from the working directory."""
         try:
-            # Look for common DAW project files
             daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
             if not daw_files:
                 QMessageBox.information(
@@ -692,6 +698,8 @@ class DAWGitApp(QWidget):
                 return
 
             daw_file = daw_files[0]  # Open the first matching file
+
+            # 🔁 Use Popen here so the test can mock it directly
             subprocess.Popen(["open", str(daw_file)])
             print(f"🎼 Reopened DAW project: {daw_file.name}")
 
@@ -1635,6 +1643,10 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"❌ Failed to load last project path: {e}")
         return None
+    
+    def launch_file_with_system(self, file_path):
+        subprocess.Popen(["open", str(file_path)])
+
 
 
     def open_daw_project(self):

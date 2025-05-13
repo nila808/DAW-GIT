@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "🧪 Running DAWGitApp test suite..."
+PYTHONPATH=. pytest "$@"
 
 # Set Python path to ensure daw_git_gui.py is importable
 export PYTHONPATH=$(pwd)

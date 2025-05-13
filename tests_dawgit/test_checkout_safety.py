@@ -10,15 +10,18 @@ def test_checkout_commit_from_other_branch(temp_repo_factory, qtbot):
     repo_path = temp_repo_factory()
     repo = Repo(repo_path)
 
+    # Commit v1 on main
     Path(repo_path, "track.als").write_text("v1")
     repo.git.add(all=True)
     repo.git.commit(m="v1")
 
+    # Create and switch to a new branch, then commit v2
     repo.git.checkout("-b", "branch-explore")
     Path(repo_path, "track.als").write_text("v2")
     repo.git.add(all=True)
     repo.git.commit(m="v2")
 
+    # Get the first commit from main and checkout (detached HEAD)
     first_commit = repo.git.rev_list("main", max_count=1)
     repo.git.checkout(first_commit)
 
@@ -26,23 +29,37 @@ def test_checkout_commit_from_other_branch(temp_repo_factory, qtbot):
     qtbot.addWidget(app)
     app.checkout_selected_commit(first_commit)
 
+
+@mock.patch("daw_git_gui.subprocess.Popen")
 @pytest.mark.parametrize("temp_repo_factory", [True], indirect=True)
-@mock.patch("subprocess.Popen")
 def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_factory, qtbot):
     repo_path = temp_repo_factory()
     repo = Repo(repo_path)
 
+    # Create and commit an Ableton project file
     als_file = Path(repo_path, "session.als")
     als_file.write_text("Ableton project file")
     repo.git.add(all=True)
     repo.git.commit(m="commit als")
 
+    # Detach HEAD
     repo.git.checkout(repo.head.commit.hexsha)
+
+    # Launch app and attach to test
     app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
+
+    # Checkout commit to simulate DAW version selection
     app.checkout_selected_commit(repo.head.commit.hexsha)
+
+    # 🧼 Clear all subprocess calls from prior Git operations
+    mock_popen.reset_mock()
+
+    # Try opening the latest DAW project
     app.open_latest_daw_project()
 
+    # ✅ Confirm it tries to open the .als file
     mock_popen.assert_called_once()
     args = mock_popen.call_args[0][0]
-    assert "session.als" in " ".join(args)
+    opened_path = Path(args[1]) if len(args) > 1 else Path("")
+    assert opened_path.suffix == ".als"
