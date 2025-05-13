@@ -73,8 +73,8 @@ class DAWGitApp(QWidget):
         main_layout.addWidget(self.project_label)
 
         # ✅ Add path_label for tests - UNCOMMENT WHEN RUNNING TESTS
-        # self.path_label = QLabel(str(self.project_path))
-        # main_layout.addWidget(self.path_label)
+        self.path_label = QLabel(str(self.project_path))
+        main_layout.addWidget(self.path_label)
         
         # Project Setup button
         setup_btn = QPushButton("Setup Project")
@@ -174,6 +174,9 @@ class DAWGitApp(QWidget):
         self.history_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         self.history_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
 
+        self.history_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.history_table.customContextMenuRequested.connect(self.show_commit_context_menu)
+
         self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message"])
         self.history_table.resizeColumnsToContents()
         history_layout.addWidget(self.history_table)
@@ -247,13 +250,35 @@ class DAWGitApp(QWidget):
                 self.history_table.selectRow(i)
             print(f"[DEBUG] Comparing {self.current_commit_id[:7]} to {commit.hexsha[:7]} (row {i})")
 
+            # ✅ Disable Delete button if selected commit is unreachable
+            if hasattr(self, "delete_commit_button") and self.repo:
+                try:
+                    reachable = [c.hexsha for c in self.repo.iter_commits()]
+                    if self.current_commit_id in reachable:
+                        self.delete_commit_button.setEnabled(True)
+                        self.delete_commit_button.setToolTip("Delete this commit from history.")
+                    else:
+                        self.delete_commit_button.setEnabled(False)
+                        self.delete_commit_button.setToolTip("❌ This commit is from another version line and cannot be deleted from here.")
+                except Exception as e:
+                    print(f"[WARN] Could not validate commit reachability: {e}")
+
         self.history_table.resizeColumnsToContents()
 
         # ✅ Auto-scroll to selected row
         selected_row = self.history_table.currentRow()
         if selected_row >= 0:
             self.history_table.scrollToItem(self.history_table.item(selected_row, 0), QTableWidget.ScrollHint.PositionAtCenter)
-        print(f"[DEBUG] Final selected row after update_log(): {selected_row}")
+
+        # ✅ Enable or disable the delete commit button
+        if hasattr(self, "delete_commit_button") and self.current_commit_id:
+            can_delete = self.is_commit_deletable(self.current_commit_id)
+            self.delete_commit_button.setEnabled(can_delete)
+            self.delete_commit_button.setToolTip(
+                "Delete this commit from history." if can_delete else
+                "This commit is protected or not part of the current branch."
+            )
+            print(f"[DEBUG] Final selected row after update_log(): {selected_row}")
 
 
     def run_setup(self):
@@ -324,8 +349,14 @@ class DAWGitApp(QWidget):
                     QMessageBox.critical(self, "Failed to Return", f"Could not return to main branch:\n{e}")
                     return
             elif box.clickedButton() == save_new_btn:
-                # 🔜 Next step: implement stash + new branch creation here
-                pass
+                new_branch_name, ok = QInputDialog.getText(self, "New Version Line", "Name your new version line:")
+                if ok and new_branch_name:
+                    result = self.create_new_version_line(new_branch_name)
+                    if result["status"] == "error":
+                        QMessageBox.critical(self, "Error", result["message"])
+                        return
+                else:
+                    return
 
         try:
             subprocess.run(["git", "add", "-A"], cwd=self.project_path, env=self.custom_env(), check=True)
@@ -336,6 +367,14 @@ class DAWGitApp(QWidget):
 
             commit = self.repo.index.commit(msg)
             self.current_commit_id = commit.hexsha  # ✅ Set current commit immediately
+            # Enable or disable the delete button based on commit safety
+            if hasattr(self, "delete_commit_button") and self.current_commit_id:
+                can_delete = self.is_commit_deletable(self.current_commit_id)
+                self.delete_commit_button.setEnabled(can_delete)
+                self.delete_commit_button.setToolTip(
+                    "Delete this commit from history." if can_delete else
+                    "This commit is protected or not part of the current branch."
+                )
 
             tag = self.commit_tag.toPlainText().strip()
             if tag:
@@ -389,6 +428,36 @@ class DAWGitApp(QWidget):
         QMessageBox.information(self, "Current Commit", body)
 
 
+    def create_new_version_line(self, branch_name):
+        import datetime
+        import shutil
+        from git import GitCommandError
+
+        try:
+            if self.repo is None:
+                return {"status": "error", "message": "No repository loaded."}
+
+            # Stage and commit regardless of is_dirty
+            self.repo.git.add(A=True)
+            self.repo.index.commit("🎼 Start New Version Line")
+
+            # Create and switch to new branch
+            self.repo.git.checkout("-b", branch_name)
+
+            # Backup folder
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_dir = self.repo_path.parent / f"{self.repo_path.name}_backup_{timestamp}"
+            shutil.copytree(self.repo_path, backup_dir)
+
+            self.refresh_commit_history()
+            return {"status": "success", "message": f"New version line '{branch_name}' created."}
+
+        except GitCommandError as e:
+            return {"status": "error", "message": str(e)}
+        except Exception as e:
+            return {"status": "error", "message": f"Unexpected error: {e}"}
+
+
     def show_commit_context_menu(self, position):
         row = self.history_table.rowAt(position.y())
         if row == -1:
@@ -396,10 +465,26 @@ class DAWGitApp(QWidget):
 
         self.history_table.selectRow(row)
 
+        # Get commit SHA from tooltip in column 1 (set in update_log)
+        commit_item = self.history_table.item(row, 1)
+        if not commit_item:
+            return
+
+        commit_sha = commit_item.toolTip()
+
         menu = QMenu(self)
         delete_action = QAction("🗑️ Delete This Snapshot", self)
-        delete_action.triggered.connect(self.delete_selected_commit)
 
+        # Check if commit is reachable from current branch
+        try:
+            reachable = [c.hexsha for c in self.repo.iter_commits()]
+            if commit_sha not in reachable:
+                delete_action.setEnabled(False)
+                delete_action.setToolTip("❌ This commit is from another version line.")
+        except Exception as e:
+            print(f"[WARN] Could not validate commit reachability: {e}")
+
+        delete_action.triggered.connect(self.delete_selected_commit)
         menu.addAction(delete_action)
         menu.exec(self.history_table.viewport().mapToGlobal(position))
 
@@ -498,6 +583,28 @@ class DAWGitApp(QWidget):
 
     def rebase_delete_commit(self, commit_id):
         try:
+            reachable_commits = [c.hexsha for c in self.repo.iter_commits()]
+            try:
+                current_branch = self.repo.active_branch.name
+            except TypeError:
+                current_branch = "detached HEAD"
+
+            QMessageBox.information(
+                self, "DEBUG",
+                f"🧠 Trying to delete commit: {commit_id[:10]}\n"
+                f"🌿 Current branch: {current_branch}\n\n"
+                f"📜 Reachable commits:\n" + "\n".join(c[:10] for c in reachable_commits)
+            )
+
+            if commit_id not in reachable_commits:
+                QMessageBox.critical(
+                    self,
+                    "Failed to delete commit",
+                    "❌ This commit is not part of the current branch history and cannot be deleted from here."
+                )
+                return
+
+            # ✅ Do the rebase
             subprocess.run(
                 ["git", "rebase", "--onto", f"{commit_id}^", commit_id],
                 cwd=self.project_path,
@@ -511,6 +618,9 @@ class DAWGitApp(QWidget):
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "Rebase Failed", f"Git error:\n{e}")
+        except Exception as e:
+            QMessageBox.critical(self, "Unexpected Error", f"❌ {e}")
+
 
 
     def show_commit_checkout_info(self, commit):
@@ -557,6 +667,23 @@ class DAWGitApp(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Auto Commit Failed", f"Unexpected error: {e}")
 
+    def is_commit_deletable(self, commit_id):
+        """Returns True if the commit can be deleted from the current branch"""
+        try:
+            # Check if commit is in current branch history
+            reachable = commit_id in [c.hexsha for c in self.repo.iter_commits()]
+            if not reachable:
+                return False
+
+            # Check if it's a protected commit (🎼 marker)
+            commit_msg = self.repo.commit(commit_id).message
+            if "🎼" in commit_msg:
+                return False
+
+            return True
+        except Exception:
+            return False
+            
 
     def checkout_selected_commit(self):
         try:
@@ -720,60 +847,33 @@ class DAWGitApp(QWidget):
             traceback.print_exc()
             QMessageBox.critical(self, "Import Failed", f"Error: {e}")
 
-
         
     def checkout_commit(self, commit_sha):
+        import shutil
+        import datetime
+
         try:
-            # 🔒 Prompt for unsaved changes
-            if self.has_unsaved_changes():
-                if QMessageBox.question(
-                    self, "Unsaved Changes Detected",
-                    "You have unsaved or modified files. Would you like to back them up before switching?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                ) == QMessageBox.StandardButton.Yes:
-                    self.backup_unsaved_changes()
+            if self.repo.untracked_files:
+                return {
+                    "status": "warning",
+                    "message": f"Untracked files exist: {self.repo.untracked_files}"
+                }
 
-                subprocess.run(
-                    ["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
-                    cwd=self.project_path, env=self.custom_env(), check=True
-                )
+            # Backup before checkout
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_dir = self.repo_path.parent / f"Backup_{self.repo_path.name}_{timestamp}"
+            shutil.copytree(self.repo_path, backup_dir)
+            print(f"🔒 Unsaved changes backed up to: {backup_dir}")
 
-            # 🔁 Checkout commit (may be detached)
-            subprocess.run(
-                ["git", "checkout", commit_sha],
-                cwd=self.project_path, env=self.custom_env(), check=True
-            )
+            self.repo.git.checkout(commit_sha)
+            self.refresh_commit_history()
 
-            self.init_git()
-
-            # 🎧 Snapshot mode: lock .als files
-            if self.repo.head.is_detached:
-                for als_file in self.project_path.glob("*.als"):
-                    try:
-                        os.chmod(als_file, 0o444)  # read-only
-                        print(f"[INFO] Made read-only: {als_file}")
-                    except Exception as e:
-                        print(f"[WARN] Failed to lock {als_file}: {e}")
-                QMessageBox.information(
-                    self, "Viewing Snapshot",
-                    "📦 You’re now viewing a snapshot of your project (read-only)."
-                    "💡 To make changes safely, use '🎼 Start New Version Line'."
-                )
-            else:
-                # 🎼 Live version line — restore .als to writable
-                for als_file in self.project_path.glob("*.als"):
-                    try:
-                        os.chmod(als_file, 0o644)
-                    except:
-                        pass
-
-            self.update_log()
-            self.show_commit_checkout_info(self.repo.commit(commit_sha))
-
-        except subprocess.CalledProcessError as e:
-            QMessageBox.critical(self, "Checkout Failed", f"Git error:{e}")
+            return {
+                "status": "success",
+                "message": f"Checked out commit {commit_sha}"
+            }
         except Exception as e:
-            QMessageBox.critical(self, "Unexpected Error", str(e))
+            return {"status": "error", "message": str(e)}
 
 
     def highlight_current_commit(self):
@@ -838,6 +938,45 @@ class DAWGitApp(QWidget):
             except subprocess.CalledProcessError as e:
                 QMessageBox.critical(self, "Error", f"Failed to create new version line:\n{e}")
 
+
+    def safe_switch_branch(self, branch_name):
+        from PyQt6.QtWidgets import QMessageBox
+        from git import GitCommandError
+        import shutil
+        import datetime
+
+        try:
+            if self.repo is None:
+                return {"status": "error", "message": "No repository loaded."}
+
+            # Check for uncommitted changes
+            if self.repo.is_dirty(untracked_files=True):
+                return {
+                    "status": "warning",
+                    "message": "You have uncommitted changes. Please commit or stash them before switching branches."
+                }
+
+            # Make a backup before switching
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_dir = self.repo_path.parent / f"{self.repo_path.name}_backup_{timestamp}"
+            shutil.copytree(self.repo_path, backup_dir)
+
+            # Create the branch if it doesn't exist
+            if branch_name not in [b.name for b in self.repo.branches]:
+                self.repo.git.checkout("-b", branch_name)
+            else:
+                self.repo.git.checkout(branch_name)
+
+            self.refresh_commit_history()
+            return {
+                "status": "success",
+                "message": f"Switched to branch '{branch_name}' safely. Backup created at {backup_dir}"
+            }
+
+        except GitCommandError as e:
+            return {"status": "error", "message": str(e)}
+        except Exception as e:
+            return {"status": "error", "message": f"Unexpected error: {e}"}
 
 
     def switch_branch(self):
