@@ -550,33 +550,27 @@ class DAWGitApp(QWidget):
 
 
     def create_new_version_line(self, branch_name):
-        import datetime
-        import shutil
-        from git import GitCommandError
+            try:
+                current_commit = self.repo.head.commit.hexsha
+                # Check if branch already exists
+                if branch_name in [b.name for b in self.repo.branches]:
+                    self._show_warning(f"Branch '{branch_name}' already exists.")
+                    return
 
-        try:
-            if self.repo is None:
-                return {"status": "error", "message": "No repository loaded."}
+                # Create and switch to new branch
+                self.repo.git.branch(branch_name, current_commit)
+                self.repo.git.checkout(branch_name)
 
-            # Stage and commit regardless of is_dirty
-            self.repo.git.add(A=True)
-            self.repo.index.commit("🎼 Start New Version Line")
+                # Create a marker commit so the branch has a unique tip
+                marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
+                marker_path.write_text(f"Version line started: {branch_name}")
+                self.repo.index.add([str(marker_path.relative_to(self.repo.working_tree_dir))])
+                self.repo.index.commit(f"[Version Line] Start '{branch_name}'")
 
-            # Create and switch to new branch
-            self.repo.git.checkout("-b", branch_name)
-
-            # Backup folder
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_dir = self.repo_path.parent / f"{self.repo_path.name}_backup_{timestamp}"
-            shutil.copytree(self.repo_path, backup_dir)
-
-            self.refresh_commit_history()
-            return {"status": "success", "message": f"New version line '{branch_name}' created."}
-
-        except GitCommandError as e:
-            return {"status": "error", "message": str(e)}
-        except Exception as e:
-            return {"status": "error", "message": f"Unexpected error: {e}"}
+                self.refresh_commit_table()
+                self._show_info(f"🎼 New version line '{branch_name}' created.")
+            except Exception as e:
+                self._show_error(f"Failed to create version line: {e}")
 
 
     def show_commit_context_menu(self, position):
