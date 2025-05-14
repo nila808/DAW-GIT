@@ -75,7 +75,6 @@ class DAWGitApp(QWidget):
         self.status_label.setObjectName("status_label")
         main_layout.addWidget(self.status_label)
 
-
         main_layout.addWidget(self.project_label)
 
         # ✅ Add path_label for tests - UNCOMMENT WHEN RUNNING TESTS
@@ -372,12 +371,14 @@ class DAWGitApp(QWidget):
                 f"⚠️ Something went wrong while preparing your session:\n\n{e}"
             )
 
+
     def get_default_branch(self):
         try:
             return self.repo.head.reference.name
         except Exception:
             # Fallback in case we're detached
             return self.repo.heads[0].name if self.repo.heads else "main"
+
 
     def safe_switch_branch(self, target_branch):
         if self.repo.is_dirty(untracked_files=True):
@@ -396,6 +397,7 @@ class DAWGitApp(QWidget):
             return {"status": "ok"}
         except subprocess.CalledProcessError as e:
             return {"status": "error", "message": str(e)}
+
 
     def refresh_commit_table(self):
         """Stub method to satisfy tests — actual logic may be implemented later."""
@@ -591,7 +593,6 @@ class DAWGitApp(QWidget):
             return {"status": "error", "message": str(e)}
 
 
-
     def show_commit_context_menu(self, position):
         row = self.history_table.rowAt(position.y())
         if row == -1:
@@ -722,7 +723,6 @@ class DAWGitApp(QWidget):
             )
 
 
-
     def rebase_delete_commit(self, commit_id):
         try:
             reachable_commits = [c.hexsha for c in self.repo.iter_commits()]
@@ -764,7 +764,6 @@ class DAWGitApp(QWidget):
             QMessageBox.critical(self, "Rebase Failed", f"Git error:\n{e}")
         except Exception as e:
             QMessageBox.critical(self, "Unexpected Error", f"❌ {e}")
-
 
 
     def show_commit_checkout_info(self, commit):
@@ -1147,7 +1146,6 @@ class DAWGitApp(QWidget):
                 "Import Failed",
                 f"⚠️ Something went wrong while importing your snapshot:\n\n{e}"
             )
-
 
         
     def checkout_commit(self, commit_sha):
@@ -1578,7 +1576,6 @@ class DAWGitApp(QWidget):
             )
 
 
-
     def change_project_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select New Project Folder")
         if folder:
@@ -1659,7 +1656,6 @@ class DAWGitApp(QWidget):
         subprocess.Popen(["open", str(file_path)])
 
 
-
     def open_daw_project(self):
         if not self.project_path:
             return
@@ -1674,6 +1670,7 @@ class DAWGitApp(QWidget):
                 print(f"🎼 Opening DAW file: {daw_file.name}")
             except Exception as e:
                 print(f"❌ Failed to open DAW project file: {e}")
+
 
     def show_status_message(self, message):
         """🎵 Display a status message to the user in the status label."""
