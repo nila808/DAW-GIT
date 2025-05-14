@@ -1228,6 +1228,12 @@ class DAWGitApp(QWidget):
         
     def load_commit_history(self):
         if not self.repo:
+            print("❌ No Git repo loaded.")
+            return
+
+        if not self.repo.head.is_valid():
+            print("⚠️ Repo exists but has no commits yet.")
+            self.history_table.setRowCount(0)
             return
 
         self.history_table.setRowCount(0)
