@@ -741,7 +741,9 @@ class DAWGitApp(QWidget):
     def open_latest_daw_project(self):
         """🎛️ Reopen the main DAW project file from the working directory."""
         try:
+            # Include both Ableton and Logic files
             daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
+
             if not daw_files:
                 QMessageBox.information(
                     self,
@@ -751,11 +753,24 @@ class DAWGitApp(QWidget):
                 )
                 return
 
-            daw_file = daw_files[0]  # Open the first matching file
-
-            # 🔁 Use Popen here so the test can mock it directly
-            subprocess.Popen(["open", str(daw_file)])
+            # Choose the most recently modified file
+            daw_file = max(daw_files, key=lambda f: f.stat().st_mtime)
             print(f"🎼 Reopened DAW project: {daw_file.name}")
+
+            if daw_file.suffix == ".logicx":
+                try:
+                    print("🔁 Trying Logic Pro...")
+                    subprocess.run(["open", "-a", "Logic Pro", str(daw_file)], check=True)
+                except subprocess.CalledProcessError:
+                    try:
+                        print("🔁 Logic Pro failed. Trying Logic Pro X...")
+                        subprocess.run(["open", "-a", "Logic Pro X", str(daw_file)], check=True)
+                    except subprocess.CalledProcessError:
+                        print("🔁 Both failed. Using system default.")
+                        subprocess.Popen(["open", str(daw_file)])
+            else:
+                # For .als (Ableton), regular open is fine
+                subprocess.Popen(["open", str(daw_file)])
 
         except Exception as e:
             QMessageBox.critical(
@@ -763,6 +778,9 @@ class DAWGitApp(QWidget):
                 "Couldn’t Open Project",
                 f"❌ Something went wrong while launching your DAW file:\n\n{e}"
             )
+
+
+
 
 
     def rebase_delete_commit(self, commit_id):
@@ -1237,6 +1255,12 @@ class DAWGitApp(QWidget):
             return
 
         self.history_table.setRowCount(0)
+        self.history_table.insertRow(0)
+        self.history_table.setItem(0, 0, QTableWidgetItem("–"))
+        self.history_table.setItem(0, 1, QTableWidgetItem("–"))
+        self.history_table.setItem(0, 2, QTableWidgetItem("No commits yet"))
+        self.history_table.setItem(0, 3, QTableWidgetItem("–"))
+
 
         # ✅ Detect current branch safely
         try:
