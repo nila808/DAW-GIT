@@ -63,23 +63,28 @@ class DAWGitApp(QWidget):
         self.unsaved_timer = self.startTimer(800)
         main_layout.addWidget(self.unsaved_indicator)
 
-        # 📁 Project tracking label
+        # 📁 Project tracking label (visible in UI and testable)
         self.project_label = QLabel()
-        self.project_label.setText(f"Tracking: {self.project_path}")
+        self.project_label.setObjectName("project_label")  # Optional for testing
         self.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
         self.project_label.setOpenExternalLinks(True)
         self.project_label.setToolTip("Click to open in Finder")
         self.project_label.setWordWrap(True)
 
+        main_layout.addWidget(self.project_label)
+
+        # 🛠️ For test inspection only — hidden in UI
+        self.path_label = QLabel(str(self.project_path))
+        self.path_label.setVisible(False)  # Hidden but accessible for test assertions
+        main_layout.addWidget(self.path_label)
+
+        # This label will be updated anytime self.project_path changes
+        self.update_project_label()
+
+        # Status label
         self.status_label = QLabel("Status: Ready")
         self.status_label.setObjectName("status_label")
         main_layout.addWidget(self.status_label)
-
-        main_layout.addWidget(self.project_label)
-
-        # ✅ Add path_label for tests - UNCOMMENT WHEN RUNNING TESTS
-        self.path_label = QLabel(str(self.project_path))
-        main_layout.addWidget(self.path_label)
         
         # Project Setup button
         setup_btn = QPushButton("Setup Project")
@@ -294,6 +299,19 @@ class DAWGitApp(QWidget):
 
 
     def run_setup(self):
+        confirm = QMessageBox.question(
+            self,
+            "🎚️ Set Up This Project?",
+            "🎶 Are you sure you want to start tracking this folder with version control?\n\n"
+            "You’ll be able to snapshot, loop, and branch your musical ideas from here.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
+        )
+        if confirm != QMessageBox.StandardButton.Yes:
+            print("🛑 Setup cancelled by user.")
+            return
+
+        print("✅ User confirmed project setup.")
+
         if not self.project_path or not self.project_path.exists():
             folder = QFileDialog.getExistingDirectory(self, "Select Project Folder")
             if not folder:
@@ -1485,10 +1503,10 @@ class DAWGitApp(QWidget):
             )
 
 
-
     def open_project_folder(self, event):
         if self.project_path.exists():
             subprocess.run(["open", str(self.project_path)])
+
 
     def clear_saved_project(self):
         if self.settings_path.exists():
@@ -1582,6 +1600,12 @@ class DAWGitApp(QWidget):
             self.project_path = Path(folder)
             os.chdir(self.project_path)
             self.init_git()
+
+
+    def update_project_label(self):
+        self.project_label.setText(f"Tracking: {self.project_path}")
+        self.path_label.setText(str(self.project_path))  # keeps tests passing
+
 
 
     def status_message(self, message):
