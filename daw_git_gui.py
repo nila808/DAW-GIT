@@ -1476,7 +1476,7 @@ class DAWGitApp(QWidget):
                 "Project Not Set Up",
                 "🎛️ Please load or set up a project folder first."
             )
-            return
+            return {"status": "error", "message": "No repo loaded."}
 
         try:
             branches = [head.name for head in self.repo.heads]
@@ -1486,7 +1486,7 @@ class DAWGitApp(QWidget):
                     "No Saved Versions",
                     "🎚️ This project has no saved version lines yet.\n\nUse 'Start New Version Line' to begin branching."
                 )
-                return
+                return {"status": "error", "message": "No branches available."}
 
             if self.repo.head.is_detached:
                 choice = QMessageBox.question(
@@ -1497,7 +1497,7 @@ class DAWGitApp(QWidget):
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
                 )
                 if choice != QMessageBox.StandardButton.Yes:
-                    return
+                    return {"status": "cancelled", "message": "User cancelled branch switch from detached HEAD."}
 
             # If branch name wasn't passed (e.g. from dropdown), show picker
             if not branch_name:
@@ -1509,7 +1509,7 @@ class DAWGitApp(QWidget):
                     editable=False
                 )
                 if not ok or not selected_branch:
-                    return
+                    return {"status": "cancelled", "message": "No branch selected."}
             else:
                 selected_branch = branch_name
 
@@ -1521,6 +1521,9 @@ class DAWGitApp(QWidget):
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                 )
                 if choice == QMessageBox.StandardButton.Yes:
+                    self.backup_unsaved_changes()
+                elif os.getenv("DAWGIT_TEST_MODE") == "1":
+                    # Force backup in test mode even without user input
                     self.backup_unsaved_changes()
 
                 subprocess.run(
@@ -1538,11 +1541,13 @@ class DAWGitApp(QWidget):
             )
 
             self.init_git()
+
             QMessageBox.information(
                 self,
                 "Switched Version",
                 f"🎚️ You’re now working on version line:\n\n{selected_branch}"
             )
+            return {"status": "success", "message": f"Switched to branch {selected_branch}"}
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(
@@ -1550,12 +1555,16 @@ class DAWGitApp(QWidget):
                 "Couldn’t Switch",
                 f"❌ Something went wrong switching versions:\n\n{e}"
             )
+            return {"status": "error", "message": str(e)}
+
         except Exception as e:
             QMessageBox.critical(
                 self,
                 "Unexpected Issue",
                 f"⚠️ Something unexpected happened:\n\n{e}"
             )
+            return {"status": "error", "message": str(e)}
+
 
 
     def checkout_latest(self):

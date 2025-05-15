@@ -214,3 +214,38 @@ def test_git_stash_created_on_return(tmp_path, qtbot):
 
     assert not app.repo.head.is_detached
     assert app.repo.head.commit.hexsha == latest_sha
+
+
+def test_switch_branch_with_uncommitted_changes_warns_or_stashes(temp_repo_factory, qtbot):
+    repo_path = temp_repo_factory()
+    repo = Repo(repo_path)
+
+    # Create initial commit with project.als
+    als_file = Path(repo_path) / "track.als"
+    als_file.write_text("Initial version")
+    repo.git.add(all=True)
+    repo.git.commit(m="First commit on main")
+
+    # Create second branch
+    repo.git.checkout("-b", "alt_branch")
+    (Path(repo_path) / "track.als").write_text("Modified on alt branch")
+    repo.git.add(all=True)
+    repo.git.commit(m="Alt branch change")
+
+    # Switch back to main and dirty working state
+    repo.git.checkout("main")
+    (Path(repo_path) / "track.als").write_text("⚠️ unsaved mod")
+
+    # Launch app and simulate branch switch
+    app = DAWGitApp(repo_path)
+    qtbot.addWidget(app)
+
+    result = app.switch_branch("alt_branch")
+
+    assert result["status"] == "success"
+    assert app.repo.active_branch.name == "alt_branch"
+
+    # ✅ Check if backup folder was created
+    backup_root = Path("/var/folders")
+    matching_backups = list(backup_root.rglob(f"Backup_{Path(repo_path).name}_*"))
+    assert matching_backups, "Expected backup folder not found for unsaved changes"
