@@ -1,0 +1,39 @@
+QWidget {
+    background-color: #f0f0f0;
+    color: #202020;
+    font-family: 'Arial';
+    font-size: 14px;
+}
+QPushButton#setupButton {
+    background-color: #2196F3;
+    color: white;
+}
+QPushButton#commitButton {
+    background-color: #4CAF50;
+    color: white;
+}
+QPushButton#checkoutButton {
+    background-color: #FF9800;
+    color: white;
+}
+QPushButton#returnButton {
+    background-color: #9C27B0;
+    color: white;
+}
+QPushButton:hover {
+    opacity: 0.85;
+}
+QTextEdit, QTableWidget {
+    background-color: #ffffff;
+    color: #202020;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+QCheckBox {
+    padding: 5px;
+}
+QComboBox {
+    background-color: #ffffff;
+    color: #202020;
+    border: 1px solid #ccc;
+}
