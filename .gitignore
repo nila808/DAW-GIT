@@ -10,9 +10,9 @@ __pycache__/
 dist/
 build/
 
-# VSCode and JetBrains project folders (optional)
+# VSCode and JetBrains IDE configs
 .vscode/
 .idea/
 
-.DS_Store
-.DS_Store
+# Local virtual environment
+daw-git-env/
