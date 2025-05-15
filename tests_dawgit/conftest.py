@@ -9,6 +9,13 @@ from pathlib import Path
 from git import Repo
 import subprocess
 
+
+@pytest.fixture(autouse=True)
+def clear_last_path_file():
+    if os.path.exists("last_path"):
+        os.remove("last_path")
+
+        
 @pytest.fixture
 def temp_repo_factory():
     """
