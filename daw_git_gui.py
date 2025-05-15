@@ -486,10 +486,18 @@ class DAWGitApp(QWidget):
 
     def get_default_branch(self):
         try:
-            return self.repo.head.reference.name
+            if not self.repo.head.is_detached:
+                return self.repo.active_branch.name
         except Exception:
-            # Fallback in case we're detached
-            return self.repo.heads[0].name if self.repo.heads else "main"
+            pass
+
+        # Fallback to main/master
+        for default in ["main", "master"]:
+            if default in [h.name for h in self.repo.heads]:
+                return default
+
+        return self.repo.heads[0].name if self.repo.heads else "main"
+
 
 
     def safe_switch_branch(self, target_branch):
@@ -1638,7 +1646,6 @@ class DAWGitApp(QWidget):
 
     def checkout_latest(self):
         try:
-            # 🔐 Safety: Prompt if unsaved changes exist
             if self.has_unsaved_changes():
                 choice = QMessageBox.question(
                     self,
@@ -1657,20 +1664,37 @@ class DAWGitApp(QWidget):
                     check=True
                 )
 
-            # ✅ Checkout main branch
+            # ✅ Get the correct default branch name
+            default_branch = self.get_default_branch()
+            print(f"[DEBUG] Switching to default branch: {default_branch}")
+
+            # ✅ Step 1: Ensure we're on the correct branch
             subprocess.run(
-                ["git", "checkout", self.get_default_branch()],
+                ["git", "checkout", default_branch],
                 cwd=self.project_path,
                 env=self.custom_env(),
                 check=True
             )
 
-            latest_commit = next(self.repo.iter_commits(self.get_default_branch(), max_count=1))
+            # ✅ Step 2: Force reset to the latest commit on that branch
+            subprocess.run(
+                ["git", "reset", "--hard", default_branch],
+                cwd=self.project_path,
+                env=self.custom_env(),
+                check=True
+            )
+
+            # ✅ Step 3: Reload repo state and UI
+            self.repo = Repo(self.project_path)
+            latest_commit = self.repo.head.commit
             self.current_commit_id = latest_commit.hexsha
 
+            print(f"[DEBUG] Now on: {default_branch} → {self.current_commit_id[:7]}")
+
             self.update_log()
-            self.status_message("Returned to latest version (main branch)")
+            self.status_message(f"Returned to latest version on '{default_branch}'")
             self.show_commit_checkout_info(latest_commit)
+            self.open_in_daw_btn.setVisible(True)
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(
@@ -1684,6 +1708,11 @@ class DAWGitApp(QWidget):
                 "Error",
                 f"⚠️ Something unexpected happened:\n\n{e}"
             )
+
+
+
+
+
 
 
     def open_project_folder(self, event):
