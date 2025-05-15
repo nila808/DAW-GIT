@@ -578,37 +578,58 @@ class DAWGitApp(QWidget):
 
 
     def commit_changes(self, commit_message=None):
+        from PyQt6.QtWidgets import QInputDialog
+
+        is_test_mode = os.getenv("DAWGIT_TEST_MODE") == "1"
+
+        # ✅ Auto-fill commit message in test mode
+        if is_test_mode and not commit_message:
+            commit_message = "🧪 Test Commit"
+
+        # 🎤 Manual input if needed
         if commit_message is None:
             commit_message, ok = QInputDialog.getText(
                 self, "🎤 Commit Your Changes", "Enter commit message:"
             )
             if not ok or not commit_message.strip():
                 self._show_warning("Commit cancelled. Please enter a valid commit message.")
-                return
+                return {"status": "error", "message": "Empty or cancelled commit message."}
 
+        commit_message = commit_message.strip()
+
+        # ✅ Check for valid project path
+        if not self.project_path:
+            self._show_warning("No project loaded. Please select a folder first.")
+            return {"status": "error", "message": "No project loaded."}
+
+        # 🧠 Require at least one DAW file
         daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
         if not daw_files:
             self._show_warning("No Ableton (.als) or Logic (.logicx) files found. Can't commit without a DAW file.")
-            return
+            return {"status": "error", "message": "No DAW files found."}
 
         try:
-            # 🧠 Force Git to operate on a real branch (not detached HEAD)
+            # 🔒 Avoid committing in detached HEAD
             if self.repo.head.is_detached:
                 default_branch = self.get_default_branch()
                 self.repo.git.switch(default_branch)
 
-            # Stage files
+            # ✅ Stage DAW files
             self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
 
-            # 🔒 Commit on active branch
+            # ✅ Commit
             self.repo.index.commit(commit_message)
 
-            # Refresh UI
+            # ✅ UI Refresh
             self.update_commit_log()
             self._show_info(f"Changes committed successfully: '{commit_message}'")
+            return {"status": "success", "message": f"Committed: {commit_message}"}
 
         except Exception as e:
             self._show_warning(f"Error committing changes: {e}")
+            return {"status": "error", "message": str(e)}
+
+
 
 
 

@@ -35,4 +35,8 @@ def test_create_new_branch_from_commit(temp_repo_factory, qtbot):
         # ✅ Clean up test branch if it was created
         if "test_branch" in repo.branches:
             print("🧹 Removing test branch...")
-            repo.git.branch("-D", "test_branch")
+            try:
+                repo.git.checkout("main")
+                repo.git.branch("-D", "test_branch")
+            except Exception as e:
+                print(f"[CLEANUP] Could not delete test_branch: {e}")

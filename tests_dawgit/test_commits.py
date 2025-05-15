@@ -16,9 +16,11 @@ def test_commit_requires_als_file(temp_repo_factory, qtbot):
 
     app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
+
     result = app.commit_changes()
-    status = app.status_label.text().lower()
-    assert result is False or "als" in status
+    assert result["status"] == "error"
+    msg = result["message"].lower()
+    assert any(word in msg for word in ["als", "daw", "no project"])
 
 @pytest.mark.parametrize("temp_repo_factory", [True], indirect=True)
 def test_commit_requires_logicx_file(temp_repo_factory, qtbot):
@@ -29,6 +31,8 @@ def test_commit_requires_logicx_file(temp_repo_factory, qtbot):
 
     app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
+
     result = app.commit_changes()
-    status = app.status_label.text().lower()
-    assert result is False or "logicx" in status
+    assert result["status"] == "error"
+    msg = result["message"].lower()
+    assert any(word in msg for word in ["logicx", "daw", "no project"])

@@ -1,6 +1,10 @@
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# ✅ Activate test mode globally
+os.environ["DAWGIT_TEST_MODE"] = "1"
+
 import pytest
 from PyQt6.QtWidgets import QMessageBox, QFileDialog
 import tempfile
@@ -8,6 +12,8 @@ import shutil
 from pathlib import Path
 from git import Repo
 import subprocess
+
+
 
 
 @pytest.fixture(autouse=True)
