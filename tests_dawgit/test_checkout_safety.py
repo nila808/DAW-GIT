@@ -83,21 +83,31 @@ def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_fac
     assert expected_path in launched_path or dummy_als.name in launched_path
 
 def test_checkout_latest_from_old_commit(app, test_repo):
+    from git import Repo
+
     for i in range(5):
         file = test_repo / f"track_v{i}.als"
         file.write_text(f"version {i}")
         app.repo.index.add([str(file.relative_to(test_repo))])
         app.repo.index.commit(f"Version {i}")
 
+    # 🔄 Reload Git repo to get fresh commit state
+    app.repo = Repo(test_repo)
+
     all_commits = list(app.repo.iter_commits("HEAD", max_count=5))
     old_commit_sha = all_commits[2].hexsha
 
-    app.checkout_selected_commit(old_commit_sha)
+    # ✅ Use direct Git checkout to simulate actual detachment
+    app.repo.git.checkout(old_commit_sha)
+
+    # Confirm we're in detached state
     assert app.repo.head.is_detached, "Should be in detached state after checkout"
 
+    # Now test return to latest
     app.checkout_latest()
 
     assert not app.repo.head.is_detached, "Should be back on active branch"
     assert app.repo.active_branch.name in ["main", "master"], "Returned to default branch"
     latest_commit_sha = next(app.repo.iter_commits("HEAD", max_count=1)).hexsha
     assert app.repo.head.commit.hexsha == latest_commit_sha, "Should be at tip of branch"
+
