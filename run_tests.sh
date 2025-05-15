@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 🔒 Guaranteed cleanup even if script is interrupted or fails
+trap 'echo "🧹 Final cleanup..."; rm -rf ~/pytest-of-*; find /private/var/folders -type d -name "pytest-of-*" 2>/dev/null -exec rm -rf {} +' EXIT
+
 echo "🧪 Running DAW Git App test suite..."
 pytest -v tests_dawgit
 
@@ -15,13 +18,3 @@ else
 fi
 
 echo "✅ All done."
-
-echo "🧹 Cleaning up leftover pytest folders..."
-
-# ✅ Clean up from user home (if any)
-rm -rf ~/pytest-of-*
-
-# ✅ Clean up from macOS temp system folders
-find /private/var/folders -type d -name "pytest-of-*" -exec rm -rf {} +
-
-echo "🧼 Temp pytest folders removed."
