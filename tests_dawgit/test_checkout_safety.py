@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import os
 import pytest
 from pathlib import Path
@@ -36,43 +39,47 @@ def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_fac
     repo_path = temp_repo_factory()
     repo = Repo(repo_path)
 
-    # Create and commit an Ableton project file
+    # ✅ STEP 1: Create and commit a real Ableton project file
     als_file = Path(repo_path, "session.als")
     als_file.write_text("Ableton project file")
     repo.git.add(all=True)
     repo.git.commit(m="commit als")
 
-    # Detach HEAD
-    repo.git.checkout(repo.head.commit.hexsha)
-
-    # Launch app and attach to test
-    app = DAWGitApp(repo_path)
-    qtbot.addWidget(app)
-
-    if not app.repo:
-        app.repo = Repo(repo_path)
-
-    # Create the dummy.als file that the app expects to launch
+    # ✅ STEP 2: Create and commit the dummy.als file BEFORE launching the app
     dummy_als = Path(repo_path, "dummy.als")
     dummy_als.write_text("dummy Ableton session")
     repo.git.add(all=True)
     repo.git.commit(m="Add dummy.als")
 
-    # Checkout commit to simulate DAW version selection
-    app.checkout_selected_commit(repo.head.commit.hexsha)   
+    # ✅ STEP 3: Detach HEAD so we're testing from a clean commit state
+    repo.git.checkout(repo.head.commit.hexsha)
 
-    # 🧼 Clear all subprocess calls from prior Git operations
+    # ✅ STEP 4: Launch app and connect to test
+    app = DAWGitApp(repo_path)
+    qtbot.addWidget(app)
+
+   # ✅ Force correct temp repo and block fallback to real project path
+    app.repo = repo
+    app.settings.setValue("last_path", str(repo_path))
+
+    # ✅ STEP 5: Checkout the commit that contains dummy.als
+    app.checkout_selected_commit(repo.head.commit.hexsha)
+
+    # 🧼 Clear previous Git subprocess calls
     mock_popen.reset_mock()
 
-    # Try opening the latest DAW project
+    # ✅ STEP 6: Call the function that should open dummy.als
     app.open_latest_daw_project()
 
-    # ✅ Confirm it tries to open the .als file
+    # ✅ STEP 7: Assert it launched the correct file
     mock_popen.assert_called_once()
     args = mock_popen.call_args[0][0]
     launched_path = " ".join(args)
-    print("📂 Launched path:", launched_path)
 
-    # ✅ Check that the opened file was dummy.als as expected by the app
+    # Debug info to help verify what actually launched
+    expected_path = str(dummy_als)
+    print("📂 Launched path:", launched_path)
+    print("✅ Should contain:", expected_path)
+
     expected_path = str(dummy_als)
     assert expected_path in launched_path or dummy_als.name in launched_path

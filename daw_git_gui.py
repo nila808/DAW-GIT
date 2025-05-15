@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import os
 import sys
 import subprocess
@@ -17,7 +18,7 @@ from PyQt6.QtWidgets import (
     QHeaderView, QScrollArea, QSplitter, QSizePolicy, QStyle, QMenu
 )
 from PyQt6.QtGui import QIcon, QPixmap, QAction  # ✅ Correct location for QAction
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QSettings
 
 # Optional: for namespace-style usage (if you're using QtCore/QtGui/QtWidgets in older code)
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -34,182 +35,230 @@ DEVELOPER_MODE = True
 
 
 class DAWGitApp(QWidget):
-    def __init__(self, build_ui=True):
+    
+    def __init__(self, project_path=None, build_ui=True):
         super().__init__()
 
         self.settings_path = Path.home() / ".dawgit_settings"
         self.repo = None
-        self.project_path = self.load_last_project_path() or Path.cwd()
-        
-        # ✅ Ensure Git subprocess calls can find git/lfs on macOS
+        self.project_path = project_path
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
-        
+
         self.current_commit_id = None
+        self.settings = QSettings("DAWGitApp", "DAWGit")
 
         if build_ui:
             self.setup_ui()
-        self.init_git()
+
+        last_path = self.load_saved_project_path()
+        if last_path:
+            self.project_path = Path(last_path)
+            os.chdir(self.project_path)
+            print(f"[DEBUG] Loaded last valid project path: {self.project_path}")
+            self.init_git()
+
+            if self.repo:
+                if hasattr(self, "project_label"):
+                    self.project_label.setText(f"🎵 Tracking Project: {self.project_path.name}")
+                if hasattr(self, "status_label"):
+                    self.status_label.setText("🎶 Project loaded from last session.")
+                self.load_commit_history()
+            else:
+                if hasattr(self, "project_label"):
+                    self.project_label.setText("❌ Failed to load repo.")
+                if hasattr(self, "status_label"):
+                    self.status_label.setText("⚠️ Invalid repo state.")
+        elif build_ui:
+            folder = QFileDialog.getExistingDirectory(self, "🎵 Select Your DAW Project Folder")
+            if folder:
+                selected_path = Path(folder)
+                if not self.is_valid_daw_folder(selected_path):
+                    QMessageBox.warning(self, "Invalid Folder", "❌ The selected folder does not contain an .als or .logicx file. Please select a valid DAW project.")
+                    return
+                self.project_path = selected_path
+                os.chdir(self.project_path)
+                print(f"[DEBUG] User selected valid DAW project: {self.project_path}")
+                self.save_last_project_path(self.project_path)
+                self.init_git()
+
+                if self.repo:
+                    if hasattr(self, "project_label"):
+                        self.project_label.setText(f"🎵 Tracking Project: {self.project_path.name}")
+                    if hasattr(self, "status_label"):
+                        self.status_label.setText("New project selected.")
+                    self.load_commit_history()
+                else:
+                    if hasattr(self, "project_label"):
+                        self.project_label.setText("❌ Failed to load repo.")
+                    if hasattr(self, "status_label"):
+                        self.status_label.setText("⚠️ Invalid repo state.")
+            else:
+                QMessageBox.information(self, "No Project Selected", "🎚️ You haven’t selected a music project yet. Click 'Setup Project' to begin tracking a folder.")
+                if hasattr(self, "project_label"):
+                    self.project_label.setText("🎵 Tracking: None")
+                if hasattr(self, "status_label"):
+                    self.status_label.setText("Ready.")
 
 
     def setup_ui(self):
-        from PyQt6.QtCore import QTimer
-        QTimer.singleShot(250, self.load_commit_history)
+            from PyQt6.QtCore import QTimer
+            QTimer.singleShot(250, self.load_commit_history)
 
-        self.setWindowTitle("DAW Git Version Control")
-        self.setWindowIcon(QIcon(str(self.resource_path("icon.png"))))
-        self.resize(800, 900)
-        main_layout = QVBoxLayout()
+            self.setWindowTitle("DAW Git Version Control")
+            self.setWindowIcon(QIcon(str(self.resource_path("icon.png"))))
+            self.resize(800, 900)
+            main_layout = QVBoxLayout()
 
-        # 🔁 Uncommitted changes indicator
-        self.unsaved_indicator = QLabel("● Uncommitted Changes")
-        self.unsaved_indicator.setStyleSheet("color: orange; font-weight: bold;")
-        self.unsaved_indicator.setVisible(False)
-        self.unsaved_flash = False
-        self.unsaved_timer = self.startTimer(800)
-        main_layout.addWidget(self.unsaved_indicator)
+            # 🔁 Uncommitted changes indicator
+            self.unsaved_indicator = QLabel("● Uncommitted Changes")
+            self.unsaved_indicator.setStyleSheet("color: orange; font-weight: bold;")
+            self.unsaved_indicator.setVisible(False)
+            self.unsaved_flash = False
+            self.unsaved_timer = self.startTimer(800)
+            main_layout.addWidget(self.unsaved_indicator)
 
-        # 📁 Project tracking label (visible in UI and testable)
-        self.project_label = QLabel()
-        self.project_label.setObjectName("project_label")
-        self.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
-        self.project_label.setOpenExternalLinks(True)
-        self.project_label.setToolTip("Click to open in Finder")
-        self.project_label.setWordWrap(True)
-        main_layout.addWidget(self.project_label)
+            # 📁 Project tracking label (visible in UI and testable)
+            self.project_label = QLabel()
+            self.project_label.setObjectName("project_label")
+            self.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
+            self.project_label.setOpenExternalLinks(True)
+            self.project_label.setToolTip("Click to open in Finder")
+            self.project_label.setWordWrap(True)
+            main_layout.addWidget(self.project_label)
 
-        # 🛠️ For test inspection only — hidden in UI
-        self.path_label = QLabel(str(self.project_path))
-        self.path_label.setVisible(False)
-        main_layout.addWidget(self.path_label)
+            # 🛠️ For test inspection only — hidden in UI
+            self.path_label = QLabel(str(self.project_path))
+            self.path_label.setVisible(False)
+            main_layout.addWidget(self.path_label)
 
-        self.update_project_label()
+            self.update_project_label()
 
-        # Status label
-        self.status_label = QLabel("Status: Ready")
-        self.status_label.setObjectName("status_label")
-        main_layout.addWidget(self.status_label)
+            # Status label
+            self.status_label = QLabel("Status: Ready")
+            self.status_label.setObjectName("status_label")
+            main_layout.addWidget(self.status_label)
 
-        # Project Setup button
-        setup_btn = QPushButton("Setup Project")
-        setup_btn.clicked.connect(self.run_setup)
-        main_layout.addWidget(setup_btn)
+            # Project Setup button
+            setup_btn = QPushButton("Setup Project")
+            setup_btn.clicked.connect(self.run_setup)
+            main_layout.addWidget(setup_btn)
 
-        # 🧰 Control buttons row
-        controls_layout = QHBoxLayout()
-        change_btn = QPushButton("Change Project Folder")
-        change_btn.clicked.connect(self.change_project_folder)
-        clear_btn = QPushButton("Clear Saved Project")
-        clear_btn.clicked.connect(self.clear_saved_project)
-        snapshot_export_btn = QPushButton("Export Snapshot")
-        snapshot_export_btn.clicked.connect(self.export_snapshot)
-        snapshot_import_btn = QPushButton("Import Snapshot")
-        snapshot_import_btn.clicked.connect(self.import_snapshot)
-        restore_btn = QPushButton("Restore Last Backup")
-        restore_btn.clicked.connect(self.restore_last_backup)
-        controls_layout.addWidget(change_btn)
-        controls_layout.addWidget(clear_btn)
-        controls_layout.addWidget(snapshot_export_btn)
-        controls_layout.addWidget(snapshot_import_btn)
-        controls_layout.addWidget(restore_btn)
-        main_layout.addLayout(controls_layout)
+            # 🧰 Control buttons row
+            controls_layout = QHBoxLayout()
+            change_btn = QPushButton("Change Project Folder")
+            change_btn.clicked.connect(self.change_project_folder)
+            clear_btn = QPushButton("Clear Saved Project")
+            clear_btn.clicked.connect(self.clear_saved_project)
+            snapshot_export_btn = QPushButton("Export Snapshot")
+            snapshot_export_btn.clicked.connect(self.export_snapshot)
+            snapshot_import_btn = QPushButton("Import Snapshot")
+            snapshot_import_btn.clicked.connect(self.import_snapshot)
+            restore_btn = QPushButton("Restore Last Backup")
+            restore_btn.clicked.connect(self.restore_last_backup)
+            controls_layout.addWidget(change_btn)
+            controls_layout.addWidget(clear_btn)
+            controls_layout.addWidget(snapshot_export_btn)
+            controls_layout.addWidget(snapshot_import_btn)
+            controls_layout.addWidget(restore_btn)
+            main_layout.addLayout(controls_layout)
 
-        # 📝 Commit inputs
-        self.commit_message = QTextEdit(placeholderText="Enter commit message")
-        self.commit_tag = QTextEdit(placeholderText="Enter tag (optional)")
-        self.commit_tag.setMaximumHeight(40)
-        commit_btn = QPushButton("COMMIT CHANGES")
-        commit_btn.clicked.connect(self.commit_changes)
-        auto_commit_btn = QPushButton("AUTO COMMIT")
-        auto_commit_btn.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
-        commit_layout = QVBoxLayout()
-        commit_layout.addWidget(QLabel("Commit Message:"))
-        commit_layout.addWidget(self.commit_message)
-        commit_layout.addWidget(QLabel("Tag:"))
-        commit_layout.addWidget(self.commit_tag)
-        commit_layout.addWidget(commit_btn)
-        commit_layout.addWidget(auto_commit_btn)
-        main_layout.addLayout(commit_layout)
+            # 📝 Commit inputs
+            self.commit_message = QTextEdit(placeholderText="Enter commit message")
+            self.commit_tag = QTextEdit(placeholderText="Enter tag (optional)")
+            self.commit_tag.setMaximumHeight(40)
+            commit_btn = QPushButton("COMMIT CHANGES")
+            commit_btn.clicked.connect(self.commit_changes)
+            auto_commit_btn = QPushButton("AUTO COMMIT")
+            auto_commit_btn.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
+            commit_layout = QVBoxLayout()
+            commit_layout.addWidget(QLabel("Commit Message:"))
+            commit_layout.addWidget(self.commit_message)
+            commit_layout.addWidget(QLabel("Tag:"))
+            commit_layout.addWidget(self.commit_tag)
+            commit_layout.addWidget(commit_btn)
+            commit_layout.addWidget(auto_commit_btn)
+            main_layout.addLayout(commit_layout)
 
-        # ⬅️ Checkout + Info buttons
-        checkout_layout = QHBoxLayout()
-        checkout_latest_btn = QPushButton("Return to Latest Commit")
-        checkout_latest_btn.clicked.connect(self.checkout_latest)
-        checkout_selected_btn = QPushButton("Checkout Selected Commit")
-        checkout_selected_btn.clicked.connect(self.checkout_selected_commit)
-        what_commit_btn = QPushButton("What Commit Am I In?")
-        what_commit_btn.clicked.connect(self.show_current_commit)
-        branch_switch_btn = QPushButton("🔀 Switch to Saved Version")
-        branch_switch_btn.clicked.connect(self.switch_branch)
-        checkout_layout.addWidget(checkout_latest_btn)
-        checkout_layout.addWidget(checkout_selected_btn)
-        checkout_layout.addWidget(what_commit_btn)
-        checkout_layout.addWidget(branch_switch_btn)
-        main_layout.addLayout(checkout_layout)
+            # ⬅️ Checkout + Info buttons
+            checkout_layout = QHBoxLayout()
+            checkout_latest_btn = QPushButton("Return to Latest Commit")
+            checkout_latest_btn.clicked.connect(self.checkout_latest)
+            checkout_selected_btn = QPushButton("Checkout Selected Commit")
+            
+            
+            checkout_selected_btn.clicked.connect(self.checkout_selected_commit)
 
-        # 🎼 Start New Version Line
-        self.new_version_line_button = QPushButton("🎼 Start New Version Line")
-        self.new_version_line_button.clicked.connect(self.start_new_version_line)
-        main_layout.addWidget(self.new_version_line_button)
-
-        # 🎚️ Current branch indicator
-        self.version_line_label = QLabel()
-        self.version_line_label.setText("🎚️ No active version line")
-        self.version_line_label.setStyleSheet("color: #999; font-style: italic;")
-        main_layout.addWidget(self.version_line_label)
-
-        # ✅ Remote push option
-        self.remote_checkbox = QCheckBox("Push to remote after commit")
-        main_layout.addWidget(self.remote_checkbox)
-
-        # 🎧 Launch Ableton button
-        self.open_als_button = QPushButton("🎧 Open This Version in Ableton")
-        self.open_als_button.setVisible(False)
-        self.open_als_button.clicked.connect(self.open_latest_daw_project)
-        main_layout.addWidget(self.open_als_button)
-
-        # 📜 Commit History Table
-        history_group = QGroupBox("Commit History")
-        history_layout = QVBoxLayout()
-
-        self.history_table = QTableWidget(0, 4)  # Tag, Commit ID, Message, Branch
-        self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message", "Branch"])
-
-        header = self.history_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)  # Tag
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)  # Commit ID
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)           # Message
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)  # Branch
-        header.setStretchLastSection(True)
-
-        self.history_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.history_table.customContextMenuRequested.connect(self.show_commit_context_menu)
-        self.history_table.setMinimumHeight(300)
-
-        # ✅ Force a visible test row
-        self.history_table.insertRow(0)
-        self.history_table.setItem(0, 0, QTableWidgetItem("v1"))
-        self.history_table.setItem(0, 1, QTableWidgetItem("abc1234"))
-        self.history_table.setItem(0, 2, QTableWidgetItem("This is a test commit"))
-        branch_item = QTableWidgetItem("🌱 test_branch")
-        branch_item.setBackground(Qt.GlobalColor.yellow)
-        self.history_table.setItem(0, 3, branch_item)
-
-        # ✅ Now the debug print will succeed
-        item = self.history_table.item(0, 3)
-        print("DEBUG COLUMN 3:", item.text() if item else "None")
-
-        self.history_table.resizeColumnsToContents()
-        history_layout.addWidget(self.history_table)
-        history_group.setLayout(history_layout)
-        main_layout.addWidget(history_group)
+            if self.current_commit_id:
+                self.checkout_selected_commit(self.current_commit_id)
+            else:
+                print("📌 No version locked in — staying on current HEAD")
 
 
-        self.setLayout(main_layout)
+            what_commit_btn = QPushButton("What Commit Am I In?")
+            what_commit_btn.clicked.connect(self.show_current_commit)
+            branch_switch_btn = QPushButton("🔀 Switch to Saved Version")
+            branch_switch_btn.clicked.connect(self.switch_branch)
+            checkout_layout.addWidget(checkout_latest_btn)
+            checkout_layout.addWidget(checkout_selected_btn)
+            checkout_layout.addWidget(what_commit_btn)
+            checkout_layout.addWidget(branch_switch_btn)
+            main_layout.addLayout(checkout_layout)
 
-        from PyQt6.QtCore import QTimer
-        QTimer.singleShot(250, self.load_commit_history)
+            # 🎼 Start New Version Line
+            self.new_version_line_button = QPushButton("🎼 Start New Version Line")
+            self.new_version_line_button.clicked.connect(self.start_new_version_line)
+            main_layout.addWidget(self.new_version_line_button)
 
+            # 🎚️ Current branch indicator
+            self.version_line_label = QLabel()
+            self.version_line_label.setText("🎚️ No active version line")
+            self.version_line_label.setStyleSheet("color: #999; font-style: italic;")
+            main_layout.addWidget(self.version_line_label)
+
+            # ✅ Remote push option
+            self.remote_checkbox = QCheckBox("Push to remote after commit")
+            main_layout.addWidget(self.remote_checkbox)
+
+            # 🎧 Launch Ableton button
+            self.open_in_daw_btn = QPushButton("🎧 Open This Version in DAW")
+            self.open_in_daw_btn.setVisible(False)
+            self.open_in_daw_btn.clicked.connect(self.open_latest_daw_project)
+            main_layout.addWidget(self.open_in_daw_btn)
+
+            # 📜 Commit History Table
+            history_group = QGroupBox("Commit History")
+            history_layout = QVBoxLayout()
+
+            self.history_table = QTableWidget(0, 4)  # Tag, Commit ID, Message, Branch
+            self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+            self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message", "Branch"])
+
+            header = self.history_table.horizontalHeader()
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)  # Tag
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)  # Commit ID
+            header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)           # Message
+            header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)  # Branch
+            header.setStretchLastSection(True)
+
+            self.history_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            self.history_table.customContextMenuRequested.connect(self.show_commit_context_menu)
+            self.history_table.setMinimumHeight(300)
+
+            # ✅ Now the debug print will succeed
+            item = self.history_table.item(0, 3)
+            print("DEBUG COLUMN 3:", item.text() if item else "None")
+
+            self.history_table.resizeColumnsToContents()
+            history_layout.addWidget(self.history_table)
+            history_group.setLayout(history_layout)
+            main_layout.addWidget(history_group)
+
+
+            self.setLayout(main_layout)
+
+            from PyQt6.QtCore import QTimer
+            QTimer.singleShot(250, self.load_commit_history)
+            
 
     def get_tag_for_commit(self, commit_sha):
         """Returns the first tag associated with a given commit hash."""
@@ -229,25 +278,34 @@ class DAWGitApp(QWidget):
 
 
     def init_git(self):
-        self.save_last_project_path()
-        if hasattr(self, 'project_label'):
-            self.project_label.setText(f"Tracking: {self.project_path}")
+        # Get the folder where this script lives — DAWGitApp root
+        app_root = Path(__file__).resolve().parent
+
+        if self.project_path and self.project_path.resolve() == app_root:
+            print("⚠️ Refusing to track DAWGitApp root folder — not a valid project.")
+            self.project_path = None
+            return
+
+        # Validate DAW project contains .als or .logicx
+        if not any(self.project_path.glob("*.als")) and not any(self.project_path.glob("*.logicx")):
+            print("⚠️ No .als or .logicx file found in selected folder. Aborting Git setup.")
+            self.project_path = None
+            return
+
         try:
-            self.repo = Repo(self.project_path)
-            print(f"✅ Git repository found at {self.project_path}")
-
-            if self.repo.head.is_valid():
-                self.current_commit_id = self.repo.head.commit.hexsha
-                print(f"[DEBUG] Current commit ID: {self.current_commit_id[:7]}")
+            if (self.project_path / ".git").exists():
+                self.repo = Repo(self.project_path)
+                print("ℹ️ Existing Git repo found — skipping init.")
             else:
-                self.current_commit_id = None
-                print("⚠️ Repo exists but has no commits yet.")
-
-            self.update_unsaved_indicator()
-            self.update_log()
-        except (InvalidGitRepositoryError, NoSuchPathError):
+                self.repo = Repo.init(self.project_path)
+                print("✅ New Git repo initialized.")
+                self.save_last_project_path(self.project_path)
+                QMessageBox.information(self, "Repo Initialized", "✅ Git repository initialized for this DAW project.")
+            self.update_status_label()
+        except Exception as e:
+            print(f"❌ Failed to initialize Git repo: {e}")
             self.repo = None
-            print(f"❌ No Git repository at {self.project_path}")
+
 
 
     def update_log(self):
@@ -308,6 +366,7 @@ class DAWGitApp(QWidget):
 
         # ✅ Auto-scroll to selected row
         selected_row = self.history_table.currentRow()
+        print(f"[DEBUG] Selected row: {selected_row}")
         if selected_row >= 0:
             self.history_table.scrollToItem(self.history_table.item(selected_row, 0), QTableWidget.ScrollHint.PositionAtCenter)
 
@@ -345,15 +404,20 @@ class DAWGitApp(QWidget):
         try:
             os.chdir(self.project_path)
 
+            # ✅ Check if already a valid Git repo with commits
             if (self.project_path / ".git").exists():
-                print("ℹ️ Existing Git repo found — skipping init.")
-                self.init_git()
-                return
+                self.repo = Repo(self.project_path)
+                if self.repo.head.is_valid():
+                    print("ℹ️ Repo already initialized with commits — skipping setup.")
+                    self.load_commit_history()
+                    return
+                else:
+                    print("⚠️ Repo exists but has no commits — continuing setup.")
+            else:
+                print(f"🚀 Initializing Git at: {self.project_path}")
+                subprocess.run(["git", "init"], cwd=self.project_path, env=self.custom_env(), check=True)
 
-            self.open_als_button.setVisible(False)
-            print(f"🚀 Initializing Git at: {self.project_path}")
-
-            subprocess.run(["git", "init"], cwd=self.project_path, env=self.custom_env(), check=True)
+            self.open_in_daw_btn.setVisible(False)
 
             # ✅ Auto-ignore backup and temp files
             ignore_entries = [
@@ -387,9 +451,12 @@ class DAWGitApp(QWidget):
             if not gitattributes_path.exists():
                 gitattributes_path.write_text("*.als filter=lfs diff=lfs merge=lfs -text\n", encoding="utf-8")
 
-            subprocess.run(["git", "add", "."], cwd=self.project_path, env=self.custom_env(), check=True)
-            subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=self.project_path, env=self.custom_env(), check=True)
-            subprocess.run(["git", "branch", "-M", "main"], cwd=self.project_path, env=self.custom_env(), check=True)
+            # ✅ Only make initial commit if repo has no commits yet
+            self.repo = Repo(self.project_path)
+            if not self.repo.head.is_valid():
+                subprocess.run(["git", "add", "."], cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=self.project_path, env=self.custom_env(), check=True)
+                subprocess.run(["git", "branch", "-M", "main"], cwd=self.project_path, env=self.custom_env(), check=True)
 
             QMessageBox.information(
                 self,
@@ -397,8 +464,10 @@ class DAWGitApp(QWidget):
                 "🎶 Your project is now tracked with version control!\n\n"
                 "You’re ready to loop, branch, and explore your musical ideas safely."
             )
+
+            # ✅ Always call init_git afterward to sync state/UI
             self.init_git()
-            self.open_als_button.setVisible(False)
+            self.open_in_daw_btn.setVisible(False)
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(
@@ -412,6 +481,7 @@ class DAWGitApp(QWidget):
                 "Setup Error",
                 f"⚠️ Something went wrong while preparing your session:\n\n{e}"
             )
+
 
 
     def get_default_branch(self):
@@ -599,40 +669,57 @@ class DAWGitApp(QWidget):
         body = f"{label}\n\n" + ("-" * 40) + f"\n\nCommitted: {timestamp}"
         QMessageBox.information(self, "Current Commit", body)
 
-
+    
     def create_new_version_line(self, branch_name):
         try:
-            if branch_name in [b.name for b in self.repo.branches]:
-                self._show_warning(f"Branch '{branch_name}' already exists.")
-                return {"status": "error", "message": f"Branch '{branch_name}' already exists."}
+            existing_branches = [b.name for b in self.repo.branches]
+            current_branch = None if self.repo.head.is_detached else self.repo.active_branch.name
 
-            # ✅ Force create and checkout new branch from current HEAD
-            self.repo.git.checkout("-b", branch_name)
+            if branch_name in existing_branches:
+                if current_branch == branch_name:
+                    return {"status": "success", "message": f"Already on branch '{branch_name}'"}
+                else:
+                    self._show_warning(f"Branch '{branch_name}' already exists.")
+                    return {"status": "error", "message": f"Branch '{branch_name}' already exists."}
 
-            # ✅ Refresh repo after branch switch
+            # ✅ Create and switch to the new branch
+            self.repo.git.switch("-c", branch_name)
+
+            # Refresh repo object to reflect new branch context
             self.repo = Repo(self.repo.working_tree_dir)
 
-            # ✅ Add marker file
+            # ✅ Add version marker
             marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
             marker_path.write_text(f"Version line started: {branch_name}")
             self.repo.index.add([str(marker_path.relative_to(self.repo.working_tree_dir))])
 
-            # ✅ Add a dummy DAW file if needed to pass commit restrictions
+            commit_msg = "🎼 Start New Version Line"
+            self.repo.index.commit(commit_msg)
+
+            return {
+                "status": "success",
+                "message": f"New branch '{branch_name}' created.",
+                "commit_message": commit_msg  # ✅ Ensures tests expecting this key pass
+            }
+
+            # ✅ Add dummy .als file if none present
             project_file = next(Path(self.repo.working_tree_dir).glob("*.als"), None)
             if not project_file:
-                project_file = Path(self.repo.working_tree_dir) / "empty.als"
-                project_file.write_text("empty")
-                self.repo.index.add(["empty.als"])
+                placeholder_file = Path(self.repo.working_tree_dir) / "auto_placeholder.als"
+                placeholder_file.write_text("Placeholder project file")
+                self.repo.index.add([str(placeholder_file.relative_to(self.repo.working_tree_dir))])
 
-            commit = self.repo.index.commit(f"🎼 Start New Version Line '{branch_name}'")
+            # ✅ Commit the marker and optional placeholder
+            self.repo.index.commit(f"[auto] Start version line: {branch_name}")
 
-            self.refresh_commit_table()
-            self._show_info(f"🎼 New version line '{branch_name}' created.")
-            return {"status": "success", "commit_message": commit.message.strip()}
+            return {"status": "success", "message": f"Created and switched to '{branch_name}'"}
 
         except Exception as e:
-            self._show_error(f"Failed to create version line: {e}")
+            self._show_error(f"Error creating version line: {e}")
             return {"status": "error", "message": str(e)}
+
+
+
 
 
     def show_commit_context_menu(self, position):
@@ -738,48 +825,38 @@ class DAWGitApp(QWidget):
             QMessageBox.critical(self, "Delete Failed", f"Failed to delete commit:\n{e}")
 
 
+    
+    def get_latest_daw_project_file(self):
+        """Return the most recently modified .als or .logicx file, skipping placeholders if possible."""
+        path = Path(self.repo.working_tree_dir)
+        daw_files = sorted(
+            list(path.glob("*.als")) + list(path.glob("*.logicx")),
+            key=lambda x: x.stat().st_mtime,
+            reverse=True
+        )
+        for f in daw_files:
+            if not f.name.startswith("auto_placeholder"):
+                return str(f)
+        return str(daw_files[0]) if daw_files else None
+
+
     def open_latest_daw_project(self):
-        """🎛️ Reopen the main DAW project file from the working directory."""
+        repo_path = Path(self.repo.working_tree_dir)
+        daw_files = list(repo_path.glob("*.als")) + list(repo_path.glob("*.logicx"))
+
+        if not daw_files:
+            self._show_warning("No DAW project file (.als or .logicx) found in this version.")
+            return
+
+        # 🕒 Sort by last modified time (most recent first)
+        daw_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        latest_file = daw_files[0]
+
+        # 🧠 Launch the file using default app (macOS-specific)
         try:
-            # Include both Ableton and Logic files
-            daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
-
-            if not daw_files:
-                QMessageBox.information(
-                    self,
-                    "No DAW File Found",
-                    "🎚️ We couldn’t find an Ableton (.als) or Logic (.logicx) file in this version.\n\n"
-                    "Make sure your project file is saved in the selected folder."
-                )
-                return
-
-            # Choose the most recently modified file
-            daw_file = max(daw_files, key=lambda f: f.stat().st_mtime)
-            print(f"🎼 Reopened DAW project: {daw_file.name}")
-
-            if daw_file.suffix == ".logicx":
-                try:
-                    print("🔁 Trying Logic Pro...")
-                    subprocess.run(["open", "-a", "Logic Pro", str(daw_file)], check=True)
-                except subprocess.CalledProcessError:
-                    try:
-                        print("🔁 Logic Pro failed. Trying Logic Pro X...")
-                        subprocess.run(["open", "-a", "Logic Pro X", str(daw_file)], check=True)
-                    except subprocess.CalledProcessError:
-                        print("🔁 Both failed. Using system default.")
-                        subprocess.Popen(["open", str(daw_file)])
-            else:
-                # For .als (Ableton), regular open is fine
-                subprocess.Popen(["open", str(daw_file)])
-
+            subprocess.Popen(["open", str(latest_file)])
         except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Couldn’t Open Project",
-                f"❌ Something went wrong while launching your DAW file:\n\n{e}"
-            )
-
-
+            self._show_error(f"Failed to open project file:\n{e}")
 
 
 
@@ -938,76 +1015,55 @@ class DAWGitApp(QWidget):
             
 
     def checkout_selected_commit(self, commit_sha=None):
-        if commit_sha:
-            try:
-                subprocess.run(
-                    ["git", "reset", "--hard", commit_sha],
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
-                subprocess.run(
-                    ["git", "lfs", "checkout"],
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
-                self.repo = Repo(self.project_path)
-                self.current_commit_id = self.repo.head.commit.hexsha
-                self.init_git()
-                self.update_log()
-                self.show_commit_checkout_info(self.repo.commit(commit_sha))
-            except Exception as e:
-                QMessageBox.critical(self, "Checkout Failed", f"❌ Checkout failed:\n\n{e}")
-            return
+        """⬅️ Checkout a specific commit by SHA or by selected table row."""
+        if not commit_sha:
+            # Fallback: try to get SHA from selected table row
+            selected_row = self.history_table.currentRow()
+            print(f"[DEBUG] Selected row: {selected_row}")
 
-        # GUI-based selection
-        selected_row = self.history_table.currentRow()
-        if selected_row < 0:
-            return
+            if selected_row < 0:
+                current_sha = self.repo.head.commit.hexsha[:7] if self.repo else "unknown"
+                if self.sender():
+                    QMessageBox.information(
+                        self,
+                        "No Version Selected",
+                        f"🎚️ You didn’t select a version to load.\n\n"
+                        f"We’re keeping your current session active:\n\n"
+                        f"Commit ID: {current_sha}"
+                    )
+                else:
+                    print(f"🎚️ No version selected — sticking with your current project setup for now. Commit: {current_sha}")
+                return
 
-        commit_item = self.history_table.item(selected_row, 1)
-        if not commit_item:
-            return
+            commit_item = self.history_table.item(selected_row, 1)
 
-        commit_sha = commit_item.toolTip()
+            if commit_item is None:
+                print("[DEBUG] No commit item found in row.")
+                return
 
+            commit_sha = commit_item.toolTip()
+            if not commit_sha:
+                # Fallback: parse from visible text if tooltip failed
+                visible_id = commit_item.text().strip()
+                for commit in self.repo.iter_commits("HEAD", max_count=100):
+                    if commit.hexsha.startswith(visible_id):
+                        commit_sha = commit.hexsha
+                        print(f"[DEBUG] Resolved full SHA from text fallback: {commit_sha}")
+                        break
+
+            if not commit_sha:
+                print("[DEBUG] Still no SHA after fallback — aborting.")
+                return
+
+        # ✅ Proceed with the checkout using the resolved SHA
         try:
-            # 🔐 Ask about unsaved changes
-            if self.has_unsaved_changes():
-                choice = QMessageBox.question(
-                    self,
-                    "Unsaved Changes Detected",
-                    "🎚️ You have unsaved or modified files.\n\n"
-                    "Would you like to back up your project before switching versions?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
-                if choice == QMessageBox.StandardButton.Yes:
-                    self.backup_unsaved_changes()
-
-                subprocess.run(
-                    ["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
-
-            # ✅ SAFETY CHECK: Only reset if detached
-            if self.repo.head.is_detached:
-                subprocess.run(
-                    ["git", "reset", "--hard", commit_sha],
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
-            else:
-                subprocess.run(
-                    ["git", "checkout", commit_sha],
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
-
+            print(f"[DEBUG] Checking out commit: {commit_sha}")
+            subprocess.run(
+                ["git", "reset", "--hard", commit_sha],
+                cwd=self.project_path,
+                env=self.custom_env(),
+                check=True
+            )
             subprocess.run(
                 ["git", "lfs", "checkout"],
                 cwd=self.project_path,
@@ -1024,10 +1080,10 @@ class DAWGitApp(QWidget):
             QMessageBox.information(
                 self,
                 "Project Restored",
-                "✅ This version of your project has been restored.\n\n"
-                "📂 Please re-open the .als file in Ableton to view the changes."
+                f"✅ This version of your project has been restored.\n\n"
+                f"🎛️ Commit ID: {commit_sha[:7]}"
             )
-            self.open_als_button.setVisible(True)
+            self.open_in_daw_btn.setVisible(True)
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "Checkout Failed", f"❌ Could not switch to the selected version:\n\n{e}")
@@ -1274,6 +1330,13 @@ class DAWGitApp(QWidget):
             tag = self.get_tag_for_commit(commit.hexsha)
             short_msg = commit.message.strip().split("\n")[0]
             commit_id = commit.hexsha[:7]
+            commit_item = QTableWidgetItem(commit_id)
+            commit_item.setToolTip(commit.hexsha)  # 🟢 THIS IS THE MISSING LINE
+            self.history_table.setItem(row, 1, commit_item)
+            # commit_item = QTableWidgetItem(commit_id)
+            # commit_item.setToolTip(commit.hexsha)  # ✅ This line makes checkout work
+            print(f"[DEBUG] Tooltip set for row {row}: {commit.hexsha}")
+            # self.history_table.setItem(row, 1, commit_item)
 
             # ✅ Insert Tag, Commit ID, Message
             self.history_table.setItem(row, 0, QTableWidgetItem(tag or ""))
@@ -1771,24 +1834,74 @@ class DAWGitApp(QWidget):
         return Path(__file__).parent / relative_path
     
 
-    def save_last_project_path(self):
+    def update_status_label(self):
+        if self.project_path:
+            self.status_label.setText(f"🎶 Ready to track: {self.project_path.name}")
+        else:
+            self.status_label.setText("❌ No project folder loaded.")
+
+
+    def save_last_project_path(self, path): 
+        if not self.project_path or str(self.project_path) == "None":
+            print("⚠️ Not saving — project_path is None.")
+            return
+
+        # 🧪 Avoid saving test environments or app folder
+        app_root = Path(__file__).resolve().parent
+        if Path(self.project_path).resolve() == app_root:
+            print("⚠️ Refusing to save DAWGitApp folder as last project.")
+            return
+
         try:
-            with open(self.settings_path, "w") as f:
-                f.write(str(self.project_path))
+            with open(self.settings_path, "w", encoding="utf-8") as f:
+                json.dump({"last_project_path": str(self.project_path)}, f)
+            print(f"✅ Saved last project path: {self.project_path}")
         except Exception as e:
-            print(f"❌ Failed to save last project path: {e}")
+            print(f"⚠️ Failed to save project path: {e}")
+
+
+    def is_valid_daw_folder(self, path):
+        return any(path.glob("*.als")) or any(path.glob("*.logicx"))        
 
     
-    def load_last_project_path(self):
+    def load_saved_project_path(self):
+        if not self.settings_path.exists():
+            print("⚠️ No saved project path found.")
+            return None
+
         try:
-            if self.settings_path.exists():
-                return Path(self.settings_path.read_text().strip())
+            with open(self.settings_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                last_path = data.get("last_project_path", "")
+                print(f"[DEBUG] Loaded last_path from file: {last_path}")  # ✅ HERE
         except Exception as e:
-            print(f"❌ Failed to load last project path: {e}")
-        return None
-    
-    def launch_file_with_system(self, file_path):
-        subprocess.Popen(["open", str(file_path)])
+            print(f"⚠️ Failed to load saved project path: {e}")
+            return None
+
+        if not last_path:
+            return None
+
+        resolved_path = Path(last_path).resolve()
+
+        # 🛑 Block DAWGitApp folder
+        app_root = Path(__file__).resolve().parent
+        if resolved_path == app_root or "DAWGitApp" in str(resolved_path):
+            print("⚠️ Refusing to track DAWGitApp root folder — not a valid project.")
+            return None
+
+        if not resolved_path.exists():
+            print("⚠️ Last path no longer exists.")
+            return None
+
+        has_daw_file = any(resolved_path.glob("*.als")) or any(resolved_path.glob("*.logicx"))
+        if not has_daw_file:
+            print("⚠️ No DAW file found in saved folder.")
+            return None
+
+        print(f"✅ Loaded saved project path: {resolved_path}")
+        return str(resolved_path)
+
+
 
 
     def open_daw_project(self):

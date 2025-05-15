@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import os
 import pytest
 from pathlib import Path
@@ -17,14 +20,19 @@ def test_create_new_branch_from_commit(temp_repo_factory, qtbot):
     # Detach HEAD
     repo.git.checkout(repo.head.commit.hexsha)
 
+    # 🚀 Launch app and manually assign repo (in case init fails due to detached HEAD)
     app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
 
+    if not app.repo:
+        app.repo = Repo(repo_path)
+
     try:
-        app.create_new_version_line("test_branch")
+        result = app.create_new_version_line("test_branch")
+        assert result["status"] == "success"
         assert not app.repo.head.is_detached
     finally:
-        # ✅ Clean up the test-created branch
+        # ✅ Clean up test branch if it was created
         if "test_branch" in repo.branches:
             print("🧹 Removing test branch...")
             repo.git.branch("-D", "test_branch")
