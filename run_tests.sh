@@ -15,3 +15,13 @@ else
 fi
 
 echo "✅ All done."
+
+echo "🧹 Cleaning up leftover pytest folders..."
+
+# ✅ Clean up from user home (if any)
+rm -rf ~/pytest-of-*
+
+# ✅ Clean up from macOS temp system folders
+find /private/var/folders -type d -name "pytest-of-*" -exec rm -rf {} +
+
+echo "🧼 Temp pytest folders removed."
