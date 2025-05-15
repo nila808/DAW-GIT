@@ -115,166 +115,163 @@ class DAWGitApp(QWidget):
                     self.status_label.setText("Ready.")
 
 
-
     def setup_ui(self):
-            from PyQt6.QtCore import QTimer
-            QTimer.singleShot(250, self.load_commit_history)
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(250, self.load_commit_history)
 
-            self.setWindowTitle("DAW Git Version Control")
-            self.setWindowIcon(QIcon(str(self.resource_path("icon.png"))))
-            self.resize(800, 900)
-            main_layout = QVBoxLayout()
+        self.setWindowTitle("DAW Git Version Control")
+        self.setWindowIcon(QIcon(str(self.resource_path("icon.png"))))
+        self.resize(800, 900)
+        main_layout = QVBoxLayout()
 
-            # 🔁 Uncommitted changes indicator
-            self.unsaved_indicator = QLabel("● Uncommitted Changes")
-            self.unsaved_indicator.setStyleSheet("color: orange; font-weight: bold;")
-            self.unsaved_indicator.setVisible(False)
-            self.unsaved_flash = False
-            self.unsaved_timer = self.startTimer(800)
-            main_layout.addWidget(self.unsaved_indicator)
+        # 🔁 Uncommitted changes indicator
+        self.unsaved_indicator = QLabel("● Uncommitted Changes")
+        self.unsaved_indicator.setStyleSheet("color: orange; font-weight: bold;")
+        self.unsaved_indicator.setVisible(False)
+        self.unsaved_flash = False
+        self.unsaved_timer = self.startTimer(800)
+        main_layout.addWidget(self.unsaved_indicator)
 
-            # 📁 Project tracking label (visible in UI and testable)
-            self.project_label = QLabel()
-            self.project_label.setObjectName("project_label")
-            self.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
-            self.project_label.setOpenExternalLinks(True)
-            self.project_label.setToolTip("Click to open in Finder")
-            self.project_label.setWordWrap(True)
-            main_layout.addWidget(self.project_label)
+        # 📁 Project tracking label
+        self.project_label = QLabel()
+        self.project_label.setObjectName("project_label")
+        self.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
+        self.project_label.setOpenExternalLinks(True)
+        self.project_label.setToolTip("Click to open in Finder")
+        self.project_label.setWordWrap(True)
+        main_layout.addWidget(self.project_label)
 
-            # 🛠️ For test inspection only — hidden in UI
-            self.path_label = QLabel(str(self.project_path))
-            self.path_label.setVisible(False)
-            main_layout.addWidget(self.path_label)
+        self.path_label = QLabel(str(self.project_path))
+        self.path_label.setVisible(False)
+        main_layout.addWidget(self.path_label)
 
-            self.update_project_label()
+        self.update_project_label()
 
-            # Status label
-            self.status_label = QLabel("Status: Ready")
-            self.status_label.setObjectName("status_label")
-            main_layout.addWidget(self.status_label)
+        # Status label
+        self.status_label = QLabel("Status: Ready")
+        self.status_label.setObjectName("status_label")
+        main_layout.addWidget(self.status_label)
 
-            # Project Setup button
-            setup_btn = QPushButton("Setup Project")
-            setup_btn.clicked.connect(self.run_setup)
-            main_layout.addWidget(setup_btn)
+        # Project Setup button
+        setup_btn = QPushButton("Setup Project")
+        setup_btn.clicked.connect(self.run_setup)
+        main_layout.addWidget(setup_btn)
 
-            # 🧰 Control buttons row
-            controls_layout = QHBoxLayout()
-            change_btn = QPushButton("Change Project Folder")
-            change_btn.clicked.connect(self.change_project_folder)
-            clear_btn = QPushButton("Clear Saved Project")
-            clear_btn.clicked.connect(self.clear_saved_project)
-            snapshot_export_btn = QPushButton("Export Snapshot")
-            snapshot_export_btn.clicked.connect(self.export_snapshot)
-            snapshot_import_btn = QPushButton("Import Snapshot")
-            snapshot_import_btn.clicked.connect(self.import_snapshot)
-            restore_btn = QPushButton("Restore Last Backup")
-            restore_btn.clicked.connect(self.restore_last_backup)
-            controls_layout.addWidget(change_btn)
-            controls_layout.addWidget(clear_btn)
-            controls_layout.addWidget(snapshot_export_btn)
-            controls_layout.addWidget(snapshot_import_btn)
-            controls_layout.addWidget(restore_btn)
-            main_layout.addLayout(controls_layout)
+        # ✅ Branch dropdown
+        self.branch_dropdown = QComboBox()
+        self.branch_dropdown.setToolTip("🎚️ Switch to another branch")
+        self.branch_dropdown.currentIndexChanged.connect(self.on_branch_selected)
+        main_layout.addWidget(self.branch_dropdown)
 
-            # 📝 Commit inputs
-            self.commit_message = QTextEdit(placeholderText="Enter commit message")
-            self.commit_tag = QTextEdit(placeholderText="Enter tag (optional)")
-            self.commit_tag.setMaximumHeight(40)
-            commit_btn = QPushButton("COMMIT CHANGES")
-            commit_btn.clicked.connect(self.commit_changes)
-            auto_commit_btn = QPushButton("AUTO COMMIT")
-            auto_commit_btn.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
-            commit_layout = QVBoxLayout()
-            commit_layout.addWidget(QLabel("Commit Message:"))
-            commit_layout.addWidget(self.commit_message)
-            commit_layout.addWidget(QLabel("Tag:"))
-            commit_layout.addWidget(self.commit_tag)
-            commit_layout.addWidget(commit_btn)
-            commit_layout.addWidget(auto_commit_btn)
-            main_layout.addLayout(commit_layout)
+        # 🧰 Control buttons row
+        controls_layout = QHBoxLayout()
+        change_btn = QPushButton("Change Project Folder")
+        change_btn.clicked.connect(self.change_project_folder)
+        clear_btn = QPushButton("Clear Saved Project")
+        clear_btn.clicked.connect(self.clear_saved_project)
+        snapshot_export_btn = QPushButton("Export Snapshot")
+        snapshot_export_btn.clicked.connect(self.export_snapshot)
+        snapshot_import_btn = QPushButton("Import Snapshot")
+        snapshot_import_btn.clicked.connect(self.import_snapshot)
+        restore_btn = QPushButton("Restore Last Backup")
+        restore_btn.clicked.connect(self.restore_last_backup)
+        controls_layout.addWidget(change_btn)
+        controls_layout.addWidget(clear_btn)
+        controls_layout.addWidget(snapshot_export_btn)
+        controls_layout.addWidget(snapshot_import_btn)
+        controls_layout.addWidget(restore_btn)
+        main_layout.addLayout(controls_layout)
 
-            # ⬅️ Checkout + Info buttons
-            checkout_layout = QHBoxLayout()
-            checkout_latest_btn = QPushButton("Return to Latest Commit")
-            checkout_latest_btn.clicked.connect(self.checkout_latest)
-            checkout_selected_btn = QPushButton("Checkout Selected Commit")
-            
-            
-            checkout_selected_btn.clicked.connect(self.checkout_selected_commit)
+        # 📝 Commit inputs
+        self.commit_message = QTextEdit(placeholderText="Enter commit message")
+        self.commit_tag = QTextEdit(placeholderText="Enter tag (optional)")
+        self.commit_tag.setMaximumHeight(40)
+        commit_btn = QPushButton("COMMIT CHANGES")
+        commit_btn.clicked.connect(self.commit_changes)
+        auto_commit_btn = QPushButton("AUTO COMMIT")
+        auto_commit_btn.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
+        commit_layout = QVBoxLayout()
+        commit_layout.addWidget(QLabel("Commit Message:"))
+        commit_layout.addWidget(self.commit_message)
+        commit_layout.addWidget(QLabel("Tag:"))
+        commit_layout.addWidget(self.commit_tag)
+        commit_layout.addWidget(commit_btn)
+        commit_layout.addWidget(auto_commit_btn)
+        main_layout.addLayout(commit_layout)
 
-            if self.current_commit_id:
-                self.checkout_selected_commit(self.current_commit_id)
-            else:
-                print("📌 No version locked in — staying on current HEAD")
+        # ⬅️ Checkout + Info buttons
+        checkout_layout = QHBoxLayout()
+        checkout_latest_btn = QPushButton("Return to Latest Commit")
+        checkout_latest_btn.clicked.connect(self.checkout_latest)
+        checkout_selected_btn = QPushButton("Checkout Selected Commit")
+        checkout_selected_btn.clicked.connect(self.checkout_selected_commit)
 
+        if self.current_commit_id:
+            self.checkout_selected_commit(self.current_commit_id)
+        else:
+            print("📌 No version locked in — staying on current HEAD")
 
-            what_commit_btn = QPushButton("What Commit Am I In?")
-            what_commit_btn.clicked.connect(self.show_current_commit)
-            branch_switch_btn = QPushButton("🔀 Switch to Saved Version")
-            branch_switch_btn.clicked.connect(self.switch_branch)
-            checkout_layout.addWidget(checkout_latest_btn)
-            checkout_layout.addWidget(checkout_selected_btn)
-            checkout_layout.addWidget(what_commit_btn)
-            checkout_layout.addWidget(branch_switch_btn)
-            main_layout.addLayout(checkout_layout)
+        what_commit_btn = QPushButton("What Commit Am I In?")
+        what_commit_btn.clicked.connect(self.show_current_commit)
+        branch_switch_btn = QPushButton("🔀 Switch to Saved Version")
+        branch_switch_btn.clicked.connect(self.switch_branch)
+        checkout_layout.addWidget(checkout_latest_btn)
+        checkout_layout.addWidget(checkout_selected_btn)
+        checkout_layout.addWidget(what_commit_btn)
+        checkout_layout.addWidget(branch_switch_btn)
+        main_layout.addLayout(checkout_layout)
 
-            # 🎼 Start New Version Line
-            self.new_version_line_button = QPushButton("🎼 Start New Version Line")
-            self.new_version_line_button.clicked.connect(self.start_new_version_line)
-            main_layout.addWidget(self.new_version_line_button)
+        # 🎼 Start New Version Line
+        self.new_version_line_button = QPushButton("🎼 Start New Version Line")
+        self.new_version_line_button.clicked.connect(self.start_new_version_line)
+        main_layout.addWidget(self.new_version_line_button)
 
-            # 🎚️ Current branch indicator
-            self.version_line_label = QLabel()
-            self.version_line_label.setText("🎚️ No active version line")
-            self.version_line_label.setStyleSheet("color: #999; font-style: italic;")
-            main_layout.addWidget(self.version_line_label)
+        # 🎚️ Current branch indicator
+        self.version_line_label = QLabel()
+        self.version_line_label.setText("🎚️ No active version line")
+        self.version_line_label.setStyleSheet("color: #999; font-style: italic;")
+        main_layout.addWidget(self.version_line_label)
 
-            # ✅ Remote push option
-            self.remote_checkbox = QCheckBox("Push to remote after commit")
-            main_layout.addWidget(self.remote_checkbox)
+        # ✅ Remote push option
+        self.remote_checkbox = QCheckBox("Push to remote after commit")
+        main_layout.addWidget(self.remote_checkbox)
 
-            # 🎧 Launch Ableton button
-            self.open_in_daw_btn = QPushButton("🎧 Open This Version in DAW")
-            self.open_in_daw_btn.setVisible(False)
-            self.open_in_daw_btn.clicked.connect(self.open_latest_daw_project)
-            main_layout.addWidget(self.open_in_daw_btn)
+        # 🎧 Launch Ableton button
+        self.open_in_daw_btn = QPushButton("🎧 Open This Version in DAW")
+        self.open_in_daw_btn.setVisible(False)
+        self.open_in_daw_btn.clicked.connect(self.open_latest_daw_project)
+        main_layout.addWidget(self.open_in_daw_btn)
 
-            # 📜 Commit History Table
-            history_group = QGroupBox("Commit History")
-            history_layout = QVBoxLayout()
+        # 📜 Commit History Table
+        history_group = QGroupBox("Commit History")
+        history_layout = QVBoxLayout()
+        self.history_table = QTableWidget(0, 4)
+        self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message", "Branch"])
 
-            self.history_table = QTableWidget(0, 4)  # Tag, Commit ID, Message, Branch
-            self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-            self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message", "Branch"])
+        header = self.history_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        header.setStretchLastSection(True)
 
-            header = self.history_table.horizontalHeader()
-            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)  # Tag
-            header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)  # Commit ID
-            header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)           # Message
-            header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)  # Branch
-            header.setStretchLastSection(True)
+        self.history_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.history_table.customContextMenuRequested.connect(self.show_commit_context_menu)
+        self.history_table.setMinimumHeight(300)
 
-            self.history_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-            self.history_table.customContextMenuRequested.connect(self.show_commit_context_menu)
-            self.history_table.setMinimumHeight(300)
+        item = self.history_table.item(0, 3)
+        print("DEBUG COLUMN 3:", item.text() if item else "None")
 
-            # ✅ Now the debug print will succeed
-            item = self.history_table.item(0, 3)
-            print("DEBUG COLUMN 3:", item.text() if item else "None")
+        self.history_table.resizeColumnsToContents()
+        history_layout.addWidget(self.history_table)
+        history_group.setLayout(history_layout)
+        main_layout.addWidget(history_group)
 
-            self.history_table.resizeColumnsToContents()
-            history_layout.addWidget(self.history_table)
-            history_group.setLayout(history_layout)
-            main_layout.addWidget(history_group)
+        self.setLayout(main_layout)
 
+        QTimer.singleShot(250, self.load_commit_history)
 
-            self.setLayout(main_layout)
-
-            from PyQt6.QtCore import QTimer
-            QTimer.singleShot(250, self.load_commit_history)
-            
 
     def get_tag_for_commit(self, commit_sha):
         """Returns the first tag associated with a given commit hash."""
@@ -333,6 +330,23 @@ class DAWGitApp(QWidget):
             self.repo = None
 
 
+    def update_branch_dropdown(self):
+        if not hasattr(self, "branch_dropdown") or not self.repo:
+            return
+
+        self.branch_dropdown.clear()
+        try:
+            branches = [head.name for head in self.repo.heads]
+            for b in branches:
+                self.branch_dropdown.addItem(b)
+
+            current = self.repo.active_branch.name if not self.repo.head.is_detached else None
+            if current:
+                index = self.branch_dropdown.findText(current)
+                if index >= 0:
+                    self.branch_dropdown.setCurrentIndex(index)
+        except Exception as e:
+            print(f"[WARN] Failed to update branch dropdown: {e}")
 
 
     def update_log(self):
@@ -513,6 +527,14 @@ class DAWGitApp(QWidget):
                 f"⚠️ Something went wrong while preparing your session:\n\n{e}"
             )
 
+
+    def on_branch_selected(self, index):
+        if not self.repo or not hasattr(self, "branch_dropdown"):
+            return
+
+        selected_branch = self.branch_dropdown.itemText(index).strip()
+        if selected_branch:
+            self.switch_branch(selected_branch)
 
 
     def get_default_branch(self):
@@ -1426,7 +1448,7 @@ class DAWGitApp(QWidget):
                 )
 
 
-    def switch_branch(self):
+    def switch_branch(self, branch_name=None):
         if not self.repo:
             QMessageBox.warning(
                 self,
@@ -1446,7 +1468,6 @@ class DAWGitApp(QWidget):
                 return
 
             if self.repo.head.is_detached:
-                # 🎧 Warn about switching from snapshot view
                 choice = QMessageBox.question(
                     self,
                     "Currently Viewing Snapshot",
@@ -1457,101 +1478,19 @@ class DAWGitApp(QWidget):
                 if choice != QMessageBox.StandardButton.Yes:
                     return
 
-            selected_branch, ok = QInputDialog.getItem(
-                self,
-                "🔀 Switch to Saved Version",
-                "Choose a saved version line:",
-                branches,
-                editable=False
-            )
-            if not ok or not selected_branch:
-                return
-
-            if self.has_unsaved_changes():
-                choice = QMessageBox.question(
+            # If branch name wasn't passed (e.g. from dropdown), show picker
+            if not branch_name:
+                selected_branch, ok = QInputDialog.getItem(
                     self,
-                    "Unsaved Work Detected",
-                    "🎵 You’ve made changes that haven’t been saved yet.\n\nWould you like to back them up before switching?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                    "🔀 Switch to Saved Version",
+                    "Choose a saved version line:",
+                    branches,
+                    editable=False
                 )
-                if choice == QMessageBox.StandardButton.Yes:
-                    self.backup_unsaved_changes()
-
-                subprocess.run(
-                    ["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
-
-            subprocess.run(
-                ["git", "checkout", selected_branch],
-                cwd=self.project_path,
-                env=self.custom_env(),
-                check=True
-            )
-
-            self.init_git()
-            QMessageBox.information(
-                self,
-                "Switched Version",
-                f"🎚️ You’re now working on version line:\n\n{selected_branch}"
-            )
-
-        except subprocess.CalledProcessError as e:
-            QMessageBox.critical(
-                self,
-                "Couldn’t Switch",
-                f"❌ Something went wrong switching versions:\n\n{e}"
-            )
-        except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Unexpected Issue",
-                f"⚠️ Something unexpected happened:\n\n{e}"
-            )
-
-
-    def switch_branch(self):
-        if not self.repo:
-            QMessageBox.warning(
-                self,
-                "Project Not Set Up",
-                "🎛️ Please load or set up a project folder first."
-            )
-            return
-
-        try:
-            branches = [head.name for head in self.repo.heads]
-            if not branches:
-                QMessageBox.information(
-                    self,
-                    "No Saved Versions",
-                    "🎚️ This project has no saved version lines yet.\n\nUse 'Start New Version Line' to begin branching."
-                )
-                return
-
-            if self.repo.head.is_detached:
-                # 🎧 Warn about switching from snapshot view
-                choice = QMessageBox.question(
-                    self,
-                    "Currently Viewing Snapshot",
-                    "🎧 You’re currently exploring a snapshot.\n\n"
-                    "Switching now will move you to a saved version line.\n\nContinue?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
-                )
-                if choice != QMessageBox.StandardButton.Yes:
+                if not ok or not selected_branch:
                     return
-
-            selected_branch, ok = QInputDialog.getItem(
-                self,
-                "🔀 Switch to Saved Version",
-                "Choose a saved version line:",
-                branches,
-                editable=False
-            )
-            if not ok or not selected_branch:
-                return
+            else:
+                selected_branch = branch_name
 
             if self.has_unsaved_changes():
                 choice = QMessageBox.question(
