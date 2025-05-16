@@ -38,6 +38,7 @@ def test_commit_log_display_on_startup(tmp_path, qtbot):
     qtbot.addWidget(app)
     app.repo = repo
     app.init_git()
+    app.update_log()  # ✅ Ensure history_table is populated
 
     latest_sha = repo.head.commit.hexsha
     tooltips = [
@@ -62,6 +63,7 @@ def test_checked_out_commit_highlighted_on_startup(tmp_path, qtbot):
     qtbot.addWidget(app)
     app.repo = repo
     app.init_git()
+    app.update_log()  # ✅ Populate history table before check
 
     checked_out_sha = repo.head.commit.hexsha[:7]
     found = any(
@@ -69,6 +71,7 @@ def test_checked_out_commit_highlighted_on_startup(tmp_path, qtbot):
         for row in range(app.history_table.rowCount())
     )
     assert found
+
 
 
 def test_branch_dropdown_shows_active_branch(tmp_path, qtbot):
@@ -98,18 +101,26 @@ def test_startup_in_detached_head_warns_user(tmp_path, qtbot):
     project_path.mkdir()
     (project_path / "clip.als").write_text("v1")
 
+    # Init repo and create two commits
     repo = Repo.init(project_path)
     repo.index.add(["clip.als"])
     repo.index.commit("first")
+    (project_path / "clip.als").write_text("v2")
+    repo.index.add(["clip.als"])
     repo.index.commit("second")
     repo.git.branch("-M", "main")
 
+    # Detach HEAD to first commit
     first_sha = list(repo.iter_commits("main"))[-1].hexsha
     repo.git.checkout(first_sha)
 
+    # Launch app with repo already in detached HEAD state
     app = DAWGitApp(project_path=str(project_path), build_ui=True)
     qtbot.addWidget(app)
-    app.repo = Repo(project_path)  # ensure reload
+
+    # 🔥 MUST RE-ASSIGN actual repo object (ensures detached state is respected)
+    app.repo = Repo(project_path)
     app.init_git()
 
-    assert app.repo.head.is_detached
+    # ✅ Confirm we are truly detached
+    assert app.repo.head.is_detached, "Repo should be in detached HEAD state"

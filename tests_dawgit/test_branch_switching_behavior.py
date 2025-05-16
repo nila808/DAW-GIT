@@ -4,13 +4,15 @@ from pathlib import Path
 
 @pytest.fixture
 def simple_daw_repo(tmp_path):
-    """Creates a repo with a single branch and a commit."""
+    """
+    Creates a simple Git repo with one commit on the main branch.
+    """
     project_dir = tmp_path / "BranchSwitchTest"
     project_dir.mkdir()
     (project_dir / "test.als").write_text("Ableton baseline")
 
     app = DAWGitApp(project_path=project_dir, build_ui=False)
-    app.init_git()
+    app.init_git()  # Initializes Git repo and commits the .als file
 
     return app
 
@@ -20,5 +22,6 @@ def test_switching_to_same_branch_does_nothing(simple_daw_repo):
 
     result = app.switch_branch(current_branch)
     
-    assert result["status"] == "success" or result["status"] == "cancelled"
+    # The switch_branch method may return 'success' if no switch needed, or 'cancelled' if user cancels.
+    assert result["status"] in ("success", "cancelled"), "Switching to current branch should succeed or be cancelled gracefully"
     assert app.repo.active_branch.name == current_branch, "Should remain on the same branch"

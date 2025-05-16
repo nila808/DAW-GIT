@@ -17,9 +17,8 @@ def test_autocommit_marker_before_version_branch(tmp_path):
     # Start from detached HEAD
     repo.git.checkout(repo.head.commit.hexsha)
 
-    # 🧪 Launch app
-    app = DAWGitApp()
-    app.repo_path = tmp_path
+    # 🧪 Launch app with proper initialization
+    app = DAWGitApp(project_path=tmp_path, build_ui=False)
     app.repo = Repo(tmp_path)
 
     # 🧪 Call method under test
@@ -37,4 +36,3 @@ def test_autocommit_marker_before_version_branch(tmp_path):
     # ✅ Marker commit should match
     print("🔖 Commit message:", app.repo.head.commit.message)
     assert "🎼 Start New Version Line" in app.repo.head.commit.message
-

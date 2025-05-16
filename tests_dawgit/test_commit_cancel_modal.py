@@ -18,13 +18,16 @@ def test_commit_cancel_does_not_change_repo(monkeypatch, qtbot, daw_project_with
     app.init_git()
     initial_commit_count = len(list(app.repo.iter_commits()))
 
-    # Monkeypatch the QInputDialog to simulate "Cancel"
+    # Monkeypatch QInputDialog.getText to simulate the Cancel button clicked
     def fake_get_text(*args, **kwargs):
-        return ("", False)  # Simulate user cancelling input
+        return ("", False)  # Cancel pressed, so no commit message
+
     monkeypatch.setattr(QInputDialog, "getText", fake_get_text)
 
     result = app.commit_changes()
-    assert result is None or result["status"] == "error"
+
+    # When commit is cancelled, commit_changes() returns None or dict with error status
+    assert result is None or (isinstance(result, dict) and result.get("status") == "error")
 
     final_commit_count = len(list(app.repo.iter_commits()))
-    assert final_commit_count == initial_commit_count, "No commit should be added on cancel"
+    assert final_commit_count == initial_commit_count, "No new commit should be created when commit is cancelled"

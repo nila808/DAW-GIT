@@ -17,12 +17,11 @@ def test_untracked_file_warning_on_checkout(tmp_path):
     untracked = tmp_path / "extra.wav"
     untracked.write_text("Untracked audio")
 
-    app = DAWGitApp()
-    app.repo_path = tmp_path
+    app = DAWGitApp(project_path=tmp_path, build_ui=False)
     app.repo = repo
 
-    # Try to checkout a commit
-    result = app.checkout_commit(commit_hash)
+    # Attempt to checkout the commit hash
+    result = app.checkout_selected_commit(commit_hash)
 
     assert result["status"] == "warning"
     assert "untracked" in result["message"].lower()

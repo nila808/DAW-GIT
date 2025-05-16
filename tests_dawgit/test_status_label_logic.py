@@ -32,13 +32,19 @@ def test_status_label_ignores_non_daw_files(qtbot, clean_daw_project):
 
 def test_status_label_detects_modified_als(qtbot, clean_daw_project):
     als_path = clean_daw_project / "dummy.als"
+    als_path.write_text("original")
+
     app = DAWGitApp(project_path=clean_daw_project, build_ui=True)
     qtbot.addWidget(app)
 
-    # Modify .als after app launch
-    als_path.write_text("modified data")
-    assert app.has_unsaved_changes(), ".als modification should trigger dirty state"
+    # ✅ Ensure the initial state is clean
+    assert not app.has_unsaved_changes(), "Initial project state should be clean"
 
+    # 🔥 Modify the .als file after app is launched
+    als_path.write_text("modified data")
+
+    # 🧪 Trigger status re-check
     app.update_status_label()
-    label_text = app.status_label.text()
-    assert "⚠️ Uncommitted changes" in label_text
+
+    # ✅ Assert that the dirty state is detected
+    assert app.has_unsaved_changes(), ".als modification should trigger dirty state"

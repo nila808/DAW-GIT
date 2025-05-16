@@ -12,14 +12,16 @@ def test_prevent_branch_switch_with_uncommitted_changes(tmp_path):
     repo.index.add(["track.als"])
     repo.index.commit("Initial commit")
 
+    # Create the new branch so switch can happen
+    repo.git.branch("new-branch")
+
     # Simulate uncommitted change
     project_file.write_text("Uncommitted edit")
 
-    app = DAWGitApp()
-    app.repo_path = tmp_path
+    app = DAWGitApp(project_path=tmp_path, build_ui=False)
     app.repo = repo
 
-    # Try to switch branch with uncommitted changes
+    # Attempt branch switch to new-branch with uncommitted changes
     result = app.safe_switch_branch("new-branch")
 
     assert result["status"] == "warning"

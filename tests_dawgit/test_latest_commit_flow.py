@@ -31,10 +31,15 @@ def test_commit_and_return_to_latest(tmp_path, qtbot):
     # Simulate checkout of previous commit
     first_sha = list(app.repo.iter_commits("main"))[-1].hexsha
     app.checkout_selected_commit(commit_sha=first_sha)
+
+    # Assert detached HEAD state after checkout
+    assert app.repo.head.is_detached
     assert app.repo.head.commit.hexsha == first_sha
 
     # Return to latest commit
     app.checkout_latest()
     app.repo = Repo(app.project_path)  # ⬅️ crucial repo reload here
-    assert app.repo.head.commit.hexsha == new_sha
 
+    assert not app.repo.head.is_detached
+    assert app.repo.head.commit.hexsha == new_sha
+    assert app.repo.active_branch.name == "main"

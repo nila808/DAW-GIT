@@ -121,9 +121,6 @@ class DAWGitApp(QWidget):
             self.update_status_label()
 
 
-
-
-
     def setup_ui(self):
         from PyQt6.QtCore import QTimer
         QTimer.singleShot(250, self.load_commit_history)
@@ -331,8 +328,15 @@ class DAWGitApp(QWidget):
 
         try:
             if (self.project_path / ".git").exists():
-                self.bind_repo()
-                print("ℹ️ Existing Git repo found — checking status...")
+                temp_repo = Repo(self.project_path)
+
+                if temp_repo.head.is_detached:
+                    print("🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.")
+                    self.repo = temp_repo
+                else:
+                    self.bind_repo()
+                    print("ℹ️ Existing Git repo found — checking status...")
+
 
                 # ✅ Auto-commit any DAW files if repo has no commits
                 if not self.repo.head.is_valid():
@@ -353,7 +357,10 @@ class DAWGitApp(QWidget):
             # ✅ Safely refresh the commit log if the repo has a valid HEAD
             try:
                 if self.repo and self.repo.head.is_valid():
-                    self.update_log()
+                    if hasattr(self, "history_table"):
+                        self.update_log()
+                    else:
+                        print("⚠️ Skipping update_log(): history_table not initialized yet.")
             except Exception as log_err:
                 print(f"[DEBUG] Skipping log update — repo not ready: {log_err}")
 
@@ -765,12 +772,19 @@ class DAWGitApp(QWidget):
                     return {"status": "error", "message": f"Branch '{branch_name}' already exists."}
 
             # ✅ Create and switch to the new branch
-            self.repo.git.switch("-c", branch_name)
+            base_commit = self.repo.head.commit.hexsha
+            self.repo.git.switch("-c", branch_name, base_commit)
             self.bind_repo(self.repo.working_tree_dir)
 
             # ✅ Add version marker
             marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
-            marker_path.write_text(f"Version line started: {branch_name}")
+            marker_text = f"🎼 Start of version line: {branch_name}\nCommit: {base_commit[:7]}"
+            marker_path.write_text(marker_text)
+
+            # 🔒 Ensure file is flushed and exists before staging
+            if not marker_path.exists():
+                raise FileNotFoundError(".version_marker file not written properly.")
+
             self.repo.index.add([str(marker_path.relative_to(self.repo.working_tree_dir))])
 
             # ✅ Add placeholder .als if none present
@@ -858,18 +872,29 @@ class DAWGitApp(QWidget):
             return
 
         try:
-            # Backup first (optional but recommended)
+            # Backup unsaved changes if any
             if self.has_unsaved_changes():
                 self.backup_unsaved_changes()
 
-            # Rebase interactively to drop the selected commit
+            # Get recent commits
             all_commits = list(self.repo.iter_commits("HEAD", max_count=50))
             target_commit = next((c for c in all_commits if c.hexsha.startswith(commit_id[:7])), None)
-
             if not target_commit:
                 raise Exception("Commit not found in history.")
 
-            base = all_commits[all_commits.index(target_commit) + 1]  # commit just after the one being deleted
+            # Determine base commit for rebase
+            idx = all_commits.index(target_commit)
+            if idx + 1 < len(all_commits):
+                base = all_commits[idx + 1]
+            else:
+                base = target_commit.parents[0] if target_commit.parents else None
+
+            if base is None:
+                raise Exception("Cannot determine base commit for rebase")
+
+            print(f"Rebasing: dropping {target_commit.hexsha} onto {base.hexsha}")
+
+            # Run git rebase to drop the target commit
             subprocess.run(
                 ["git", "rebase", "--onto", base.hexsha, target_commit.hexsha],
                 cwd=self.project_path,
@@ -877,25 +902,19 @@ class DAWGitApp(QWidget):
                 check=True
             )
 
-            # Refresh UI
+            # Refresh repo and UI after rebase
             self.init_git()
-
-            # Auto-select nearest commit (base), scroll to it
             self.current_commit_id = base.hexsha
             self.update_log()
             self.history_table.scrollToItem(self.history_table.item(0, 0), QTableWidget.ScrollHint.PositionAtTop)
-
-            # Automatically check out that commit
             self.repo.git.checkout(base.hexsha)
-            self.current_commit_id = base.hexsha
             self.status_message(f"Snapshot deleted. Now viewing: {base.hexsha[:7]}")
             self.show_commit_checkout_info(self.repo.commit(base.hexsha))
-
-            # Open the DAW project
             self.open_latest_daw_project()
 
         except Exception as e:
             QMessageBox.critical(self, "Delete Failed", f"Failed to delete commit:\n{e}")
+
 
 
     def als_recently_modified(self, threshold_seconds=60):
@@ -1260,14 +1279,13 @@ class DAWGitApp(QWidget):
 
             dirty = False
             status_output = self.repo.git.status("--porcelain").splitlines()
-            # Paste this inside has_unsaved_changes(), just after status_output line
             print("[DEBUG] Full status --porcelain output:")
             for line in status_output:
                 print(f"  → {line}")
             print("[DEBUG] Raw Git status --porcelain:")
             for line in status_output:
-                print(f"  {line}")
                 file_path = line[3:].strip()
+                print(f"  {line} → {file_path}")
                 if file_path.endswith(".als") or file_path.endswith(".logicx"):
                     print(f"[DEBUG] Unsaved change detected: {file_path}")
                     dirty = True
@@ -1277,6 +1295,7 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"[DEBUG] has_unsaved_changes() failed: {e}")
             return False
+
 
 
 

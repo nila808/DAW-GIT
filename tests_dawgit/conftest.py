@@ -15,7 +15,6 @@ import subprocess
 
 
 
-
 @pytest.fixture(autouse=True)
 def clear_last_path_file():
     if os.path.exists("last_path"):
@@ -87,3 +86,14 @@ def auto_patch_dialogs(monkeypatch):
     monkeypatch.setattr(QFileDialog, "getExistingDirectory", lambda *a, **k: "/tmp/test-dir")
     monkeypatch.setattr(QFileDialog, "getOpenFileName", lambda *a, **k: ("/tmp/test-file.als", "ALS Files (*.als)"))
     monkeypatch.setattr(QFileDialog, "getSaveFileName", lambda *a, **k: ("/tmp/saved-project.als", "ALS Files (*.als)"))
+
+
+# Helpers:
+@pytest.fixture
+def temp_project(tmp_path):
+    """
+    Provides a temporary isolated project directory for tests.
+    """
+    project_dir = tmp_path / "TestProject"
+    project_dir.mkdir()
+    return project_dir
