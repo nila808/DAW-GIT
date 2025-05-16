@@ -76,7 +76,8 @@ class DAWGitApp(QWidget):
                     self.project_label.setText(f"🎵 Tracking Project: {self.project_path.name}")
                 if hasattr(self, "status_label"):
                     self.status_label.setText("🎶 Project loaded from last session.")
-                self.load_commit_history()
+                if build_ui and hasattr(self, "history_table"):
+                    self.load_commit_history()
             else:
                 if hasattr(self, "project_label"):
                     self.project_label.setText("❌ Failed to load repo.")
@@ -101,7 +102,8 @@ class DAWGitApp(QWidget):
                         self.project_label.setText(f"🎵 Tracking Project: {self.project_path.name}")
                     if hasattr(self, "status_label"):
                         self.status_label.setText("New project selected.")
-                    self.load_commit_history()
+                    if hasattr(self, "history_table"):
+                        self.load_commit_history()
                 else:
                     if hasattr(self, "project_label"):
                         self.project_label.setText("❌ Failed to load repo.")
@@ -117,6 +119,7 @@ class DAWGitApp(QWidget):
         # ✅ Final UI sync safety net
         if hasattr(self, "status_label"):
             self.update_status_label()
+
 
 
 
