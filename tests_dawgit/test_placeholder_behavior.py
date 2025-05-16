@@ -1,3 +1,4 @@
+import os
 import pytest
 from daw_git_gui import DAWGitApp
 from pathlib import Path
@@ -10,6 +11,9 @@ def project_without_daw_files(tmp_path):
     return project_dir
 
 def test_placeholder_file_created_on_version_line_start(qtbot, project_without_daw_files):
+    # ✅ Ensure env override is set for project_path fallback
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_without_daw_files)
+
     app = DAWGitApp(project_path=project_without_daw_files, build_ui=False)
     app.init_git()
     result = app.create_new_version_line("v1-experiment")
@@ -21,6 +25,9 @@ def test_placeholder_file_created_on_version_line_start(qtbot, project_without_d
     assert "🎼" in result["commit_message"]
 
 def test_placeholder_file_committed_to_repo(project_without_daw_files):
+    # ✅ Ensure env override is set
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_without_daw_files)
+
     app = DAWGitApp(project_path=project_without_daw_files, build_ui=False)
     app.init_git()
     app.create_new_version_line("with-placeholder")
