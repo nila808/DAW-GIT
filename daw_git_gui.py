@@ -319,10 +319,15 @@ class DAWGitApp(QWidget):
         print("🎛️ Found DAW files:", daw_files)
 
         is_test_mode = os.getenv("DAWGIT_TEST_MODE") == "1"
-        if not daw_files and not is_test_mode:
-            print("⚠️ No .als or .logicx file found in selected folder. Aborting Git setup.")
-            self.project_path = None
-            return
+        # ✅ Allow empty project in test mode
+        if not daw_files:
+            if os.getenv("DAWGIT_TEST_MODE") == "1":
+                print("🧪 [Test Mode] No DAW files found — continuing with empty project.")
+            else:
+                print("⚠️ No .als or .logicx file found in selected folder. Aborting Git setup.")
+                self.project_path = None
+                return
+
 
         try:
             if (self.project_path / ".git").exists():
