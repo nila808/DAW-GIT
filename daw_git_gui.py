@@ -114,6 +114,12 @@ class DAWGitApp(QWidget):
                 if hasattr(self, "status_label"):
                     self.status_label.setText("Ready.")
 
+        # ✅ Final UI sync safety net
+        if hasattr(self, "status_label"):
+            self.update_status_label()
+
+
+
 
     def setup_ui(self):
         from PyQt6.QtCore import QTimer
@@ -342,27 +348,34 @@ class DAWGitApp(QWidget):
 
     def bind_repo(self, path=None):
         """
-        Safely rebind the repo object, update commit ID and UI.
+        Safely rebind the repo object, update commit ID and refresh UI state.
         """
         from git import Repo
         try:
             repo_path = Path(path or self.project_path)
             self.repo = Repo(repo_path)
 
-            if hasattr(self.repo, "head") and self.repo.head and self.repo.head.is_valid():
+            if self.repo.head.is_valid():
                 self.current_commit_id = self.repo.head.commit.hexsha
                 print(f"[DEBUG] Repo rebound: HEAD = {self.current_commit_id[:7]}")
             else:
                 self.current_commit_id = None
-                print(f"[DEBUG] HEAD not valid or detached")
+                print("[DEBUG] HEAD not valid or detached")
 
+            # ✅ Refresh commit log UI
             if hasattr(self, "update_log"):
                 self.update_log()
+
+            # ✅ Force Git status label refresh after rebinding
+            if hasattr(self, "update_status_label"):
+                self.update_status_label()
 
         except Exception as e:
             print(f"[ERROR] Failed to bind repo: {e}")
             self.repo = None
             self.current_commit_id = None
+
+
 
 
     def update_branch_dropdown(self):
@@ -1223,24 +1236,24 @@ class DAWGitApp(QWidget):
     def has_unsaved_changes(self):
         try:
             if not self.repo or not self.project_path:
-                print("[DEBUG] has_unsaved_changes: no repo or project_path")
                 return False
 
-            print(f"[DEBUG] Checking unsaved changes in: {self.project_path}")
-            dirty = self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
-            print(f"[DEBUG] repo.is_dirty = {dirty}")
-
+            dirty = False
             status_output = self.repo.git.status("--porcelain").splitlines()
-            print("[DEBUG] git status --porcelain output:")
+            # Paste this inside has_unsaved_changes(), just after status_output line
+            print("[DEBUG] Full status --porcelain output:")
             for line in status_output:
-                print(f"   {line}")
+                print(f"  → {line}")
+            print("[DEBUG] Raw Git status --porcelain:")
             for line in status_output:
+                print(f"  {line}")
                 file_path = line[3:].strip()
                 if file_path.endswith(".als") or file_path.endswith(".logicx"):
-                    print(f"[DEBUG] Unsaved DAW change detected: {file_path}")
-                    return True
+                    print(f"[DEBUG] Unsaved change detected: {file_path}")
+                    dirty = True
 
-            return False
+            print(f"[DEBUG] has_unsaved_changes = {dirty}")
+            return dirty
         except Exception as e:
             print(f"[DEBUG] has_unsaved_changes() failed: {e}")
             return False
@@ -1864,10 +1877,38 @@ class DAWGitApp(QWidget):
     
 
     def update_status_label(self):
-        if self.project_path:
-            self.status_label.setText(f"🎶 Ready to track: {self.project_path.name}")
-        else:
-            self.status_label.setText("❌ No project folder loaded.")
+        if not hasattr(self, "status_label"):
+            return
+
+        if not self.repo:
+            self.status_label.setText("❌ No Git repo loaded.")
+            print("[DEBUG] status label set: ❌ No Git repo loaded.")
+            return
+
+        try:
+            branch = self.repo.active_branch.name if self.repo.head.is_valid() else "(detached)"
+            short_sha = self.repo.head.commit.hexsha[:7] if self.repo.head.is_valid() else "unknown"
+
+            # 🔍 Enhanced dirty check
+            dirty = self.has_unsaved_changes()
+            print(f"[DEBUG] update_status_label → has_unsaved_changes = {dirty}")
+            print("[DEBUG] Untracked files:", self.repo.untracked_files)
+            for diff_item in self.repo.index.diff(None):
+                print(f"[DEBUG] Modified file: {diff_item.a_path}")
+
+            if dirty:
+                self.status_label.setText("⚠️ Uncommitted changes")
+                print("[DEBUG] status label set: ⚠️ Uncommitted changes")
+            else:
+                user_friendly = f"🎧 On version line: {branch} — snapshot {short_sha}"
+                self.status_label.setText(user_friendly)
+                print(f"[DEBUG] status label set: ✅ Up to date with version: {branch} @ {short_sha}")
+
+        except Exception as e:
+            self.status_label.setText(f"⚠️ Git status error: {e}")
+            print(f"[DEBUG] status label set: ⚠️ Git status error: {e}")
+
+
 
 
     def save_last_project_path(self, path): 
