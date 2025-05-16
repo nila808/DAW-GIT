@@ -300,18 +300,28 @@ class DAWGitApp(QWidget):
             return
 
         # Validate DAW project contains .als or .logicx
-        if not any(self.project_path.glob("*.als")) and not any(self.project_path.glob("*.logicx")):
+        daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
+        print("🎛️ Found DAW files:", daw_files)
+        if not daw_files:
             print("⚠️ No .als or .logicx file found in selected folder. Aborting Git setup.")
             self.project_path = None
             return
 
         try:
             if (self.project_path / ".git").exists():
-                self.repo = Repo(self.project_path)
-                print("ℹ️ Existing Git repo found — skipping init.")
+                self.bind_repo()
+                print("ℹ️ Existing Git repo found — checking status...")
+
+                # ✅ Auto-commit any DAW files if repo has no commits
+                if not self.repo.head.is_valid():
+                    print("🧪 No commits found — auto-committing initial DAW files...")
+                    self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
+                    self.repo.index.commit("Initial commit")
             else:
                 self.repo = Repo.init(self.project_path)
                 print("✅ New Git repo initialized.")
+                self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
+                self.repo.index.commit("Initial commit")
                 self.save_last_project_path(self.project_path)
                 QMessageBox.information(self, "Repo Initialized", "✅ Git repository initialized for this DAW project.")
 
@@ -328,6 +338,31 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"❌ Failed to initialize Git repo: {e}")
             self.repo = None
+
+
+    def bind_repo(self, path=None):
+        """
+        Safely rebind the repo object, update commit ID and UI.
+        """
+        from git import Repo
+        try:
+            repo_path = Path(path or self.project_path)
+            self.repo = Repo(repo_path)
+
+            if hasattr(self.repo, "head") and self.repo.head and self.repo.head.is_valid():
+                self.current_commit_id = self.repo.head.commit.hexsha
+                print(f"[DEBUG] Repo rebound: HEAD = {self.current_commit_id[:7]}")
+            else:
+                self.current_commit_id = None
+                print(f"[DEBUG] HEAD not valid or detached")
+
+            if hasattr(self, "update_log"):
+                self.update_log()
+
+        except Exception as e:
+            print(f"[ERROR] Failed to bind repo: {e}")
+            self.repo = None
+            self.current_commit_id = None
 
 
     def update_branch_dropdown(self):
@@ -348,7 +383,6 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"[WARN] Failed to update branch dropdown: {e}")
 
-
     def update_log(self):
         if not hasattr(self, "history_table"):
             print("⚠️ Skipping update_log(): no history_table defined yet.")
@@ -357,13 +391,19 @@ class DAWGitApp(QWidget):
         self.history_table.setRowCount(0)  # Clear previous rows
         self.history_table.clearSelection()  # ✅ Also clear previous selection
 
-        if not self.repo or not self.repo.head.is_valid():
-            print("ℹ️ Skipping update_log — no commits found.")
+        if not self.repo or not hasattr(self.repo, "head") or not self.repo.head or not self.repo.head.is_valid():
+            print("ℹ️ Skipping update_log — no valid repo or commits found.")
             return
 
-        commits = list(self.repo.iter_commits(max_count=50))
-        commits.reverse()  # ✅ Align row order with modals
+        try:
+            commits = list(self.repo.iter_commits(max_count=50))
+        except Exception as e:
+            print(f"[DEBUG] Could not retrieve commits: {e}")
+            return
 
+        commits.reverse()  # ✅ Align row order with modals
+        current_id = getattr(self, "current_commit_id", "")
+        id_short = current_id[:7] if isinstance(current_id, str) else "None"
 
         for i, commit in enumerate(commits):
             self.history_table.insertRow(i)
@@ -382,26 +422,14 @@ class DAWGitApp(QWidget):
             commit_id_item.setToolTip(commit.hexsha)
             message_item.setToolTip(commit.message.strip())
 
-            if self.current_commit_id == commit.hexsha:
+            if current_id == commit.hexsha:
                 for col in range(self.history_table.columnCount()):
                     item = self.history_table.item(i, col)
                     if item:
                         item.setBackground(Qt.GlobalColor.green)
                 self.history_table.selectRow(i)
-            print(f"[DEBUG] Comparing {self.current_commit_id[:7]} to {commit.hexsha[:7]} (row {i})")
 
-            # ✅ Disable Delete button if selected commit is unreachable
-            if hasattr(self, "delete_commit_button") and self.repo:
-                try:
-                    reachable = [c.hexsha for c in self.repo.iter_commits()]
-                    if self.current_commit_id in reachable:
-                        self.delete_commit_button.setEnabled(True)
-                        self.delete_commit_button.setToolTip("Delete this commit from history.")
-                    else:
-                        self.delete_commit_button.setEnabled(False)
-                        self.delete_commit_button.setToolTip("❌ This commit is from another version line and cannot be deleted from here.")
-                except Exception as e:
-                    print(f"[WARN] Could not validate commit reachability: {e}")
+            print(f"[DEBUG] Comparing {id_short} to {commit.hexsha[:7]} (row {i})")
 
         self.history_table.resizeColumnsToContents()
 
@@ -412,16 +440,20 @@ class DAWGitApp(QWidget):
             self.history_table.scrollToItem(self.history_table.item(selected_row, 0), QTableWidget.ScrollHint.PositionAtCenter)
 
         # ✅ Enable or disable the delete commit button
-        if hasattr(self, "delete_commit_button") and self.current_commit_id:
-            can_delete = self.is_commit_deletable(self.current_commit_id)
-            self.delete_commit_button.setEnabled(can_delete)
-            self.delete_commit_button.setToolTip(
-                "Delete this commit from history." if can_delete else
-                "This commit is protected or not part of the current branch."
-            )
-            print(f"[DEBUG] Final selected row after update_log(): {selected_row}")
+        if hasattr(self, "delete_commit_button") and isinstance(current_id, str) and current_id:
+            try:
+                can_delete = self.is_commit_deletable(current_id)
+                self.delete_commit_button.setEnabled(can_delete)
+                self.delete_commit_button.setToolTip(
+                    "Delete this commit from history." if can_delete else
+                    "This commit is protected or not part of the current branch."
+                )
+            except Exception as e:
+                print(f"[WARN] Could not evaluate commit deletability: {e}")
 
+        print(f"[DEBUG] Final selected row after update_log(): {selected_row}")
 
+    
     def run_setup(self):
         confirm = QMessageBox.question(
             self,
@@ -447,7 +479,7 @@ class DAWGitApp(QWidget):
 
             # ✅ Check if already a valid Git repo with commits
             if (self.project_path / ".git").exists():
-                self.repo = Repo(self.project_path)
+                self.bind_repo()
                 if self.repo.head.is_valid():
                     print("ℹ️ Repo already initialized with commits — skipping setup.")
                     self.load_commit_history()
@@ -493,15 +525,13 @@ class DAWGitApp(QWidget):
                 gitattributes_path.write_text("*.als filter=lfs diff=lfs merge=lfs -text\n", encoding="utf-8")
 
             # ✅ Only make initial commit if repo has no commits yet
-            self.repo = Repo(self.project_path)
+            self.bind_repo()
             if not self.repo.head.is_valid():
                 subprocess.run(["git", "add", "."], cwd=self.project_path, env=self.custom_env(), check=True)
                 subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=self.project_path, env=self.custom_env(), check=True)
                 subprocess.run(["git", "branch", "-M", "main"], cwd=self.project_path, env=self.custom_env(), check=True)
 
-                self.repo = Repo(self.project_path)  # ✅ Rebind
-                self.current_commit_id = self.repo.head.commit.hexsha
-                self.update_log()
+                self.bind_repo()  # ✅ Rebind + update log + current commit
 
             QMessageBox.information(
                 self,
@@ -526,6 +556,7 @@ class DAWGitApp(QWidget):
                 "Setup Error",
                 f"⚠️ Something went wrong while preparing your session:\n\n{e}"
             )
+
 
 
     def on_branch_selected(self, index):
@@ -564,7 +595,7 @@ class DAWGitApp(QWidget):
                 env=self.custom_env(),
                 check=True
             )
-            self.repo = Repo(self.project_path)
+            self.bind_repo()
             self.init_git()
             self.update_log()
             return {"status": "ok"}
@@ -702,7 +733,7 @@ class DAWGitApp(QWidget):
 
             # ✅ Create and switch to the new branch
             self.repo.git.switch("-c", branch_name)
-            self.repo = Repo(self.repo.working_tree_dir)
+            self.bind_repo(self.repo.working_tree_dir)
 
             # ✅ Add version marker
             marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
@@ -1092,7 +1123,7 @@ class DAWGitApp(QWidget):
                 check=True
             )
 
-            self.repo = Repo(self.project_path)
+            self.bind_repo()
             self.current_commit_id = self.repo.head.commit.hexsha
             self.init_git()
             self.update_log()
@@ -1190,7 +1221,28 @@ class DAWGitApp(QWidget):
 
 
     def has_unsaved_changes(self):
-        return self.repo and self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
+        """
+        Returns True if there are uncommitted changes to any .als or .logicx files.
+        """
+        try:
+            if not hasattr(self, "repo") or not self.repo or not self.project_path:
+                print("[DEBUG] has_unsaved_changes(): repo or project path not set")
+                return False
+
+            dirty = False
+            status_output = self.repo.git.status("--porcelain").splitlines()
+            for line in status_output:
+                file_path = line[3:].strip()
+                if file_path.endswith(".als") or file_path.endswith(".logicx"):
+                    print(f"[DEBUG] Unsaved change detected: {file_path}")
+                    dirty = True
+
+            print(f"[DEBUG] has_unsaved_changes = {dirty}")
+            return dirty
+
+        except Exception as e:
+            print(f"[DEBUG] has_unsaved_changes() failed: {e}")
+            return False
 
 
     def backup_unsaved_changes(self):
@@ -1633,7 +1685,7 @@ class DAWGitApp(QWidget):
             )
 
             # ✅ Reload Git state
-            self.repo = Repo(self.project_path)
+            self.bind_repo()
             self.current_commit_id = self.repo.head.commit.hexsha
 
             print(f"[DEBUG] HEAD is now at: {self.repo.head.commit.hexsha}")
