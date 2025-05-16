@@ -1850,7 +1850,7 @@ class DAWGitApp(QWidget):
 
 
     def timerEvent(self, event):
-        if self.repo and self.repo.is_dirty(index=True, working_tree=True, untracked_files=True):
+        if self.repo and self.has_unsaved_changes():
             self.unsaved_flash = not self.unsaved_flash
             color = "orange" if self.unsaved_flash else "transparent"
             self.unsaved_indicator.setStyleSheet(f"color: {color}; font-weight: bold;")
@@ -1892,13 +1892,16 @@ class DAWGitApp(QWidget):
             # 🔍 Enhanced dirty check
             dirty = self.has_unsaved_changes()
             print(f"[DEBUG] update_status_label → has_unsaved_changes = {dirty}")
+            print(f"[DEBUG] Project path = {self.project_path}")
+            print(f"[DEBUG] Git repo path = {self.repo.working_tree_dir}")
             print("[DEBUG] Untracked files:", self.repo.untracked_files)
+
             for diff_item in self.repo.index.diff(None):
                 print(f"[DEBUG] Modified file: {diff_item.a_path}")
 
             if dirty:
                 self.status_label.setText("⚠️ Uncommitted changes")
-                print("[DEBUG] status label set: ⚠️ Uncommitted changes")
+                print("[DEBUG] status label set: ⚠️ Uncommitted changes (via update_status_label)")
             else:
                 user_friendly = f"🎧 On version line: {branch} — snapshot {short_sha}"
                 self.status_label.setText(user_friendly)
