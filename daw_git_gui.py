@@ -1221,28 +1221,30 @@ class DAWGitApp(QWidget):
 
 
     def has_unsaved_changes(self):
-        """
-        Returns True if there are uncommitted changes to any .als or .logicx files.
-        """
         try:
-            if not hasattr(self, "repo") or not self.repo or not self.project_path:
-                print("[DEBUG] has_unsaved_changes(): repo or project path not set")
+            if not self.repo or not self.project_path:
+                print("[DEBUG] has_unsaved_changes: no repo or project_path")
                 return False
 
-            dirty = False
+            print(f"[DEBUG] Checking unsaved changes in: {self.project_path}")
+            dirty = self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
+            print(f"[DEBUG] repo.is_dirty = {dirty}")
+
             status_output = self.repo.git.status("--porcelain").splitlines()
+            print("[DEBUG] git status --porcelain output:")
+            for line in status_output:
+                print(f"   {line}")
             for line in status_output:
                 file_path = line[3:].strip()
                 if file_path.endswith(".als") or file_path.endswith(".logicx"):
-                    print(f"[DEBUG] Unsaved change detected: {file_path}")
-                    dirty = True
+                    print(f"[DEBUG] Unsaved DAW change detected: {file_path}")
+                    return True
 
-            print(f"[DEBUG] has_unsaved_changes = {dirty}")
-            return dirty
-
+            return False
         except Exception as e:
             print(f"[DEBUG] has_unsaved_changes() failed: {e}")
             return False
+
 
 
     def backup_unsaved_changes(self):
