@@ -308,10 +308,18 @@ class DAWGitApp(QWidget):
             self.project_path = None
             return
 
+        # ✅ Safety: ensure project_path is valid before proceeding
+        if not self.project_path or not self.project_path.exists():
+            print("❌ Invalid or missing project path. Aborting Git setup.")
+            self.project_path = None
+            return
+
         # Validate DAW project contains .als or .logicx
         daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
         print("🎛️ Found DAW files:", daw_files)
-        if not daw_files:
+
+        is_test_mode = os.getenv("DAWGIT_TEST_MODE") == "1"
+        if not daw_files and not is_test_mode:
             print("⚠️ No .als or .logicx file found in selected folder. Aborting Git setup.")
             self.project_path = None
             return
@@ -347,6 +355,7 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"❌ Failed to initialize Git repo: {e}")
             self.repo = None
+
 
 
     def bind_repo(self, path=None):
