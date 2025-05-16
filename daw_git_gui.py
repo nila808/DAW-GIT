@@ -592,25 +592,43 @@ class DAWGitApp(QWidget):
                 self, "🎤 Commit Your Changes", "Enter commit message:"
             )
             if not ok or not commit_message.strip():
-                self._show_warning("Commit cancelled. Please enter a valid commit message.")
+                if hasattr(self, "_show_warning"):
+                    self._show_warning("Commit cancelled. Please enter a valid commit message.")
                 return {"status": "error", "message": "Empty or cancelled commit message."}
 
         commit_message = commit_message.strip()
 
         # ✅ Check for valid project path
         if not self.project_path:
-            self._show_warning("No project loaded. Please select a folder first.")
+            if hasattr(self, "_show_warning"):
+                self._show_warning("No project loaded. Please select a folder first.")
             return {"status": "error", "message": "No project loaded."}
+
+        # ✅ Check for repo existence
+        if not hasattr(self, "repo") or self.repo is None:
+            if hasattr(self, "_show_warning"):
+                self._show_warning("No Git repository found for this project.")
+            return {"status": "error", "message": "No Git repo loaded."}
 
         # 🧠 Require at least one DAW file
         daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
         if not daw_files:
-            self._show_warning("No Ableton (.als) or Logic (.logicx) files found. Can't commit without a DAW file.")
+            if hasattr(self, "_show_warning"):
+                self._show_warning("No Ableton (.als) or Logic (.logicx) files found. Can't commit without a DAW file.")
             return {"status": "error", "message": "No DAW files found."}
 
         try:
+            # 🧪 Debug: print repo safety status
+            print("🧪 DEBUG: self.repo =", self.repo)
+            print("🧪 DEBUG: self.repo.head =", getattr(self.repo, "head", "⚠️ Missing"))
+
             # 🔒 Avoid committing in detached HEAD
-            if self.repo.head.is_detached:
+            if (
+                hasattr(self.repo, "head")
+                and self.repo.head
+                and not isinstance(self.repo.head, str)
+                and getattr(self.repo.head, "is_detached", False)
+            ):
                 default_branch = self.get_default_branch()
                 self.repo.git.switch(default_branch)
 
@@ -620,14 +638,19 @@ class DAWGitApp(QWidget):
             # ✅ Commit
             self.repo.index.commit(commit_message)
 
-            # ✅ UI Refresh
-            self.update_commit_log()
-            self._show_info(f"Changes committed successfully: '{commit_message}'")
+            # ✅ UI Refresh (safe in all modes)
+            if hasattr(self, "update_log"):
+                self.update_log()
+            if hasattr(self, "_show_info"):
+                self._show_info(f"Changes committed successfully: '{commit_message}'")
+
             return {"status": "success", "message": f"Committed: {commit_message}"}
 
         except Exception as e:
-            self._show_warning(f"Error committing changes: {e}")
+            if hasattr(self, "_show_warning"):
+                self._show_warning(f"Error committing changes: {e}")
             return {"status": "error", "message": str(e)}
+
 
 
 

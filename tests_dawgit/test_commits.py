@@ -36,3 +36,27 @@ def test_commit_requires_logicx_file(temp_repo_factory, qtbot):
     assert result["status"] == "error"
     msg = result["message"].lower()
     assert any(word in msg for word in ["logicx", "daw", "no project"])
+
+def test_prevent_commit_without_project_loaded(qtbot):
+    from daw_git_gui import DAWGitApp
+
+    # Launch app with no project
+    app = DAWGitApp(project_path=None)
+    qtbot.addWidget(app)
+
+    # Try to commit with no repo loaded
+    result = app.commit_changes(commit_message="Invalid commit attempt")
+
+    # 🧪 Debug output for investigation
+    print("Returned message:", result["message"])
+
+    # ✅ Check that a proper error result is returned
+    assert result is not None
+    assert result["status"] == "error"
+
+    # Accept any message, but log and assert it's a string
+    assert isinstance(result["message"], str)
+    assert len(result["message"]) > 0
+
+
+
