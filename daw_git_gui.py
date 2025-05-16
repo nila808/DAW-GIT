@@ -591,11 +591,14 @@ class DAWGitApp(QWidget):
             commit_message, ok = QInputDialog.getText(
                 self, "🎤 Commit Your Changes", "Enter commit message:"
             )
-            if not ok or not commit_message.strip():
+            if not ok or not isinstance(commit_message, str) or not commit_message.strip():
                 if hasattr(self, "_show_warning"):
                     self._show_warning("Commit cancelled. Please enter a valid commit message.")
                 return {"status": "error", "message": "Empty or cancelled commit message."}
 
+        # ✅ Sanitize input safely
+        if not isinstance(commit_message, str):
+            return {"status": "error", "message": "Invalid commit message type."}
         commit_message = commit_message.strip()
 
         # ✅ Check for valid project path
@@ -650,6 +653,7 @@ class DAWGitApp(QWidget):
             if hasattr(self, "_show_warning"):
                 self._show_warning(f"Error committing changes: {e}")
             return {"status": "error", "message": str(e)}
+
 
 
 
