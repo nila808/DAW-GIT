@@ -4,7 +4,10 @@
 trap 'echo "🧹 Final cleanup..."; rm -rf ~/pytest-of-*; find /private/var/folders -type d -name "pytest-of-*" 2>/dev/null -exec rm -rf {} +' EXIT
 
 echo "🧪 Running DAW Git App test suite..."
-pytest -v tests_dawgit
+# Runs all tests
+# pytest -v tests_dawgit
+# Runs individual tests
+pytest "$@"
 
 echo "🧹 Cleaning up test artifacts..."
 python3 cleanup_temp_test_folders.py
