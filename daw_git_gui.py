@@ -640,6 +640,7 @@ class DAWGitApp(QWidget):
 
     def commit_changes(self, commit_message=None):
         from PyQt6.QtWidgets import QInputDialog
+        import traceback
 
         is_test_mode = os.getenv("DAWGIT_TEST_MODE") == "1"
 
@@ -686,6 +687,11 @@ class DAWGitApp(QWidget):
             return {"status": "error", "message": "No DAW files found."}
 
         try:
+            print(f"[DEBUG] Starting commit with message: '{commit_message}'")
+            print(f"[DEBUG] Project path: {self.project_path}")
+            print(f"[DEBUG] Repo is None? {self.repo is None}")
+            print(f"[DEBUG] DAW files found: {daw_files}")
+
             # 🔒 Safety: auto-switch if in detached HEAD
             if (
                 hasattr(self.repo, "head")
@@ -709,9 +715,13 @@ class DAWGitApp(QWidget):
             return {"status": "success", "message": f"Committed: {commit_message}"}
 
         except Exception as e:
+            print(f"[DEBUG] Commit exception: {e}")
+            traceback.print_exc()
             if hasattr(self, "_show_warning"):
                 self._show_warning(f"Error committing changes: {e}")
             return {"status": "error", "message": str(e)}
+
+
 
 
     def show_current_commit(self):
