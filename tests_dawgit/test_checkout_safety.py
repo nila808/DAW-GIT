@@ -103,7 +103,7 @@ def test_checkout_latest_from_old_commit(app, test_repo):
     app.repo.git.checkout(old_commit_sha)
     assert app.repo.head.is_detached
 
-    app.checkout_latest()
+    app.return_to_latest_clicked()
 
     assert not app.repo.head.is_detached
     assert app.repo.active_branch.name in ["main", "master"]
@@ -160,7 +160,7 @@ def test_checkout_latest_from_detached_state(tmp_path, qtbot):
     assert app.repo.head.commit.hexsha == old_sha
     assert app.repo.head.is_detached
 
-    app.checkout_latest()
+    app.return_to_latest_clicked()
     app.repo = Repo(project_path)
     assert not app.repo.head.is_detached
     assert app.repo.head.commit.hexsha == new_sha
@@ -216,7 +216,7 @@ def test_git_stash_created_on_return(tmp_path, qtbot):
     assert app.repo.head.commit.hexsha == old_sha
 
     als_file.write_text("unsaved again")
-    app.checkout_latest()
+    app.return_to_latest_clicked()
     app.repo = Repo(project_path)
 
     assert not app.repo.head.is_detached

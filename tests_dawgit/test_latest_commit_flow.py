@@ -37,7 +37,7 @@ def test_commit_and_return_to_latest(tmp_path, qtbot):
     assert app.repo.head.commit.hexsha == first_sha
 
     # Return to latest commit
-    app.checkout_latest()
+    app.return_to_latest_clicked()
     app.repo = Repo(app.project_path)  # ⬅️ crucial repo reload here
 
     assert not app.repo.head.is_detached

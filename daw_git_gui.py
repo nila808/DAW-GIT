@@ -226,9 +226,7 @@ class DAWGitApp(QWidget):
         self.commit_tag = QTextEdit(placeholderText="Enter tag (optional)")
         self.commit_tag.setMaximumHeight(40)
         commit_btn = QPushButton("COMMIT CHANGES")
-        commit_btn.clicked.connect(
-            lambda: self.commit_changes(self.commit_message.toPlainText())
-        )
+        commit_btn.clicked.connect(lambda: self.commit_changes(self.commit_message.toPlainText()))
         auto_commit_btn = QPushButton("AUTO COMMIT")
         auto_commit_btn.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
         commit_layout = QVBoxLayout()
@@ -242,8 +240,6 @@ class DAWGitApp(QWidget):
 
         # ⬅️ Checkout + Info buttons
         checkout_layout = QHBoxLayout()
-        checkout_latest_btn = QPushButton("Return to Latest Commit")
-        checkout_latest_btn.clicked.connect(self.checkout_latest)
         checkout_selected_btn = QPushButton("Checkout Selected Commit")
         checkout_selected_btn.clicked.connect(self.checkout_selected_commit)
 
@@ -256,7 +252,6 @@ class DAWGitApp(QWidget):
         what_commit_btn.clicked.connect(self.show_current_commit)
         branch_switch_btn = QPushButton("🔀 Switch to Saved Version")
         branch_switch_btn.clicked.connect(self.switch_branch)
-        checkout_layout.addWidget(checkout_latest_btn)
         checkout_layout.addWidget(checkout_selected_btn)
         checkout_layout.addWidget(what_commit_btn)
         checkout_layout.addWidget(branch_switch_btn)
@@ -267,16 +262,10 @@ class DAWGitApp(QWidget):
         self.new_version_line_button.clicked.connect(self.start_new_version_line)
         main_layout.addWidget(self.new_version_line_button)
 
-        # 🎯 Return to Latest button
+        # 🎯 Return to Latest button (user-facing)
         self.return_latest_btn = QPushButton("🎯 Return to Latest")
         self.return_latest_btn.clicked.connect(self.return_to_latest_clicked)
         main_layout.addWidget(self.return_latest_btn)
-
-        # 🎚️ Current branch indicator
-        self.version_line_label = QLabel()
-        self.version_line_label.setText("🎚️ No active version line")
-        self.version_line_label.setStyleSheet("color: #999; font-style: italic;")
-        main_layout.addWidget(self.version_line_label)
 
         # 🎚️ Current branch indicator
         self.version_line_label = QLabel()
@@ -300,7 +289,6 @@ class DAWGitApp(QWidget):
         self.history_table = QTableWidget(0, 4)
         self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message", "Branch"])
-        
 
         header = self.history_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -1820,74 +1808,6 @@ class DAWGitApp(QWidget):
                 f"⚠️ Something unexpected happened:\n\n{e}"
             )
             return {"status": "error", "message": str(e)}
-
-
-
-    def checkout_latest(self):
-        try:
-            if self.has_unsaved_changes():
-                choice = QMessageBox.question(
-                    self,
-                    "Unsaved Changes Detected",
-                    "🎚️ You have unsaved or modified files.\n\n"
-                    "Would you like to back up your project before returning to the latest saved version?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
-                if choice == QMessageBox.StandardButton.Yes:
-                    self.backup_unsaved_changes()
-
-                subprocess.run(
-                    ["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
-
-            default_branch = self.get_default_branch()
-
-            # ✅ Force switch to the latest branch tip (reattach HEAD)
-            subprocess.run(
-                ["git", "switch", default_branch],
-                cwd=self.project_path,
-                env=self.custom_env(),
-                check=True
-            )
-
-            # ✅ Ensure we reset to the latest commit on the branch
-            subprocess.run(
-                ["git", "reset", "--hard", default_branch],
-                cwd=self.project_path,
-                env=self.custom_env(),
-                check=True
-            )
-
-            # ✅ Reload Git state
-            self.bind_repo()
-            self.current_commit_id = self.repo.head.commit.hexsha
-
-            print(f"[DEBUG] HEAD is now at: {self.repo.head.commit.hexsha}")
-            print(f"[DEBUG] Active branch: {self.repo.active_branch}")
-            print(f"[DEBUG] Now on: {self.repo.active_branch} → {self.current_commit_id[:7]}")
-
-            self.update_log()
-            self.status_message(f"Returned to latest version on '{self.repo.active_branch}'")
-            self.show_commit_checkout_info(self.repo.head.commit)
-            self.open_in_daw_btn.setVisible(True)
-
-        except subprocess.CalledProcessError as e:
-            QMessageBox.critical(
-                self,
-                "Checkout Error",
-                f"❌ Couldn’t return to the latest version line:\n\n{e}"
-            )
-        except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"⚠️ Something unexpected happened:\n\n{e}"
-            )
-
-
 
 
     def open_project_folder(self, event):
