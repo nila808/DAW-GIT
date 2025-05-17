@@ -1,8 +1,13 @@
-import pytest
-from daw_git_gui import DAWGitApp
-from pathlib import Path
-import subprocess
 import os
+import subprocess
+from pathlib import Path
+
+import pytest
+from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QMessageBox
+
+from daw_git_gui import DAWGitApp
+from git import Repo
+
 
 @pytest.fixture
 def repo_with_multiple_commits(tmp_path):
@@ -18,15 +23,14 @@ def repo_with_multiple_commits(tmp_path):
     app = DAWGitApp(project_path=project_dir, build_ui=False)
     app.init_git()
 
-    # Commit first file
-    app.repo.index.add([file1.name])
-    app.repo.index.commit("First snapshot")
-
-    # Commit second file
-    app.repo.index.add([file2.name])
-    app.repo.index.commit("Second snapshot")
+    # ✅ Use relative paths *from project_dir* for git add
+    app.repo.index.add([str(file1.relative_to(project_dir))])
+    app.repo.index.commit("First commit")
+    app.repo.index.add([str(file2.relative_to(project_dir))])
+    app.repo.index.commit("Second commit")
 
     return app
+
 
 def test_deleted_commit_disappears_from_history(repo_with_multiple_commits):
     app = repo_with_multiple_commits
@@ -34,24 +38,26 @@ def test_deleted_commit_disappears_from_history(repo_with_multiple_commits):
     initial_commits = list(app.repo.iter_commits("HEAD"))
     assert len(initial_commits) >= 2
 
-    target_commit = initial_commits[-1]  # Oldest commit is last in iter_commits order
+    target_commit = initial_commits[-2]  # ✅ Non-root, safe to delete
     target_sha = target_commit.hexsha
 
-    base = initial_commits[0]  # New base is most recent commit
+    # 🔁 Simulate user selection in UI
+    app.history_table = QTableWidget(1, 3)
+    item_sha = QTableWidgetItem(target_sha[:7])
+    item_sha.setToolTip(target_sha)
+    item_msg = QTableWidgetItem(target_commit.message.strip())
+    app.history_table.setItem(0, 1, item_sha)
+    app.history_table.setItem(0, 2, item_msg)
+    app.history_table.selectRow(0)
 
-    env_vars = getattr(app, "custom_env", lambda: os.environ)()
+    # 🧪 Simulate confirmation
+    QMessageBox.question = lambda *a, **k: QMessageBox.StandardButton.Yes
 
-    subprocess.run(
-        ["git", "rebase", "--onto", base.hexsha, target_sha],
-        cwd=str(app.project_path),
-        env=env_vars,
-        check=True
-    )
+    # 🧨 Delete via app logic (not raw Git)
+    app.delete_selected_commit()
 
-    # Reload repo to update ref pointers
-    app.repo = app.repo.__class__(str(app.project_path))
+    # 🔍 Confirm commit is gone
+    updated_commits = list(app.repo.iter_commits("HEAD"))
+    updated_shas = [c.hexsha for c in updated_commits]
 
-    remaining_commits = list(app.repo.iter_commits("HEAD"))
-    remaining_shas = [c.hexsha for c in remaining_commits]
-
-    assert target_sha not in remaining_shas, "Deleted commit should no longer be in history"
+    assert target_sha not in updated_shas, "Deleted commit should no longer be in history"

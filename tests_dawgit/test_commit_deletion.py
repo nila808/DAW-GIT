@@ -23,16 +23,21 @@ def test_delete_commit(qtbot, repo_with_commits, monkeypatch):
     app.repo = repo
     qtbot.addWidget(app)
 
-    # Populate history_table with one commit
-    app.history_table = QTableWidget(1, 3)
+    # ✅ Create a second commit so we're not deleting the root
+    second_file = project_dir / "second.als"
+    second_file.write_text("more content")
+    repo.index.add(["second.als"])
+    repo.index.commit("Second commit")
+
+    # Target the latest commit (second one)
     commit_sha = repo.head.commit.hexsha
     commit_msg = repo.head.commit.message.strip()
 
+    # Populate table with that commit
+    app.history_table = QTableWidget(1, 3)
     item_sha = QTableWidgetItem(commit_sha[:7])
     item_sha.setToolTip(commit_sha)
     item_msg = QTableWidgetItem(commit_msg)
-
-    # Assuming col 1 = SHA, col 2 = message
     app.history_table.setItem(0, 1, item_sha)
     app.history_table.setItem(0, 2, item_msg)
     app.history_table.selectRow(0)
@@ -40,11 +45,9 @@ def test_delete_commit(qtbot, repo_with_commits, monkeypatch):
     # Auto-confirm delete dialog
     monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: QMessageBox.StandardButton.Yes)
 
-    # Call the deletion method
+    # Perform deletion
     app.delete_selected_commit()
 
-    # Refresh commits list after deletion
+    # Verify the deleted commit is gone
     commits_after = list(app.repo.iter_commits())
-
-    # Assert the deleted commit SHA no longer exists
     assert commit_sha not in [c.hexsha for c in commits_after], "Commit was not deleted"

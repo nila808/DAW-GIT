@@ -4,8 +4,12 @@
 trap 'echo "🧹 Final cleanup..."; rm -rf ~/pytest-of-*; find /private/var/folders -type d -name "pytest-of-*" 2>/dev/null -exec rm -rf {} +' EXIT
 
 echo "🧪 Running DAW Git App test suite..."
+
+# ✅ Enable test mode to suppress launching Ableton
+export DAWGIT_TEST_MODE=1
+
 # Runs all tests
-# pytest -v tests_dawgitc
+# pytest -v tests_dawgit
 
 # Runs individual tests
 pytest "$@"

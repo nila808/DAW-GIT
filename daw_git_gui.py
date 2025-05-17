@@ -48,20 +48,19 @@ class DAWGitApp(QWidget):
         self.settings = QSettings("DAWGitApp", "DAWGit")
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
 
-        # ✅ Force override for test cases
-        forced_path = os.environ.get("DAWGIT_FORCE_TEST_PATH")
-        if forced_path:
-            self.project_path = Path(forced_path)
-            print(f"[TEST MODE] Forced project path via env var: {self.project_path}")
-        elif project_path:
+        # ✅ Fix 1: Respect explicitly passed project_path first
+        if project_path is not None:
             self.project_path = Path(project_path)
+        elif os.environ.get("DAWGIT_FORCE_TEST_PATH"):
+            self.project_path = Path(os.environ["DAWGIT_FORCE_TEST_PATH"])
+            print(f"[TEST MODE] Forced project path via env var: {self.project_path}")
         else:
-            self.project_path = None  # will try to load last_path later
+            self.project_path = None  # fallback to saved path
 
         if build_ui:
             self.setup_ui()
 
-        # ✅ If no path was set manually or via test env, load last used
+        # ✅ If still None, try loading last saved path
         if self.project_path is None:
             last_path = self.load_saved_project_path()
             if last_path:
@@ -73,7 +72,6 @@ class DAWGitApp(QWidget):
             self.init_git()
 
             if self.repo:
-                # ✅ 🔍 Detached HEAD Warning
                 if self.repo.head.is_detached:
                     print("[DEBUG] Repo is in detached HEAD state")
                     self._show_warning(
@@ -93,8 +91,8 @@ class DAWGitApp(QWidget):
                     self.project_label.setText("❌ Failed to load repo.")
                 if hasattr(self, "status_label"):
                     self.status_label.setText("⚠️ Invalid repo state.")
+
         elif build_ui:
-            # 🔁 Fallback to UI prompt if no valid path was set or found
             folder = QFileDialog.getExistingDirectory(self, "🎵 Select Your DAW Project Folder")
             if folder:
                 selected_path = Path(folder)
@@ -138,6 +136,19 @@ class DAWGitApp(QWidget):
         if hasattr(self, "status_label"):
             self.update_status_label()
 
+
+    def init_git(self):
+        if not self.project_path:
+            return
+
+        self.repo = Repo(self.project_path)
+
+        # ✅ FIX 3: Don't override HEAD in test mode
+        if os.getenv("DAWGIT_TEST_MODE") != "1":
+            if not self.repo.head.is_detached and "main" in self.repo.heads:
+                self.repo.git.switch("main")
+
+        print(f"[DEBUG] Repo rebound: HEAD = {self.repo.head.commit.hexsha[:7]}")
 
 
     def setup_ui(self):
@@ -876,40 +887,37 @@ class DAWGitApp(QWidget):
             return
 
         try:
-            # Backup unsaved changes
             if self.has_unsaved_changes():
                 self.backup_unsaved_changes()
 
-            # Rebase interactively to drop the selected commit
+            # Find commit to delete and its parent
             all_commits = list(self.repo.iter_commits("HEAD", max_count=50))
             target_commit = next((c for c in all_commits if c.hexsha.startswith(commit_id[:7])), None)
             if not target_commit:
                 raise Exception("Commit not found in history.")
 
-            # Generate rebase todo list
-            temp_dir = Path(tempfile.mkdtemp())
-            todo_path = temp_dir / "rebase-todo"
-            with open(todo_path, "w") as f:
-                for c in reversed(all_commits):
-                    sha = c.hexsha
-                    if sha == target_commit.hexsha:
-                        f.write(f"# Dropping {sha[:7]}: {c.summary}\n")
-                        f.write(f"drop {sha} {c.summary}\n")
-                    else:
-                        f.write(f"pick {sha} {c.summary}\n")
+            if not target_commit.parents:
+                QMessageBox.warning(self, "Can't Delete Root", "The very first commit in the repo cannot be deleted.")
+                return
 
-            # Start rebase with scripted todo list
+            parent_sha = target_commit.parents[0].hexsha
+
+            # Rebase --onto <parent> <commit-to-drop> HEAD
             subprocess.run(
-                ["git", "rebase", "-i", "--root", "--autosquash"],
+                ["git", "rebase", "--onto", parent_sha, target_commit.hexsha],
                 cwd=self.project_path,
-                env={**self.custom_env(), "GIT_SEQUENCE_EDITOR": f"cat {todo_path} >"},
-                check=True,
+                env=self.custom_env(),
+                check=True
             )
 
+            # ✅ Move HEAD to tip of current branch to avoid dangling on deleted commit
+            self.repo = Repo(self.project_path)
+            main_branch = self.repo.active_branch.name
+            self.repo.git.checkout(main_branch)
+
             self.init_git()
-            self.update_log()
-            self.repo.git.checkout("HEAD")
-            self.status_message("Snapshot deleted. Reloaded project state.")
+            self.load_commit_history()
+            self.status_message("🗑️ Snapshot deleted using rebase --onto.")
             self.open_latest_daw_project()
 
         except Exception as e:
@@ -940,6 +948,11 @@ class DAWGitApp(QWidget):
 
 
     def open_latest_daw_project(self):
+        # 🧪 Don’t launch anything if running in test mode
+        if os.getenv("DAWGIT_TEST_MODE") == "1":
+            print("[TEST MODE] Skipping DAW launch.")
+            return
+
         repo_path = Path(self.repo.working_tree_dir)
         daw_files = list(repo_path.glob("*.als")) + list(repo_path.glob("*.logicx"))
 
@@ -951,12 +964,20 @@ class DAWGitApp(QWidget):
         daw_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
         latest_file = daw_files[0]
 
+        # 🚫 Skip launching test/placeholder/temp files
+        if (
+            latest_file.name.startswith("test_")
+            or "placeholder" in latest_file.name.lower()
+            or "pytest-of-" in str(latest_file)
+        ):
+            print(f"[DEBUG] Skipping test/placeholder file: {latest_file}")
+            return
+
         # 🧠 Launch the file using default app (macOS-specific)
         try:
             subprocess.Popen(["open", str(latest_file)])
         except Exception as e:
             self._show_error(f"Failed to open project file:\n{e}")
-
 
 
     def rebase_delete_commit(self, commit_id):
