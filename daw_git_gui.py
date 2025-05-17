@@ -738,8 +738,8 @@ class DAWGitApp(QWidget):
             self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
             self.repo.index.commit(commit_message)
 
-            if hasattr(self, "update_log"):
-                self.update_log()
+            if hasattr(self, "update_status_label"):
+                self.update_status_label()
             if hasattr(self, "_show_info"):
                 self._show_info(f"Changes committed successfully: '{commit_message}'")
 
@@ -1097,6 +1097,7 @@ class DAWGitApp(QWidget):
                     print("[WARN] Skipping remote push: no remote set")
 
             self.update_log()
+            self.update_status_label()
             msg = f"✅ Auto-commit completed:\n\n{message}"
             QMessageBox.information(
                 self,
@@ -1872,68 +1873,6 @@ class DAWGitApp(QWidget):
             )
 
 
-    def auto_commit(self, message: str, tag: str = ""):
-        if not self.repo:
-            QMessageBox.warning(
-                self,
-                "No Repo",
-                "🎛️ Please initialize version control before saving your project."
-            )
-            return
-
-        try:
-            subprocess.run(["git", "add", "-A"], cwd=self.project_path, env=self.custom_env(), check=True)
-
-            if not self.repo.is_dirty(index=True, working_tree=True, untracked_files=True):
-                QMessageBox.information(
-                    self,
-                    "No Changes",
-                    "✅ No changes found — your project is already up to date."
-                )
-                return
-
-            commit = self.repo.index.commit(message)
-
-            if tag:
-                if tag in [t.name for t in self.repo.tags]:
-                    print(f"⚠️ Tag '{tag}' already exists. Skipping tag creation.")
-                else:
-                    self.repo.create_tag(tag, ref=commit.hexsha)
-
-            if self.remote_checkbox.isChecked():
-                try:
-                    subprocess.run(
-                        ["git", "push", "origin", self.get_default_branch(), "--tags"],
-                        cwd=self.project_path,
-                        env=self.custom_env(),
-                        check=True
-                    )
-                except subprocess.CalledProcessError:
-                    print("[WARN] Skipping remote push: no remote set")
-
-            self.update_log()
-            msg = f"✅ Auto-commit completed:\n\n{message}"
-            QMessageBox.information(
-                self,
-                "Auto Save Complete",
-                msg
-            )
-            print(f"✅ Auto-committed: {message}")
-
-        except subprocess.CalledProcessError as e:
-            QMessageBox.critical(
-                self,
-                "Auto Commit Failed",
-                f"❌ Something went wrong while saving your version:\n\n{e}"
-            )
-        except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Auto Commit Failed",
-                f"⚠️ Unexpected error while saving your session:\n\n{e}"
-            )
-
-
     def update_project_label(self):
         self.project_label.setText(f"Tracking: {self.project_path}")
         self.path_label.setText(str(self.project_path))  # keeps tests passing
@@ -2031,9 +1970,10 @@ class DAWGitApp(QWidget):
                 self.status_label.setText("⚠️ Unsaved changes detected in your DAW project.")
                 print("[DEBUG] status label set: ⚠️ Unsaved changes detected in your DAW project.")
             else:
-                user_friendly = f"🎧 On version line: {branch} — snapshot {short_sha}"
+                commit_count = sum(1 for _ in self.repo.iter_commits(branch))
+                user_friendly = f"✅ 🎧 On version line — 🎵 Session branch: {branch} — Current take: version {commit_count}"
                 self.status_label.setText(user_friendly)
-                print(f"[DEBUG] status label set: ✅ Up to date with version: {branch} @ {short_sha}")
+                print(f"[DEBUG] status label set: {user_friendly}")
 
         except Exception as e:
             self.status_label.setText(f"⚠️ Git status error: {e}")
