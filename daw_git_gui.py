@@ -226,7 +226,9 @@ class DAWGitApp(QWidget):
         self.commit_tag = QTextEdit(placeholderText="Enter tag (optional)")
         self.commit_tag.setMaximumHeight(40)
         commit_btn = QPushButton("COMMIT CHANGES")
-        commit_btn.clicked.connect(self.commit_changes)
+        commit_btn.clicked.connect(
+            lambda: self.commit_changes(self.commit_message.toPlainText())
+        )
         auto_commit_btn = QPushButton("AUTO COMMIT")
         auto_commit_btn.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
         commit_layout = QVBoxLayout()
@@ -265,6 +267,17 @@ class DAWGitApp(QWidget):
         self.new_version_line_button.clicked.connect(self.start_new_version_line)
         main_layout.addWidget(self.new_version_line_button)
 
+        # 🎯 Return to Latest button
+        self.return_latest_btn = QPushButton("🎯 Return to Latest")
+        self.return_latest_btn.clicked.connect(self.return_to_latest_clicked)
+        main_layout.addWidget(self.return_latest_btn)
+
+        # 🎚️ Current branch indicator
+        self.version_line_label = QLabel()
+        self.version_line_label.setText("🎚️ No active version line")
+        self.version_line_label.setStyleSheet("color: #999; font-style: italic;")
+        main_layout.addWidget(self.version_line_label)
+
         # 🎚️ Current branch indicator
         self.version_line_label = QLabel()
         self.version_line_label.setText("🎚️ No active version line")
@@ -287,6 +300,7 @@ class DAWGitApp(QWidget):
         self.history_table = QTableWidget(0, 4)
         self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message", "Branch"])
+        
 
         header = self.history_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -737,13 +751,26 @@ class DAWGitApp(QWidget):
 
             self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
             self.repo.index.commit(commit_message)
+            # ✅ Refresh HEAD and UI
+            self.current_commit_id = self.repo.head.commit.hexsha
+            self.update_log()
+            self.update_status_label()
+            if hasattr(self, "commit_message"):
+                self.commit_message.clear()
+            print(f"[DEBUG] Commit successful: {commit_message} → {self.current_commit_id[:7]}")
+
+
 
             if hasattr(self, "update_status_label"):
                 self.update_status_label()
             if hasattr(self, "_show_info"):
                 self._show_info(f"Changes committed successfully: '{commit_message}'")
 
+            if hasattr(self, "commit_message"):
+                self.commit_message.clear()  # ✅ Clear text box after commit
+
             return {"status": "success", "message": f"Committed: {commit_message}"}
+
 
         except Exception as e:
             print(f"[DEBUG] Commit exception: {e}")
@@ -1369,8 +1396,6 @@ class DAWGitApp(QWidget):
             return False
 
 
-
-
     def backup_unsaved_changes(self):
         if not self.project_path:
             print("⚠️ No project path defined — skipping backup.")
@@ -1391,6 +1416,27 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"[ERROR] Failed to back up unsaved changes: {e}")
             return None
+
+
+    def return_to_latest_clicked(self):
+        try:
+            if not self.repo:
+                self._show_warning("No Git repository loaded.")
+                return
+
+            current_branch = self.repo.active_branch.name if not self.repo.head.is_detached else None
+            if not current_branch:
+                # If in detached state, move HEAD to latest main commit
+                self.repo.git.switch("main")
+                self.repo = Repo(self.repo.working_tree_dir)
+                self.bind_repo()
+                self.update_log()
+                self.update_status_label()
+                self._show_info("Returned to latest version on 'main'.")
+            else:
+                self._show_info(f"Already on branch '{current_branch}'. No action needed.")
+        except Exception as e:
+            self._show_error(f"Failed to return to latest: {e}")
 
 
     def export_snapshot(self):
