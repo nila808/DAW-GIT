@@ -1,0 +1,122 @@
+🧠 DAW Git — Developer Reference Notes
+
+🔗 Manual Test Plan Access
+To view your persistent manual test plan table of contents:
+
+    	show test plan
+	export test plan as markdown	    
+	show manual test toc
+
+	fix patch paste = app
+	new commit message = ncm
+	show test table.
+
+
+To export:
+    export test plan as markdown
+    export test plan as pdf
+
+🧼 Chat Context Cleanup Command
+Use this to reset and start clean tracking:
+
+    assume clean handover, all prior fixes done, and track any new features added from this point
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+
+// To run the end-to-end test from your canvas file and all other tests in your DAW Git App test suite from the terminal, use this command from the project root:
+pytest tests_dawgit/
+
+
+// If you only want to run the single full workflow test:
+pytest tests_dawgit/test_full_workflow.py
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+🚀 Launching the App
+
+From bundled launch script:
+
+./launch_daw_git.sh
+
+
+
+In development mode (manual Python execution):
+    cd ~/Projects/DAWGitApp
+    source daw-git-env/bin/activate
+    python daw_git_gui.py
+
+🧪 Run the Test Suite
+
+./run_tests.sh
+
+
+Option 1: 🧹 Temporarily Unset DAWGIT_FORCE_TEST_PATH
+Run this in your terminal before running tests:
+
+
+unset DAWGIT_FORCE_TEST_PATH
+./run_tests.sh
+
+
+This removes the override and allows each test to create its own clean temp folder.
+
+------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+🧾 App Metadata
+- App Name:
+    DAW Git
+
+- Script Type (Python Binary):
+    /Users/niccavendish/Projects/DAWGitApp/daw-git-env/bin/python
+
+- Script Path:
+    /Users/niccavendish/Projects/DAWGitApp/daw_git_gui.py
+
+📁 Note for This File
+This document is used as a persistent .txt reference. You can update it anytime or retrieve it in chat with:
+
+    show dev notes
+
+------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+✅ Copy & Paste This into a New Chat:
+------------------------------------------------------------------------------------------------------------------------
+
+Hi ChatGPT, please load the full context of my previous project called **DAW Git App**. It includes:
+
+- A PyQt6-based GUI for version control of DAW projects (Ableton, Logic Pro)
+- Git and Git LFS integration with commit, branch, and checkout logic
+- Safety features like:
+  - warnings for detached HEAD
+  - protection against commits without .als/.logicx files
+  - stash/backup handling on checkout
+- Full UI logic with commit logs, branch dropdowns, status labels
+- A working test suite (Pytest) for safety, UI, Git behavior
+- Cleanup for temp branches, tags, stashes, .dawgit_backups, and placeholders like auto_placeholder.als
+- Final app logic includes: 🎼 Start New Version Line, 🎧 Open This Version in Ableton, commit/branch checkout safety, and user-friendly DAW-themed messaging
+- Current goal: wrap up all failing tests and improve responsiveness + UX
+
+Please continue development, fix bugs, or add features based on this. I'm resuming from where the last thread left off.

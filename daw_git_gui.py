@@ -60,14 +60,23 @@ class DAWGitApp(QWidget):
         else:
             self.project_path = None  # fallback to saved path
 
+        # ✅ Build the UI
         if build_ui:
             self.setup_ui()
+
+        # ✅ Apply custom stylesheet (QSS)
+        try:
+            with open("styles/dawgit_styles.qss", "r") as f:
+                self.setStyleSheet(f.read())
+        except Exception as e:
+            print(f"[WARNING] Stylesheet not loaded: {e}")
 
         # ✅ If still None, try loading last saved path
         if self.project_path is None:
             last_path = self.load_saved_project_path()
             if last_path:
                 self.project_path = Path(last_path)
+
 
         if self.project_path and self.project_path.exists():
             os.chdir(self.project_path)
@@ -160,7 +169,8 @@ class DAWGitApp(QWidget):
 
         self.setWindowTitle("DAW Git Version Control")
         self.setWindowIcon(QIcon(str(self.resource_path("icon.png"))))
-        self.resize(800, 900)
+        self.resize(900, 700)
+        self.setMinimumHeight(900)
         main_layout = QVBoxLayout()
 
         # 🔁 Uncommitted changes indicator
@@ -262,16 +272,41 @@ class DAWGitApp(QWidget):
         self.new_version_line_button.clicked.connect(self.start_new_version_line)
         main_layout.addWidget(self.new_version_line_button)
 
-        # 🎯 Return to Latest button (user-facing)
+        # 🎯 Return to Latest button
         self.return_latest_btn = QPushButton("🎯 Return to Latest")
         self.return_latest_btn.clicked.connect(self.return_to_latest_clicked)
         main_layout.addWidget(self.return_latest_btn)
 
         # 🎚️ Current branch indicator
-        self.version_line_label = QLabel()
-        self.version_line_label.setText("🎚️ No active version line")
+        self.version_line_label = QLabel("🎚️ No active version line")
         self.version_line_label.setStyleSheet("color: #999; font-style: italic;")
         main_layout.addWidget(self.version_line_label)
+
+        # 🪪 Session label
+        self.branch_label = QLabel("Session branch: unknown • Current take: unknown")
+        self.branch_label.setObjectName("branchLabel")
+        main_layout.addWidget(self.branch_label)
+
+        # ✅ 🎶 Commit label (missing before)
+        self.commit_label = QLabel("🎶 Commit: unknown")
+        main_layout.addWidget(self.commit_label)
+
+        # 🎛️ Dynamic branch buttons
+        main_label = self.get_branch_take_label("main")
+        experiment_label = self.get_branch_take_label("experiment")
+        altmix_label = self.get_branch_take_label("alt_mix")
+
+        set_version_btn = QPushButton(f"🎛️ Main Mix: {main_label}")
+        set_version_btn.clicked.connect(lambda: self.switch_to_branch_ui("main"))
+        main_layout.addWidget(set_version_btn)
+
+        set_experiment_btn = QPushButton(f"🧪 Creative Take: {experiment_label}")
+        set_experiment_btn.clicked.connect(lambda: self.switch_to_branch_ui("experiment"))
+        main_layout.addWidget(set_experiment_btn)
+
+        set_alt_mix_btn = QPushButton(f"🎚️ Alt Mixdown: {altmix_label}")
+        set_alt_mix_btn.clicked.connect(lambda: self.switch_to_branch_ui("alt_mix"))
+        main_layout.addWidget(set_alt_mix_btn)
 
         # ✅ Remote push option
         self.remote_checkbox = QCheckBox("Push to remote after commit")
@@ -312,6 +347,8 @@ class DAWGitApp(QWidget):
         self.setLayout(main_layout)
 
         QTimer.singleShot(250, self.load_commit_history)
+
+
 
 
     def get_tag_for_commit(self, commit_sha):
@@ -631,7 +668,6 @@ class DAWGitApp(QWidget):
             )
 
 
-
     def on_branch_selected(self, index):
         if not self.repo or not hasattr(self, "branch_dropdown"):
             return
@@ -658,10 +694,39 @@ class DAWGitApp(QWidget):
 
 
     def safe_switch_branch(self, target_branch):
+        # ✅ Detect uncommitted changes and trigger backup
         if self.repo.is_dirty(untracked_files=True):
-            return {"status": "warning", "message": "Uncommitted changes present"}
-        
+            print("[SAFE SWITCH] Uncommitted changes detected — triggering backup.")
+            if hasattr(self, "backup_unsaved_changes"):
+                self.backup_unsaved_changes()
+            return {"status": "warning", "message": "Uncommitted changes present — backed up."}
+
         try:
+            # Check if target branch exists
+            existing_branches = [b.name for b in self.repo.branches]
+            if target_branch not in existing_branches:
+                confirm = QMessageBox.question(
+                    self,
+                    "Create New Version Line?",
+                    f"The version line '{target_branch}' doesn't exist yet.\n\n"
+                    f"Would you like to create it now from your current snapshot?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
+                )
+                if confirm != QMessageBox.StandardButton.Yes:
+                    return {"status": "cancelled", "message": "User cancelled branch creation."}
+
+                result = self.create_new_version_line(target_branch)
+
+                # ✅ Handle fallback if UI fails but branch was created
+                if result.get("status") not in ("ok", "success"):
+                    print(f"[SAFE SWITCH] create_new_version_line failed: {result}")
+                    if target_branch in [b.name for b in self.repo.branches]:
+                        return {"status": "warning", "message": f"Branch '{target_branch}' created but with UI fallback."}
+                    return {"status": "error", "message": result.get("message", "Failed to create new branch.")}
+
+                return {"status": "ok", "message": f"Created and switched to new branch '{target_branch}'."}
+
+            # If it already exists, just switch
             subprocess.run(
                 ["git", "checkout", target_branch],
                 cwd=self.project_path,
@@ -671,9 +736,12 @@ class DAWGitApp(QWidget):
             self.bind_repo()
             self.init_git()
             self.update_log()
-            return {"status": "ok"}
+            self.update_session_branch_display()
+            return {"status": "ok", "message": f"Switched to branch '{target_branch}'."}
+
         except subprocess.CalledProcessError as e:
             return {"status": "error", "message": str(e)}
+
 
 
     def refresh_commit_table(self):
@@ -832,6 +900,8 @@ class DAWGitApp(QWidget):
             commit_message = f"🎼 Start New Version Line: {branch_name}"
             self.repo.index.commit(commit_message)
             print(f"[DEBUG] Version line commit: {commit_message}")
+            self.update_log()
+            self.update_session_branch_display()
 
             return {"status": "success", "commit_message": commit_message}
 
@@ -871,6 +941,34 @@ class DAWGitApp(QWidget):
         delete_action.triggered.connect(self.delete_selected_commit)
         menu.addAction(delete_action)
         menu.exec(self.history_table.viewport().mapToGlobal(position))
+
+
+    def update_session_branch_display(self):
+        """Updates the labels showing current branch and commit status."""
+        if not self.repo:
+            return
+
+        try:
+            # Branch name
+            if self.repo.head.is_detached:
+                branch = "(detached)"
+            else:
+                branch = self.repo.active_branch.name
+
+            # Commit ID
+            sha = self.repo.head.commit.hexsha[:7] if self.repo.head.is_valid() else "unknown"
+
+            # Set the UI labels
+            if hasattr(self, "branch_label"):
+                self.branch_label.setText(f"🎵 Branch: {branch}")
+            if hasattr(self, "commit_label"):
+                self.commit_label.setText(f"🎶 Commit: {sha}")
+
+
+        except Exception as e:
+            print(f"[DEBUG] Error updating session display: {e}")
+
+
 
 
     def update_version_line_label(self):
@@ -1133,6 +1231,49 @@ class DAWGitApp(QWidget):
                 "Auto Commit Failed",
                 f"⚠️ Unexpected error while saving your session:\n\n{e}"
             )
+
+
+    def switch_to_branch_ui(self, branch_name: str):
+        result = self.switch_branch(branch_name)
+        if result.get("status") == "success":
+            # Try to get .version_marker or latest commit message
+            marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
+            if marker_path.exists():
+                take_label = marker_path.read_text().strip()
+            else:
+                try:
+                    commit = self.repo.head.commit
+                    msg = commit.message.strip()
+                    take_label = msg if len(msg) < 60 else "(Unnamed Take)"
+                except Exception:
+                    take_label = "(Unknown)"
+
+            self.branch_label.setText(f"Session branch: {branch_name} • Current take: {take_label}")
+        else:
+            self._show_warning(result.get("message", "Failed to switch session."))
+
+    def get_branch_take_label(self, branch_name: str) -> str:
+        try:
+            # Checkout the branch in detached mode to inspect its version marker
+            current = self.repo.head.commit.hexsha
+            temp_branch = f"_dawgit_temp_inspect_{branch_name}"
+
+            self.repo.git.switch("--detach")
+            self.repo.git.checkout(branch_name)
+
+            marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
+            if marker_path.exists():
+                label = marker_path.read_text().strip()
+            else:
+                label = self.repo.head.commit.message.strip()
+
+            # Return to original commit
+            self.repo.git.checkout(current)
+
+            return label if label else "(no label)"
+        except Exception as e:
+            print(f"[WARN] Could not load take label for branch {branch_name}: {e}")
+            return "(unknown)"
 
 
     def is_commit_deletable(self, commit_id):
@@ -1790,6 +1931,9 @@ class DAWGitApp(QWidget):
 
             self.init_git()
 
+            self.update_log()
+            self.update_session_branch_display()
+
             QMessageBox.information(
                 self,
                 "Switched Version",
@@ -1910,13 +2054,18 @@ class DAWGitApp(QWidget):
             return
 
         try:
-            branch = self.repo.active_branch.name if self.repo.head.is_valid() else "(detached)"
-            short_sha = self.repo.head.commit.hexsha[:7] if self.repo.head.is_valid() else "unknown"
+            # 🧠 Handle detached HEAD safely
+            if self.repo.head.is_detached:
+                branch = "unknown"
+                short_sha = self.repo.head.commit.hexsha[:7]
+            else:
+                branch = self.repo.active_branch.name
+                short_sha = self.repo.head.commit.hexsha[:7]
 
-            # 🔍 Git-level check
+            # 🔍 Git-level dirty check
             dirty = self.has_unsaved_changes()
 
-            # 🔍 File-level recent .als/.logicx check (last 60s)
+            # 🔍 File-level recent DAW file check (last 60 seconds)
             daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
             recently_modified = False
             for file in daw_files:
@@ -1935,15 +2084,26 @@ class DAWGitApp(QWidget):
             for diff_item in self.repo.index.diff(None):
                 print(f"[DEBUG] Modified file: {diff_item.a_path}")
 
-            # ✅ Unified condition: either Git sees a change OR .als file recently touched
+            # ✅ Unified condition: dirty or recently touched
             if dirty or recently_modified:
                 self.status_label.setText("⚠️ Unsaved changes detected in your DAW project.")
                 print("[DEBUG] status label set: ⚠️ Unsaved changes detected in your DAW project.")
             else:
-                commit_count = sum(1 for _ in self.repo.iter_commits(branch))
-                user_friendly = f"✅ 🎧 On version line — 🎵 Session branch: {branch} — Current take: version {commit_count}"
-                self.status_label.setText(user_friendly)
-                print(f"[DEBUG] status label set: {user_friendly}")
+                if branch == "unknown":
+                    self.status_label.setText("ℹ️ Detached snapshot — not on an active version line")
+                    print("[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line")
+                else:
+                    commit_count = sum(1 for _ in self.repo.iter_commits(branch))
+                    user_friendly = (
+                        '✅ 🎧 On version line — '
+                        f'🎵 Session branch: <span style="color:#00BCD4;">{branch}</span> — '
+                        f'Current take: <span style="color:#00BCD4;">version {commit_count}</span>'
+                    )
+                    self.status_label.setTextFormat(Qt.TextFormat.RichText)
+                    self.status_label.setText(user_friendly)
+
+                    self.status_label.setText(user_friendly)
+                    print(f"[DEBUG] status label set: {user_friendly}")
 
         except Exception as e:
             self.status_label.setText(f"⚠️ Git status error: {e}")

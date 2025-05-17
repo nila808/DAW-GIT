@@ -12,6 +12,7 @@ import shutil
 from pathlib import Path
 from git import Repo
 import subprocess
+from daw_git_gui import DAWGitApp
 
 
 

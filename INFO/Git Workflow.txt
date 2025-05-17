@@ -1,0 +1,77 @@
+## 🧪 DAW Git App: Git Workflow Cheatsheet (Quick Reference)
+
+---
+
+### 🌱 Branches
+
+* **`master`** → stable release branch
+* **`dev`** → active development branch
+
+---
+
+### 🔁 Daily Development Flow
+
+```bash
+# 1. Make changes to files in the project
+
+# 2. Stage and commit changes
+$ git add .
+$ git commit -m "🔧 [dev] Add: description of change"
+
+# 3. Push changes to remote dev branch
+$ git push origin dev
+```
+
+---
+
+### 🚀 Releasing a New Version
+
+```bash
+# 1. Switch to master and merge in dev
+$ git checkout master
+$ git merge dev
+
+# 2. Tag the release
+$ git tag vX.Y.Z     # Example: v1.1.0
+
+# 3. Push master and the tag
+$ git push origin master
+$ git push origin vX.Y.Z
+```
+
+---
+
+### 🧹 Remote Branch Cleanup
+
+```bash
+# Delete remote branches no longer needed
+$ git push origin --delete branch-name
+
+# Example cleanup:
+$ git push origin --delete 1.0.0
+$ git push origin --delete feature/return-to-latest
+```
+
+---
+
+### 🔎 Check Current Status
+
+```bash
+$ git status           # Check if clean / dirty
+$ git branch           # Show local branches
+$ git branch -r        # Show remote branches
+$ git log --oneline -n 5  # View last 5 commits
+```
+
+---
+
+### ✅ Tips
+
+* Keep **tags** for versions (e.g., `v1.0.2`, `v1.1.0`) — **not branches**.
+* Always work in `dev`, merge only when stable.
+* Use descriptive commits prefixed with emojis (e.g., `🔧`, `🚀`, `🧪`).
+* Clean up unused remote branches regularly.
+
+---
+
+Need help? Just type `show git cheatsheet` to get this doc anytime.

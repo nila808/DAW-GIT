@@ -1,0 +1,24 @@
+/* styles/dawgit_styles.qss */
+
+QLabel#branchLabel {
+    color: #00BFD8;        /* Aqua blue */
+    font-weight: bold;
+    font-size: 14px;
+    background-color: transparent;
+}
+
+#branchLabel {
+    color: #00ced1; /* aqua blue */
+    font-weight: bold;
+    font-size: 14px;
+}
+
+QPushButton#setVersionBtn,
+QPushButton#setExperimentBtn,
+QPushButton#setAltMixBtn {
+    background-color: #00BFD8;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: #ffffff;
+    font-weight: bold;
+}
