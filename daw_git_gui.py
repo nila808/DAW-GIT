@@ -7,7 +7,8 @@ import signal
 import shutil
 import traceback
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
+import datetime as dt  # ✅ Safety net for bundled runtimes or shadowed imports
 from git.exc import GitCommandError
 from pathlib import Path
 
@@ -72,6 +73,15 @@ class DAWGitApp(QWidget):
             self.init_git()
 
             if self.repo:
+                # ✅ 🔍 Detached HEAD Warning
+                if self.repo.head.is_detached:
+                    print("[DEBUG] Repo is in detached HEAD state")
+                    self._show_warning(
+                        "⚠️ You're in a detached HEAD state.\n\n"
+                        "This means you're viewing an older snapshot. "
+                        "You can browse, but can't make new commits unless you create a new version line."
+                    )
+
                 if hasattr(self, "project_label"):
                     self.project_label.setText(f"🎵 Tracking Project: {self.project_path.name}")
                 if hasattr(self, "status_label"):
@@ -98,6 +108,14 @@ class DAWGitApp(QWidget):
                 self.init_git()
 
                 if self.repo:
+                    if self.repo.head.is_detached:
+                        print("[DEBUG] Repo is in detached HEAD state (user-selected project)")
+                        self._show_warning(
+                            "⚠️ You're in a detached HEAD state.\n\n"
+                            "This means you're viewing an older snapshot. "
+                            "You can browse, but can't make new commits unless you create a new version line."
+                        )
+
                     if hasattr(self, "project_label"):
                         self.project_label.setText(f"🎵 Tracking Project: {self.project_path.name}")
                     if hasattr(self, "status_label"):
@@ -119,6 +137,7 @@ class DAWGitApp(QWidget):
         # ✅ Final UI sync safety net
         if hasattr(self, "status_label"):
             self.update_status_label()
+
 
 
     def setup_ui(self):
@@ -303,40 +322,38 @@ class DAWGitApp(QWidget):
         if self.project_path and self.project_path.resolve() == app_root:
             print("⚠️ Refusing to track DAWGitApp root folder — not a valid project.")
             self.project_path = None
-            return
+            return {"status": "invalid", "message": "Cannot track app root folder."}
 
         # ✅ Safety: ensure project_path is valid before proceeding
         if not self.project_path or not self.project_path.exists():
             print("❌ Invalid or missing project path. Aborting Git setup.")
             self.project_path = None
-            return
+            return {"status": "invalid", "message": "Missing or invalid project path."}
 
         # Validate DAW project contains .als or .logicx
         daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
         print("🎛️ Found DAW files:", daw_files)
 
         is_test_mode = os.getenv("DAWGIT_TEST_MODE") == "1"
-        # ✅ Allow empty project in test mode
-        if not daw_files:
-            if os.getenv("DAWGIT_TEST_MODE") == "1":
-                print("🧪 [Test Mode] No DAW files found — continuing with empty project.")
-            else:
-                print("⚠️ No .als or .logicx file found in selected folder. Aborting Git setup.")
-                self.project_path = None
-                return
-
+        if not daw_files and not is_test_mode:
+            print("⚠️ No .als or .logicx file found in selected folder. Aborting Git setup.")
+            self.project_path = None
+            return {"status": "invalid", "message": "No DAW files found."}
+        elif not daw_files:
+            print("🧪 [Test Mode] No DAW files found — continuing with empty project.")
 
         try:
             if (self.project_path / ".git").exists():
                 temp_repo = Repo(self.project_path)
+                self.repo = temp_repo  # ✅ Always assign
 
-                if temp_repo.head.is_detached:
+                if self.repo.head.is_detached:
                     print("🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.")
-                    self.repo = temp_repo
+                    return {"status": "detached", "message": "Detached HEAD state detected."}
                 else:
                     self.bind_repo()
-                    print("ℹ️ Existing Git repo found — checking status...")
 
+                    print("ℹ️ Existing Git repo found — checking status...")
 
                 # ✅ Auto-commit any DAW files if repo has no commits
                 if not self.repo.head.is_valid():
@@ -351,13 +368,14 @@ class DAWGitApp(QWidget):
                 self.save_last_project_path(self.project_path)
                 QMessageBox.information(self, "Repo Initialized", "✅ Git repository initialized for this DAW project.")
 
-            # ✅ Always update the status label once we have a repo
             self.update_status_label()
 
-            # ✅ Safely refresh the commit log if the repo has a valid HEAD
+            # ✅ Refresh commit log if we can
             try:
                 if self.repo and self.repo.head.is_valid():
                     if hasattr(self, "history_table"):
+                        self.current_commit_id = self.repo.head.commit.hexsha  # 🧠 Make sure this is always set here
+                        print(f"[DEBUG] self.current_commit_id before update_log: {self.current_commit_id}")
                         self.update_log()
                     else:
                         print("⚠️ Skipping update_log(): history_table not initialized yet.")
@@ -367,6 +385,9 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"❌ Failed to initialize Git repo: {e}")
             self.repo = None
+            return {"status": "error", "message": str(e)}
+
+        return {"status": "ok"}
 
 
 
@@ -398,8 +419,6 @@ class DAWGitApp(QWidget):
             print(f"[ERROR] Failed to bind repo: {e}")
             self.repo = None
             self.current_commit_id = None
-
-
 
 
     def update_branch_dropdown(self):
@@ -446,8 +465,9 @@ class DAWGitApp(QWidget):
             self.history_table.insertRow(i)
             tag = next((t.name for t in self.repo.tags if t.commit == commit), '')
             tag_item = QTableWidgetItem(tag)
+            marker = " 🎯" if current_id == commit.hexsha else ""
             commit_id_item = QTableWidgetItem(
-                f"[#{i+1}] [{commit.hexsha[:7]}] ({commit.committed_datetime.strftime('%Y-%m-%d')} by {commit.author.name})"
+                f"[#{i+1}] [{commit.hexsha[:7]}]{marker} ({commit.committed_datetime.strftime('%Y-%m-%d')} by {commit.author.name})"
             )
             message_item = QTableWidgetItem(commit.message.strip())
 
@@ -651,16 +671,12 @@ class DAWGitApp(QWidget):
 
         is_test_mode = os.getenv("DAWGIT_TEST_MODE") == "1"
 
-        # ✅ Handle explicit cancel simulation in test mode
         if is_test_mode and commit_message == "":
             return {"status": "error", "message": "Empty or cancelled commit message."}
 
-        # ✅ Only set auto test message if no message and not simulating cancel
         if is_test_mode and commit_message is None:
-            # Leave commit_message as None to trigger dialog (so monkeypatch works)
-            pass
+            pass  # Let monkeypatched dialog handle it
 
-        # 🎤 Prompt if no message provided (manual or monkeypatched test)
         if commit_message is None:
             commit_message, ok = QInputDialog.getText(
                 self, "🎤 Commit Your Changes", "Enter commit message:"
@@ -670,12 +686,10 @@ class DAWGitApp(QWidget):
                     self._show_warning("Commit cancelled. Please enter a valid commit message.")
                 return {"status": "error", "message": "Empty or cancelled commit message."}
 
-        # ✅ Sanitize input
         if not isinstance(commit_message, str):
             return {"status": "error", "message": "Invalid commit message type."}
         commit_message = commit_message.strip()
 
-        # ✅ Check project and repo
         if not self.project_path:
             if hasattr(self, "_show_warning"):
                 self._show_warning("No project loaded. Please select a folder first.")
@@ -686,7 +700,6 @@ class DAWGitApp(QWidget):
                 self._show_warning("No Git repository found for this project.")
             return {"status": "error", "message": "No Git repo loaded."}
 
-        # 🧠 Require DAW file
         daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
         if not daw_files:
             if hasattr(self, "_show_warning"):
@@ -699,7 +712,6 @@ class DAWGitApp(QWidget):
             print(f"[DEBUG] Repo is None? {self.repo is None}")
             print(f"[DEBUG] DAW files found: {daw_files}")
 
-            # 🔒 Safety: auto-switch if in detached HEAD
             if (
                 hasattr(self.repo, "head")
                 and self.repo.head
@@ -709,11 +721,9 @@ class DAWGitApp(QWidget):
                 default_branch = self.get_default_branch()
                 self.repo.git.switch(default_branch)
 
-            # ✅ Stage and commit
             self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
             self.repo.index.commit(commit_message)
 
-            # ✅ Refresh UI
             if hasattr(self, "update_log"):
                 self.update_log()
             if hasattr(self, "_show_info"):
@@ -761,52 +771,46 @@ class DAWGitApp(QWidget):
     
     def create_new_version_line(self, branch_name):
         try:
-            existing_branches = [b.name for b in self.repo.branches]
-            current_branch = None if self.repo.head.is_detached else self.repo.active_branch.name
+            if branch_name in [b.name for b in self.repo.branches]:
+                self._show_warning(f"Branch '{branch_name}' already exists.")
+                return {"status": "error", "message": f"Branch '{branch_name}' already exists."}
 
-            if branch_name in existing_branches:
-                if current_branch == branch_name:
-                    return {"status": "success", "message": f"Already on branch '{branch_name}'"}
-                else:
-                    self._show_warning(f"Branch '{branch_name}' already exists.")
-                    return {"status": "error", "message": f"Branch '{branch_name}' already exists."}
-
-            # ✅ Create and switch to the new branch
+            # ✅ Handle detached HEAD case safely
             base_commit = self.repo.head.commit.hexsha
             self.repo.git.switch("-c", branch_name, base_commit)
-            self.bind_repo(self.repo.working_tree_dir)
+
+            # Refresh repo object to reflect new branch context
+            self.repo = Repo(self.repo.working_tree_dir)
 
             # ✅ Add version marker
             marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
-            marker_text = f"🎼 Start of version line: {branch_name}\nCommit: {base_commit[:7]}"
-            marker_path.write_text(marker_text)
+            marker_path.write_text(f"Version line started: {branch_name}")
 
-            # 🔒 Ensure file is flushed and exists before staging
-            if not marker_path.exists():
-                raise FileNotFoundError(".version_marker file not written properly.")
+            if marker_path.exists():
+                self.repo.index.add([str(marker_path.relative_to(self.repo.working_tree_dir))])
+            else:
+                print(f"[WARN] .version_marker not created at {marker_path}")
 
-            self.repo.index.add([str(marker_path.relative_to(self.repo.working_tree_dir))])
-
-            # ✅ Add placeholder .als if none present
+            # ✅ Ensure there's at least one DAW file committed
             project_file = next(Path(self.repo.working_tree_dir).glob("*.als"), None)
             if not project_file:
                 placeholder_file = Path(self.repo.working_tree_dir) / "auto_placeholder.als"
-                placeholder_file.write_text("Placeholder project file")
+                placeholder_file.write_text("Placeholder DAW content")
                 self.repo.index.add([str(placeholder_file.relative_to(self.repo.working_tree_dir))])
+                print("🎛️ Created auto_placeholder.als file")
 
-            # ✅ Commit everything together
-            commit_msg = "🎼 Start New Version Line"
-            self.repo.index.commit(commit_msg)
+            # ✅ Commit all added files
+            commit_message = f"🎼 Start New Version Line: {branch_name}"
+            self.repo.index.commit(commit_message)
+            print(f"[DEBUG] Version line commit: {commit_message}")
 
-            return {
-                "status": "success",
-                "message": f"Created and switched to '{branch_name}'",
-                "commit_message": commit_msg
-            }
+            return {"status": "success", "commit_message": commit_message}
 
         except Exception as e:
-            self._show_error(f"Error creating version line: {e}")
+            print(f"❌ Failed to create new version line: {e}")
             return {"status": "error", "message": str(e)}
+
+
 
 
     def show_commit_context_menu(self, position):
@@ -872,49 +876,44 @@ class DAWGitApp(QWidget):
             return
 
         try:
-            # Backup unsaved changes if any
+            # Backup unsaved changes
             if self.has_unsaved_changes():
                 self.backup_unsaved_changes()
 
-            # Get recent commits
+            # Rebase interactively to drop the selected commit
             all_commits = list(self.repo.iter_commits("HEAD", max_count=50))
             target_commit = next((c for c in all_commits if c.hexsha.startswith(commit_id[:7])), None)
             if not target_commit:
                 raise Exception("Commit not found in history.")
 
-            # Determine base commit for rebase
-            idx = all_commits.index(target_commit)
-            if idx + 1 < len(all_commits):
-                base = all_commits[idx + 1]
-            else:
-                base = target_commit.parents[0] if target_commit.parents else None
+            # Generate rebase todo list
+            temp_dir = Path(tempfile.mkdtemp())
+            todo_path = temp_dir / "rebase-todo"
+            with open(todo_path, "w") as f:
+                for c in reversed(all_commits):
+                    sha = c.hexsha
+                    if sha == target_commit.hexsha:
+                        f.write(f"# Dropping {sha[:7]}: {c.summary}\n")
+                        f.write(f"drop {sha} {c.summary}\n")
+                    else:
+                        f.write(f"pick {sha} {c.summary}\n")
 
-            if base is None:
-                raise Exception("Cannot determine base commit for rebase")
-
-            print(f"Rebasing: dropping {target_commit.hexsha} onto {base.hexsha}")
-
-            # Run git rebase to drop the target commit
+            # Start rebase with scripted todo list
             subprocess.run(
-                ["git", "rebase", "--onto", base.hexsha, target_commit.hexsha],
+                ["git", "rebase", "-i", "--root", "--autosquash"],
                 cwd=self.project_path,
-                env=self.custom_env(),
-                check=True
+                env={**self.custom_env(), "GIT_SEQUENCE_EDITOR": f"cat {todo_path} >"},
+                check=True,
             )
 
-            # Refresh repo and UI after rebase
             self.init_git()
-            self.current_commit_id = base.hexsha
             self.update_log()
-            self.history_table.scrollToItem(self.history_table.item(0, 0), QTableWidget.ScrollHint.PositionAtTop)
-            self.repo.git.checkout(base.hexsha)
-            self.status_message(f"Snapshot deleted. Now viewing: {base.hexsha[:7]}")
-            self.show_commit_checkout_info(self.repo.commit(base.hexsha))
+            self.repo.git.checkout("HEAD")
+            self.status_message("Snapshot deleted. Reloaded project state.")
             self.open_latest_daw_project()
 
         except Exception as e:
             QMessageBox.critical(self, "Delete Failed", f"Failed to delete commit:\n{e}")
-
 
 
     def als_recently_modified(self, threshold_seconds=60):
@@ -1116,6 +1115,8 @@ class DAWGitApp(QWidget):
 
     def checkout_selected_commit(self, commit_sha=None):
         """⬅️ Checkout a specific commit by SHA or from selected table row."""
+        result = {"status": "success"}
+
         if not commit_sha:
             selected_row = self.history_table.currentRow()
             print(f"[DEBUG] Selected row: {selected_row}")
@@ -1132,12 +1133,12 @@ class DAWGitApp(QWidget):
                     )
                 else:
                     print(f"🎚️ No version selected — sticking with your current project setup for now. Commit: {current_sha}")
-                return
+                return {"status": "cancelled", "message": "No version selected."}
 
             commit_item = self.history_table.item(selected_row, 1)
-            if commit_item is None:
+            if not commit_item:
                 print("[DEBUG] No commit item found in row.")
-                return
+                return {"status": "error", "message": "No commit selected."}
 
             commit_sha = commit_item.toolTip()
             if not commit_sha:
@@ -1150,7 +1151,7 @@ class DAWGitApp(QWidget):
 
             if not commit_sha:
                 print("[DEBUG] Still no SHA after fallback — aborting.")
-                return
+                return {"status": "error", "message": "Unable to resolve commit SHA."}
 
         try:
             if self.als_recently_modified():
@@ -1161,13 +1162,35 @@ class DAWGitApp(QWidget):
                     "To avoid a 'Save As' prompt, please close Ableton or save your project."
                 )
 
-            print(f"[DEBUG] Checking out commit: {commit_sha}")
-            subprocess.run(
-                ["git", "checkout", commit_sha],  # ✅ Use checkout to enter detached HEAD
-                cwd=self.project_path,
-                env=self.custom_env(),
-                check=True
-            )
+            if self.has_unsaved_changes():
+                self.backup_unsaved_changes()
+
+            # Check for untracked files
+            untracked = self.repo.untracked_files
+            if untracked:
+                msg = (
+                    "You have untracked files in your project folder.\n\n"
+                    "They won’t be deleted, but may be ignored in this snapshot view."
+                )
+                self._show_warning(msg)
+                result["status"] = "warning"
+                result["untracked"] = untracked
+                result["message"] = msg  # ✅ Add this line
+
+            # Avoid re-checkout if we're already on this commit
+            current_sha = self.repo.head.commit.hexsha
+            if current_sha == commit_sha:
+                print("[DEBUG] Already on selected commit — skipping checkout.")
+                return result  # ✅ Early return now respects warning status
+            else:
+                print(f"[DEBUG] Checking out commit: {commit_sha}")
+                subprocess.run(
+                    ["git", "checkout", commit_sha],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
+
             subprocess.run(
                 ["git", "lfs", "checkout"],
                 cwd=self.project_path,
@@ -1192,15 +1215,19 @@ class DAWGitApp(QWidget):
             QMessageBox.information(
                 self,
                 "Project Restored",
-                f"✅ This version of your project has been restored.\n\n"
-                f"🎛️ Commit ID: {commit_sha[:7]}"
+                f"✅ This version of your project has been restored.\n\n🎛️ Commit ID: {commit_sha[:7]}"
             )
             self.open_in_daw_btn.setVisible(True)
 
+            return result
+
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "Checkout Failed", f"❌ Could not switch to the selected version:\n\n{e}")
+            return {"status": "error", "message": str(e)}
+
         except Exception as e:
             QMessageBox.critical(self, "Unexpected Error", f"⚠️ Something unexpected happened:\n\n{e}")
+            return {"status": "error", "message": str(e)}
 
           
 
@@ -1278,6 +1305,11 @@ class DAWGitApp(QWidget):
                 return False
 
             dirty = False
+
+            # ✅ Invalidate GitPython cache
+            self.repo.git.clear_cache()
+
+            # ✅ Check Git status directly
             status_output = self.repo.git.status("--porcelain").splitlines()
             print("[DEBUG] Full status --porcelain output:")
             for line in status_output:
@@ -1290,25 +1322,49 @@ class DAWGitApp(QWidget):
                     print(f"[DEBUG] Unsaved change detected: {file_path}")
                     dirty = True
 
+            # ✅ Only check timestamps if Git status is clean
+            if not dirty:
+                for daw_file in self.project_path.glob("*.als"):
+                    modified_time = datetime.fromtimestamp(daw_file.stat().st_mtime)
+                    if datetime.now() - modified_time < timedelta(seconds=60):
+                        print(f"[DEBUG] Recently modified .als detected: {daw_file.name}")
+                        dirty = True
+
+                for daw_file in self.project_path.glob("*.logicx"):
+                    modified_time = datetime.fromtimestamp(daw_file.stat().st_mtime)
+                    if datetime.now() - modified_time < timedelta(seconds=60):
+                        print(f"[DEBUG] Recently modified .logicx detected: {daw_file.name}")
+                        dirty = True
+
             print(f"[DEBUG] has_unsaved_changes = {dirty}")
             return dirty
+
         except Exception as e:
             print(f"[DEBUG] has_unsaved_changes() failed: {e}")
             return False
 
 
 
-
     def backup_unsaved_changes(self):
-        project_path = Path(self.project_path)  # ✅ Convert to Path
-        backup_dir = project_path.parent / f"Backup_{project_path.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        backup_dir.mkdir(parents=True, exist_ok=True)
+        if not self.project_path:
+            print("⚠️ No project path defined — skipping backup.")
+            return
 
-        for file in project_path.glob("*.*"):
-            if file.is_file():
-                shutil.copy(file, backup_dir / file.name)
+        try:
+            project_path = Path(self.project_path)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            backup_dir = project_path.parent / f"Backup_{project_path.name}_{timestamp}"
+            backup_dir.mkdir(parents=True, exist_ok=True)
 
-        print(f"🔒 Unsaved changes backed up to: {backup_dir}")
+            for file in project_path.glob("*.*"):
+                if file.is_file():
+                    shutil.copy(file, backup_dir / file.name)
+
+            print(f"🔒 Unsaved changes backed up to: {backup_dir}")
+            return backup_dir
+        except Exception as e:
+            print(f"[ERROR] Failed to back up unsaved changes: {e}")
+            return None
 
 
     def export_snapshot(self):
@@ -1449,12 +1505,13 @@ class DAWGitApp(QWidget):
             return
 
         self.history_table.setRowCount(0)
+        self.history_table.clearSelection()  # ✅ Clear any previous selection
+
         self.history_table.insertRow(0)
         self.history_table.setItem(0, 0, QTableWidgetItem("–"))
         self.history_table.setItem(0, 1, QTableWidgetItem("–"))
         self.history_table.setItem(0, 2, QTableWidgetItem("No commits yet"))
         self.history_table.setItem(0, 3, QTableWidgetItem("–"))
-
 
         # ✅ Detect current branch safely
         try:
@@ -1468,20 +1525,18 @@ class DAWGitApp(QWidget):
             tag = self.get_tag_for_commit(commit.hexsha)
             short_msg = commit.message.strip().split("\n")[0]
             commit_id = commit.hexsha[:7]
-            commit_item = QTableWidgetItem(commit_id)
-            commit_item.setToolTip(commit.hexsha)  # 🟢 THIS IS THE MISSING LINE
-            self.history_table.setItem(row, 1, commit_item)
-            # commit_item = QTableWidgetItem(commit_id)
-            # commit_item.setToolTip(commit.hexsha)  # ✅ This line makes checkout work
-            print(f"[DEBUG] Tooltip set for row {row}: {commit.hexsha}")
-            # self.history_table.setItem(row, 1, commit_item)
 
-            # ✅ Insert Tag, Commit ID, Message
+            # ✅ Tooltip-preserving SHA item
+            commit_item = QTableWidgetItem(commit_id)
+            commit_item.setToolTip(commit.hexsha)
+            self.history_table.setItem(row, 1, commit_item)
+            print(f"[DEBUG] Tooltip set for row {row}: {commit.hexsha}")
+
+            # ✅ Insert tag and message
             self.history_table.setItem(row, 0, QTableWidgetItem(tag or ""))
-            self.history_table.setItem(row, 1, QTableWidgetItem(commit_id))
             self.history_table.setItem(row, 2, QTableWidgetItem(short_msg))
 
-            # 🔍 Branch detection via Git subprocess
+            # 🔍 Branch info
             try:
                 result = subprocess.run(
                     ["git", "branch", "--contains", commit.hexsha],
@@ -1498,21 +1553,17 @@ class DAWGitApp(QWidget):
                 print(f"[ERROR] Failed to get branches for {commit_id}: {e}")
                 branch_list = []
 
-            # 🎯 Highlight current branch
             if current_branch in branch_list:
                 branch_list = [f"🎯 {b}" if b == current_branch else b for b in branch_list]
 
             branch_str = ", ".join(branch_list) if branch_list else "–"
-
-            # ✅ Insert branch info into column 3
-            branch_item = QTableWidgetItem(branch_str)
-            self.history_table.setItem(row, 3, branch_item)
-
-            # ✅ Debug print confirmation
+            self.history_table.setItem(row, 3, QTableWidgetItem(branch_str))
             print(f"[DEBUG] Row {row}: commit {commit_id} → branches: {branch_str}")
 
-
-    
+            # ✅ Auto-select the row that matches HEAD
+            if commit.hexsha == self.repo.head.commit.hexsha:
+                self.history_table.selectRow(row)
+                print(f"[DEBUG] Selected current commit row {row}")
 
 
     def highlight_current_commit(self):
@@ -1928,9 +1979,21 @@ class DAWGitApp(QWidget):
             branch = self.repo.active_branch.name if self.repo.head.is_valid() else "(detached)"
             short_sha = self.repo.head.commit.hexsha[:7] if self.repo.head.is_valid() else "unknown"
 
-            # 🔍 Enhanced dirty check
+            # 🔍 Git-level check
             dirty = self.has_unsaved_changes()
+
+            # 🔍 File-level recent .als/.logicx check (last 60s)
+            daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
+            recently_modified = False
+            for file in daw_files:
+                modified_time = datetime.fromtimestamp(file.stat().st_mtime)
+                if dt.datetime.now() - modified_time < dt.timedelta(seconds=60):
+                    recently_modified = True
+                    print(f"[DEBUG] {file.name} was modified recently at {modified_time}")
+                    break
+
             print(f"[DEBUG] update_status_label → has_unsaved_changes = {dirty}")
+            print(f"[DEBUG] recently_modified_daw_file = {recently_modified}")
             print(f"[DEBUG] Project path = {self.project_path}")
             print(f"[DEBUG] Git repo path = {self.repo.working_tree_dir}")
             print("[DEBUG] Untracked files:", self.repo.untracked_files)
@@ -1938,9 +2001,10 @@ class DAWGitApp(QWidget):
             for diff_item in self.repo.index.diff(None):
                 print(f"[DEBUG] Modified file: {diff_item.a_path}")
 
-            if dirty:
-                self.status_label.setText("⚠️ Uncommitted changes")
-                print("[DEBUG] status label set: ⚠️ Uncommitted changes (via update_status_label)")
+            # ✅ Unified condition: either Git sees a change OR .als file recently touched
+            if dirty or recently_modified:
+                self.status_label.setText("⚠️ Unsaved changes detected in your DAW project.")
+                print("[DEBUG] status label set: ⚠️ Unsaved changes detected in your DAW project.")
             else:
                 user_friendly = f"🎧 On version line: {branch} — snapshot {short_sha}"
                 self.status_label.setText(user_friendly)
@@ -1949,8 +2013,6 @@ class DAWGitApp(QWidget):
         except Exception as e:
             self.status_label.setText(f"⚠️ Git status error: {e}")
             print(f"[DEBUG] status label set: ⚠️ Git status error: {e}")
-
-
 
 
     def save_last_project_path(self, path): 

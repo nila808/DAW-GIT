@@ -1,6 +1,7 @@
 import pytest
 from daw_git_gui import DAWGitApp
 from pathlib import Path
+import time
 
 @pytest.fixture
 def clean_daw_project(tmp_path):
@@ -33,6 +34,11 @@ def test_status_label_ignores_non_daw_files(qtbot, clean_daw_project):
 def test_status_label_detects_modified_als(qtbot, clean_daw_project):
     als_path = clean_daw_project / "dummy.als"
     als_path.write_text("original")
+
+    # ✅ Set the modified time > 60 seconds ago
+    import os, time
+    past_time = time.time() - 120
+    os.utime(als_path, (past_time, past_time))
 
     app = DAWGitApp(project_path=clean_daw_project, build_ui=True)
     qtbot.addWidget(app)

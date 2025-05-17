@@ -13,6 +13,8 @@ from git import Repo
 @pytest.fixture
 def test_repo(tmp_path):
     project_path = tmp_path / "TestProject"
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
+
     project_path.mkdir()
     (project_path / "dummy.als").write_text("Ableton project v1")
     return project_path
@@ -42,6 +44,7 @@ def test_checkout_commit_from_other_branch(temp_repo_factory, qtbot):
     first_commit = repo.git.rev_list("main", max_count=1)
     repo.git.checkout(first_commit)
 
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(repo_path)
     app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
     app.checkout_selected_commit(first_commit)
@@ -65,6 +68,7 @@ def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_fac
 
     repo.git.checkout(repo.head.commit.hexsha)
 
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(repo_path)
     app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
 
@@ -118,6 +122,7 @@ def test_checkout_selected_commit_enters_detached_head(tmp_path, qtbot):
     repo.index.commit("Second")
     repo.git.branch("-M", "main")
 
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
     app = DAWGitApp()
     app.project_path = str(project_path)
     app.repo = repo
@@ -140,6 +145,7 @@ def test_checkout_latest_from_detached_state(tmp_path, qtbot):
     repo.index.commit("Init")
     repo.git.branch("-M", "main")
 
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
     app = DAWGitApp()
     app.project_path = str(project_path)
     app.repo = repo
@@ -171,6 +177,7 @@ def test_backup_folder_created_on_checkout(tmp_path, qtbot):
     repo.index.commit("commit 2")
     repo.git.branch("-M", "main")
 
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
     app = DAWGitApp()
     app.project_path = str(project_path)
     app.repo = repo
@@ -181,7 +188,6 @@ def test_backup_folder_created_on_checkout(tmp_path, qtbot):
     backup_parent = Path(project_path).parent
     matching_folders = list(backup_parent.glob(f"Backup_{project_path.name}_*"))
     assert len(matching_folders) > 0, "No backup folder created"
-
 
 
 def test_git_stash_created_on_return(tmp_path, qtbot):
@@ -195,6 +201,7 @@ def test_git_stash_created_on_return(tmp_path, qtbot):
     repo.index.commit("Init")
     repo.git.branch("-M", "main")
 
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
     app = DAWGitApp()
     app.project_path = str(project_path)
     app.repo = repo
@@ -236,7 +243,7 @@ def test_switch_branch_with_uncommitted_changes_warns_or_stashes(temp_repo_facto
     repo.git.checkout("main")
     (Path(repo_path) / "track.als").write_text("⚠️ unsaved mod")
 
-    # Launch app and simulate branch switch
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(repo_path)
     app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
 

@@ -25,15 +25,23 @@ def clear_last_path_file():
 def temp_repo_factory():
     """
     Returns a callable that creates a new temp Git repo with LFS-style tracking.
-    Automatically cleans up test_branch after use.
+    Automatically cleans up test_branch and DAW files after use.
     """
     created_paths = []
 
     def _create_repo():
         temp_dir = tempfile.mkdtemp()
         repo = Repo.init(temp_dir)
+
+        # 🧹 Ensure no leftover DAW files
+        for ext in ("*.als", "*.logicx"):
+            for f in Path(temp_dir).glob(ext):
+                f.unlink()
+
+        # 🎼 Add LFS-style .gitattributes
         gitattributes = Path(temp_dir) / ".gitattributes"
         gitattributes.write_text("*.als filter=lfs diff=lfs merge=lfs -text\n*.logicx filter=lfs diff=lfs merge=lfs -text")
+
         repo.git.add(A=True)
         repo.git.commit(m="Init repo for testing", allow_empty=True)
         created_paths.append(temp_dir)
@@ -41,15 +49,7 @@ def temp_repo_factory():
 
     yield _create_repo
 
-    # 🧹 Clean up test_branch after test
-    for path in created_paths:
-        try:
-            subprocess.run(["git", "checkout", "main"], cwd=path, check=True)
-            subprocess.run(["git", "branch", "-D", "test_branch"], cwd=path, check=True)
-        except Exception as e:
-            print(f"[CLEANUP] Could not delete test_branch in {path}: {e}")
-
-        # 🧹 Global post-test cleanup
+    # 🧹 Final cleanup for each created path
     for path in created_paths:
         try:
             subprocess.run(["git", "checkout", "main"], cwd=path, check=False)
@@ -57,20 +57,20 @@ def temp_repo_factory():
             subprocess.run(["git", "tag", "-d", "auto"], cwd=path, check=False)
             subprocess.run(["git", "stash", "clear"], cwd=path, check=False)
 
-            # 🗑️ Remove backup folder
+            # Remove backups and placeholder files
             backups = Path(path) / ".dawgit_backups"
             if backups.exists():
                 shutil.rmtree(backups)
                 print(f"[CLEANUP] Removed test backups: {backups}")
 
-            # 🗑️ Remove test placeholder .als
-            placeholder = Path(path) / "auto_placeholder.als"
-            if placeholder.exists():
-                placeholder.unlink()
-                print(f"[CLEANUP] Removed auto placeholder: {placeholder}")
+            for ext in ("auto_placeholder.als", "*.als", "*.logicx"):
+                for f in Path(path).glob(ext):
+                    f.unlink()
+                    print(f"[CLEANUP] Removed file: {f}")
 
         except Exception as e:
             print(f"[CLEANUP] Error during cleanup in {path}: {e}")
+
 
 
 # Automatically accept all modals and dialogs
