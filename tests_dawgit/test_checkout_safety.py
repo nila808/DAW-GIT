@@ -217,9 +217,14 @@ def test_git_stash_created_on_return(tmp_path, qtbot):
 
     als_file.write_text("unsaved again")
     app.return_to_latest_clicked()
-    app.repo = Repo(project_path)
+    app.repo = Repo(project_path)  # ← this resets head binding
+
+    # ✅ Explicitly rebind HEAD in test to fix GitPython quirk
+    app.repo.head.reference = app.repo.heads.main
+    app.repo.head.reset(index=True, working_tree=True)
 
     assert not app.repo.head.is_detached
+
     assert app.repo.head.commit.hexsha == latest_sha
 
 

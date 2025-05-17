@@ -1412,19 +1412,23 @@ class DAWGitApp(QWidget):
                 self._show_warning("No Git repository loaded.")
                 return
 
-            current_branch = self.repo.active_branch.name if not self.repo.head.is_detached else None
-            if not current_branch:
-                # If in detached state, move HEAD to latest main commit
+            if self.repo.head.is_detached:
                 self.repo.git.switch("main")
                 self.repo = Repo(self.repo.working_tree_dir)
+                self.repo.head.reference = self.repo.heads.main  # ✅ Explicitly bind HEAD to 'main'
+                self.repo.head.reset(index=True, working_tree=True)
                 self.bind_repo()
-                self.update_log()
-                self.update_status_label()
                 self._show_info("Returned to latest version on 'main'.")
             else:
+                current_branch = self.repo.active_branch.name
                 self._show_info(f"Already on branch '{current_branch}'. No action needed.")
+
+            self.update_log()
+            self.update_status_label()
+
         except Exception as e:
             self._show_error(f"Failed to return to latest: {e}")
+
 
 
     def export_snapshot(self):
