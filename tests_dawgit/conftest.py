@@ -15,6 +15,26 @@ import subprocess
 from daw_git_gui import DAWGitApp
 
 
+@pytest.fixture
+def app_with_commit(app, qtbot):
+    # Ensure a dummy .als file is present
+    dummy_file = Path(app.project_path) / "dummy.als"
+    dummy_file.write_text("This is a test Ableton file.")
+
+    # Add and commit the dummy file
+    app.repo.git.add(str(dummy_file))
+    app.repo.git.commit("-m", "Initial test commit")
+
+    app.update_log()
+    qtbot.addWidget(app)
+    return app
+
+@pytest.fixture
+def app(qtbot, temp_project):
+    test_app = DAWGitApp(project_path=str(temp_project))
+    qtbot.addWidget(test_app)
+    return test_app
+
 
 @pytest.fixture(autouse=True)
 def clear_last_path_file():

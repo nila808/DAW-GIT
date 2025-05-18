@@ -38,8 +38,6 @@ if QApplication.instance() is None:
 # --- Developer Configuration ---
 DEVELOPER_MODE = True
 
-
-
 class DAWGitApp(QWidget):
     
     def __init__(self, project_path=None, build_ui=True):
@@ -88,9 +86,6 @@ class DAWGitApp(QWidget):
             if self.repo:
                 self.load_commit_roles()
 
-            if self.repo:
-                self.load_commit_roles()  # ✅ Only call once, after init_git()
-
                 if self.repo.head.is_detached:
                     print("[DEBUG] Repo is in detached HEAD state")
                     self._show_warning(
@@ -128,7 +123,7 @@ class DAWGitApp(QWidget):
                 self.init_git()
 
                 if self.repo:
-                    self.load_commit_roles()  # ✅ Roles loaded here (manual folder selection)
+                    self.load_commit_roles()
 
                     if self.repo.head.is_detached:
                         print("[DEBUG] Repo is in detached HEAD state (user-selected project)")
@@ -159,10 +154,12 @@ class DAWGitApp(QWidget):
                 if hasattr(self, "status_label"):
                     self.status_label.setText("Ready to roll.")
 
+        # ✅ Show welcome modal if no project is selected
+        self.maybe_show_welcome_modal()
+
         # ✅ Final UI sync safety net
         if hasattr(self, "status_label"):
             self.update_status_label()
-
 
 
 
@@ -371,6 +368,24 @@ class DAWGitApp(QWidget):
         QTimer.singleShot(250, self.load_commit_history)
 
 
+    def maybe_show_welcome_modal(self):
+        if not self.project_path:
+            choice = QMessageBox.warning(
+                self,
+                "🎉 Welcome to DAW Git",
+                "No project folder selected. Would you like to open a project now?",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+            )
+
+            if choice == QMessageBox.StandardButton.Ok:
+                selected = QFileDialog.getExistingDirectory(self, "Select Your Project Folder")
+                if selected:
+                    self.project_path = Path(selected)
+                    self.init_git()
+                    self.update_log()
+                    return
+            # Exit if cancelled
+            self.close()
 
 
     def get_tag_for_commit(self, commit_sha):
@@ -1166,21 +1181,56 @@ class DAWGitApp(QWidget):
             QMessageBox.critical(self, "Unexpected Error", f"❌ {e}")
 
 
-    def assign_role_to_commit(self, commit_sha: str, role: str):
+    def get_commit_sha(app, row):
         """
-        Assigns a user-facing role label (e.g., 'Main Mix') to a specific commit SHA.
-        Stores this in memory in self.commit_roles.
+        Extract the commit SHA from a given table row (tooltip in column 1).
         """
-        if not commit_sha:
-            print("[WARN] Skipped assigning role — commit SHA is None or empty.")
+        try:
+            item = app.history_table.item(row, 1)  # SHA column
+        except Exception as e:
+            print(f"[TEST ERROR] Failed to get item at row {row}, column 1: {e}")
+            return None
+
+        if item is None:
+            print(f"[TEST ERROR] No item at row {row}, column 1")
+            return None
+
+        sha = item.toolTip()
+        if not sha:
+            print(f"[TEST ERROR] Empty tooltip at row {row}, column 1")
+            return None
+
+        return sha
+
+    
+
+    def _set_commit_id_from_selected_row(self):
+        selected_items = self.history_table.selectedItems()
+        if not selected_items:
+            print("[WARN] No items selected in history table.")
+            self.current_commit_id = None
             return
 
-        if not hasattr(self, "commit_roles"):
-            self.commit_roles = {}
+        # We assume SHA is in column 1
+        for item in selected_items:
+            if item.column() == 1:
+                sha = item.toolTip()
+                print(f"[DEBUG] Selected row = {item.row()}, SHA = {sha}")
+                if sha and isinstance(sha, str) and sha.strip():
+                    self.current_commit_id = sha
+                    print(f"[DEBUG] ✅ SHA set from selected row: {sha}")
+                    return
 
-        self.commit_roles[commit_sha] = role
-        print(f"[DEBUG] Assigned role '{role}' to commit {commit_sha}")
+        print("[WARN] No SHA found in selected items.")
+        self.current_commit_id = None
 
+
+    def save_settings(self):
+        """
+        Ensures QSettings are flushed to disk, and commit roles are saved.
+        """
+        self.settings.sync()
+        self.save_commit_roles()  # Also make sure this exists
 
 
     def save_commit_roles(self):
@@ -1196,10 +1246,15 @@ class DAWGitApp(QWidget):
             except Exception as e:
                 print(f"[ERROR] Failed to save commit roles: {e}")
 
+
     def assign_commit_role(self, commit_sha: str, role: str):
         """
         Assigns a role to a commit and saves the mapping.
         """
+        if not commit_sha:
+            print("[ERROR] Cannot assign role — invalid commit SHA:", commit_sha)
+            return
+
         if not hasattr(self, "commit_roles"):
             self.commit_roles = {}
 
@@ -1207,7 +1262,6 @@ class DAWGitApp(QWidget):
         self.save_commit_roles()
         print(f"[DEBUG] Assigned role '{role}' to commit {commit_sha}")
         self.show_status_message(f"🎧 Snapshot tagged as '{role}': {commit_sha[:7]}")
-
 
 
     def load_commit_roles(self):
@@ -1265,7 +1319,7 @@ class DAWGitApp(QWidget):
             return
 
         self.current_commit_id = sha  # ✅ Critical for test logic
-        self.assign_role_to_commit(sha, "Creative Take")  # ✅ This updates the in-memory dict
+        self.assign_commit_role(sha, "Creative Take")  # ✅ This updates the in-memory dict
         self.save_commit_roles()  # ✅ This persists it for reload
         self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
 
@@ -1290,7 +1344,7 @@ class DAWGitApp(QWidget):
             return
 
         self.current_commit_id = sha  # ✅ FIX
-        self.assign_role_to_commit(sha, "Alt Mixdown")
+        self.assign_commit_role(sha, "Alt Mixdown")
         self.save_commit_roles()
         self.status_message(f"🎛️ Commit tagged as 'Alt Mixdown': {sha[:7]}")
 
@@ -1314,7 +1368,7 @@ class DAWGitApp(QWidget):
             return
 
         self.current_commit_id = sha  # ✅ FIX
-        self.assign_role_to_commit(sha, "Creative Take")
+        self.assign_commit_role(sha, "Creative Take")
         self.save_commit_roles()
         self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
 
