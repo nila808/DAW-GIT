@@ -1,0 +1,22 @@
+# 🎼 DAWGitApp – Changelog
+
+## v1.0.3 – Commit Role Test Coverage
+**Date:** 2025-05-18  
+**Author:** @nila808  
+
+### ✅ Added
+- AT-050 / MT-029 – Tag commit as "Main Mix"
+- AT-051 / MT-031 – Re-tag commit from one role to another
+- AT-052 / MT-032 – Switch to "Creative Take" commit
+- AT-053 / MT-033 – Switch to "Alt Mixdown" commit
+- AT-054 / MT-034 – Tag/untag repeatedly
+- AT-055 / MT-035 – Delete commit with role and verify cleanup
+
+### 🧪 Tests
+All added to: `tests_dawgit/test_commit_role_persistence.py`
+
+### 🔧 Notes
+- `assign_commit_role()` now properly saves and commits `.dawgit_roles.json`
+- `tag_main_mix()` patched for test mode execution
+
+---
