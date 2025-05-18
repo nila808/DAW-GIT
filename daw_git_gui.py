@@ -26,7 +26,7 @@ from PyQt6.QtWidgets import (
     QHeaderView, QScrollArea, QSplitter, QSizePolicy, QStyle, QMenu
 )
 from PyQt6.QtGui import QIcon, QPixmap, QAction
-from PyQt6.QtCore import Qt, QSettings
+from PyQt6.QtCore import Qt, QSettings, QTimer
 
 # Optional compatibility import (namespace style, legacy fallback)
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -171,6 +171,7 @@ class DAWGitApp(QWidget):
             return
 
         self.repo = Repo(self.project_path)
+        self.commit_roles = self.load_commit_roles()
 
         # ✅ FIX 3: Don't override HEAD in test mode
         if os.getenv("DAWGIT_TEST_MODE") != "1":
@@ -309,9 +310,11 @@ class DAWGitApp(QWidget):
         main_layout.addWidget(self.commit_label)
 
         # 🎛️ Dynamic branch buttons with role tagging
+        # 🧩 Role-based quick switches and tagging
         main_label = self.get_branch_take_label("main")
         experiment_label = self.get_branch_take_label("experiment")
         altmix_label = self.get_branch_take_label("alt_mix")
+
 
         # 🎧 Main Mix
         self.btn_set_version_main = QPushButton(f"🎛️ Main Mix: {main_label}")
@@ -321,14 +324,13 @@ class DAWGitApp(QWidget):
 
         # 🎨 Creative Take
         self.btn_set_experiment = QPushButton(f"🧪 Creative Take: {experiment_label}")
-        self.btn_set_experiment.clicked.connect(self.tag_creative_take)
+        self.btn_set_experiment.clicked.connect(self.tag_experiment)
         main_layout.addWidget(self.btn_set_experiment)
 
         # 🎚️ Alt Mixdown
         self.btn_set_alternate = QPushButton(f"🎚️ Alt Mixdown: {altmix_label}")
         self.btn_set_alternate.clicked.connect(self.tag_alt_mix)
         main_layout.addWidget(self.btn_set_alternate)
-
 
         # ✅ Remote push option
         self.remote_checkbox = QCheckBox("Push to remote after commit")
@@ -528,7 +530,6 @@ class DAWGitApp(QWidget):
             print("ℹ️ Skipping update_log — no valid repo or commits found.")
             return
         
-        # ✅ Load commit roles from disk if available
         self.load_commit_roles()
 
         try:
@@ -543,6 +544,10 @@ class DAWGitApp(QWidget):
 
         for i, commit in enumerate(commits):
             self.history_table.insertRow(i)
+
+            # Debugging: print commit SHA before setting tooltip
+            print(f"[DEBUG] Setting tooltip for commit: {commit.hexsha}")
+
             tag = next((t.name for t in self.repo.tags if t.commit == commit), '')
             tag_item = QTableWidgetItem(tag)
             marker = " 🎯" if current_id == commit.hexsha else ""
@@ -556,23 +561,27 @@ class DAWGitApp(QWidget):
             self.history_table.setItem(i, 2, message_item)
 
             tag_item.setToolTip(tag)
-            commit_id_item.setToolTip(commit.hexsha)
+            commit_id_item.setToolTip(commit.hexsha)  # Full commit SHA as tooltip
             message_item.setToolTip(commit.message.strip())
 
+            # Highlight the currently selected commit in green
             if current_id == commit.hexsha:
                 for col in range(self.history_table.columnCount()):
                     item = self.history_table.item(i, col)
                     if item:
                         item.setBackground(Qt.GlobalColor.green)
-                self.history_table.selectRow(i)
+                self.history_table.selectRow(i)  # Select the row
+
+                # Force UI update to ensure the row is highlighted
+                self.history_table.viewport().update()
 
             print(f"[DEBUG] Comparing {id_short} to {commit.hexsha[:7]} (row {i})")
 
         self.history_table.resizeColumnsToContents()
 
-        # ✅ Auto-scroll to selected row
+        # ✅ Auto-scroll to the selected row
         selected_row = self.history_table.currentRow()
-        print(f"[DEBUG] Selected row: {selected_row}")
+        print(f"[DEBUG] Final selected row after update_log(): {selected_row}")
         if selected_row >= 0:
             self.history_table.scrollToItem(self.history_table.item(selected_row, 0), QTableWidget.ScrollHint.PositionAtCenter)
 
@@ -589,6 +598,8 @@ class DAWGitApp(QWidget):
                 print(f"[WARN] Could not evaluate commit deletability: {e}")
 
         print(f"[DEBUG] Final selected row after update_log(): {selected_row}")
+
+
 
     
     def run_setup(self):
@@ -1166,23 +1177,6 @@ class DAWGitApp(QWidget):
             QMessageBox.critical(self, "Unexpected Error", f"❌ {e}")
 
 
-    def assign_role_to_commit(self, commit_sha: str, role: str):
-        """
-        Assigns a user-facing role label (e.g., 'Main Mix') to a specific commit SHA.
-        Stores this in memory in self.commit_roles.
-        """
-        if not commit_sha:
-            print("[WARN] Skipped assigning role — commit SHA is None or empty.")
-            return
-
-        if not hasattr(self, "commit_roles"):
-            self.commit_roles = {}
-
-        self.commit_roles[commit_sha] = role
-        print(f"[DEBUG] Assigned role '{role}' to commit {commit_sha}")
-
-
-
     def save_commit_roles(self):
         """
         Saves the commit role mapping to a hidden JSON file in the project directory.
@@ -1196,18 +1190,33 @@ class DAWGitApp(QWidget):
             except Exception as e:
                 print(f"[ERROR] Failed to save commit roles: {e}")
 
-    def assign_commit_role(self, commit_sha: str, role: str):
-        """
-        Assigns a role to a commit and saves the mapping.
-        """
-        if not hasattr(self, "commit_roles"):
-            self.commit_roles = {}
 
+    def assign_commit_role(self, commit_sha, role):
+        if not commit_sha:
+            self._show_warning("Can't assign role: no commit SHA.")
+            return
+
+        print(f"[DEBUG] Before assignment: {self.commit_roles}")  # Log current roles
+
+        # Assign the role to the commit
         self.commit_roles[commit_sha] = role
-        self.save_commit_roles()
-        print(f"[DEBUG] Assigned role '{role}' to commit {commit_sha}")
-        self.show_status_message(f"🎧 Snapshot tagged as '{role}': {commit_sha[:7]}")
+        print(f"[DEBUG] Role '{role}' assigned to commit {commit_sha}")  # Log the assignment
 
+        # Save the updated commit_roles to disk
+        self.save_commit_roles()
+        print(f"[DEBUG] After assignment: {self.commit_roles}")  # Log updated roles
+
+        # Save commit roles to .json file
+        roles_path = Path(self.project_path) / ".dawgit_roles.json"
+        with open(roles_path, "w") as f:
+            json.dump(self.commit_roles, f, indent=2)
+        print(f"[DEBUG] Saved commit roles to {roles_path}")  # Confirm file save
+
+        # ✅ Ensure the roles file is added to Git index and committed
+        rel_path = str(roles_path.relative_to(self.repo.working_tree_dir))
+        self.repo.index.add([rel_path])
+        self.repo.index.commit(f"🎛️ Tag commit {commit_sha[:7]} as '{role}'")
+        print(f"[DEBUG] Git commit created for roles file with message: 'Tag commit {commit_sha[:7]} as {role}'")
 
 
     def load_commit_roles(self):
@@ -1224,10 +1233,71 @@ class DAWGitApp(QWidget):
             self.commit_roles = {}
 
 
+    def tag_commit_role(self, role_name: str):
+        """
+        Assign a role (e.g., 'Main Mix', 'Creative Take') to the currently selected commit.
+        """
+        row = self.history_table.currentRow()
+        if row < 0:
+            self._show_warning(f"Please select a snapshot to tag as '{role_name}'.")
+            return
+
+        commit_item = self.history_table.item(row, 1)
+        if not commit_item:
+            self._show_warning("Couldn't retrieve commit info.")
+            return
+
+        sha = commit_item.toolTip()
+        if not sha:
+            self._show_warning("Commit SHA missing — can't assign role.")
+            return
+
+        self.current_commit_id = sha  # ✅ Ensure correct context
+        self.commit_roles[sha] = role_name
+        self.save_commit_roles()
+        print(f"[DEBUG] Assigned role '{role_name}' to commit {sha}")
+        print(f"[STATUS] 🎨 Commit tagged as '{role_name}': {sha}")
+        self.update_log()  # Refresh UI so tag appears
+
+
+    def _set_commit_id_from_selected_row(self):
+        row = self.history_table.currentRow()
+        if row >= 0:
+            item = self.history_table.item(row, 1)  # Commit ID should be in column 1
+            if item:
+                tooltip = item.toolTip()  # Get commit SHA from the tooltip
+                print(f"[DEBUG] Tooltip for selected row: {tooltip}")  # Debugging line
+                if tooltip:
+                    self.current_commit_id = tooltip  # Assign the commit SHA to current_commit_id
+                else:
+                    print("[DEBUG] Tooltip is empty.")
+            else:
+                print("[DEBUG] No item found for selected row.")
+        else:
+            print("[DEBUG] Invalid row selected.")
+
+
     def tag_main_mix(self):
-        """
-        Assigns the 'Main Mix' role to the currently selected commit row.
-        """
+        if not self.current_commit_id:
+            print("[DEBUG] No current commit ID selected.")  # Debugging line
+            return
+        
+        print(f"[DEBUG] Assigning 'Main Mix' role to commit: {self.current_commit_id}")  # Debugging line
+        self.assign_commit_role(self.current_commit_id, "Main Mix")  # Call assign_commit_role
+
+        # Ensure current commit ID is selected before tagging
+        self._set_commit_id_from_selected_row()
+        print("[DEBUG] DAWGIT_TEST_MODE =", os.getenv("DAWGIT_TEST_MODE"))
+
+        if os.getenv("DAWGIT_TEST_MODE") == "1":
+            print("[DEBUG] Running tag_main_mix immediately (test mode)")
+            self._handle_main_mix_tag()
+        else:
+            print("[DEBUG] Delaying tag_main_mix with QTimer")
+            QTimer.singleShot(0, self._handle_main_mix_tag)
+
+
+    def _handle_main_mix_tag(self):
         row = self.history_table.currentRow()
         if row < 0:
             self._show_warning("Please select a snapshot to tag as 'Main Mix'.")
@@ -1238,42 +1308,39 @@ class DAWGitApp(QWidget):
             self._show_warning("Couldn't retrieve commit info.")
             return
 
-        sha = commit_item.toolTip()
-        if not sha:
-            self._show_warning("Commit SHA missing — can't assign role.")
+        # 🧠 Patch: fallback to visible text if tooltip missing
+        sha = commit_item.toolTip() or commit_item.text().strip()
+
+        # ❌ Reject invalid or placeholder SHAs
+        if not sha or sha.strip() == "–" or len(sha.strip()) < 7:
+            self._show_warning("Invalid commit selected. Please choose a real snapshot.")
             return
+
 
         self.current_commit_id = sha
-        self.assign_commit_role(sha, "Main Mix")  # ✅ persist and save in one step
+        print(f"[DEBUG] About to call assign_commit_role with: sha={sha}, role=Main Mix")
 
+        self.assign_commit_role(sha, "Main Mix")
+        self.save_commit_roles()
+        self.status_message(f"🎛️ Commit tagged as 'Main Mix': {sha[:7]}")
+        self.update_log()
 
-
-    def tag_creative_take(self):
-        row = self.history_table.currentRow()
-        if row < 0:
-            self._show_warning("Please select a snapshot to tag as 'Creative Take'.")
-            return
-
-        commit_item = self.history_table.item(row, 1)
-        if not commit_item:
-            self._show_warning("Couldn't retrieve commit info.")
-            return
-
-        sha = commit_item.toolTip()
-        if not sha:
-            self._show_warning("Commit SHA missing — can't assign role.")
-            return
-
-        self.current_commit_id = sha  # ✅ Critical for test logic
-        self.assign_role_to_commit(sha, "Creative Take")  # ✅ This updates the in-memory dict
-        self.save_commit_roles()  # ✅ This persists it for reload
-        self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
 
 
     def tag_alt_mix(self):
-        """
-        Assigns the 'Alt Mixdown' role to the currently selected commit row.
-        """
+        # Ensure current commit ID is selected before tagging
+        self._set_commit_id_from_selected_row()
+        print("[DEBUG] DAWGIT_TEST_MODE =", os.getenv("DAWGIT_TEST_MODE"))
+
+        if os.getenv("DAWGIT_TEST_MODE") == "1":
+            print("[DEBUG] Running tag_alt_mix immediately (test mode)")
+            self._handle_alt_mix_tag()
+        else:
+            print("[DEBUG] Delaying tag_alt_mix with QTimer")
+            QTimer.singleShot(0, self._handle_alt_mix_tag)
+
+
+    def _handle_alt_mix_tag(self):
         row = self.history_table.currentRow()
         if row < 0:
             self._show_warning("Please select a snapshot to tag as 'Alt Mixdown'.")
@@ -1289,15 +1356,29 @@ class DAWGitApp(QWidget):
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
-        self.current_commit_id = sha  # ✅ FIX
-        self.assign_role_to_commit(sha, "Alt Mixdown")
+        self.current_commit_id = sha
+        print(f"[DEBUG] tag_alt_mix → selected commit: {sha}")
+
+        self.assign_commit_role(sha, "Alt Mixdown")
         self.save_commit_roles()
-        self.status_message(f"🎛️ Commit tagged as 'Alt Mixdown': {sha[:7]}")
+        self.status_message(f"🎚️ Commit tagged as 'Alt Mixdown': {sha[:7]}")
+        self.update_log()
+
 
     def tag_experiment(self):
-        """
-        Assigns the 'Creative Take' role to the currently selected commit row.
-        """
+        # Ensure current commit ID is selected before tagging
+        self._set_commit_id_from_selected_row()
+        print("[DEBUG] DAWGIT_TEST_MODE =", os.getenv("DAWGIT_TEST_MODE"))
+    
+        if os.getenv("DAWGIT_TEST_MODE") == "1":
+            print("[DEBUG] Running tag_experiment immediately (test mode)")
+            self._handle_experiment_tag()
+        else:
+            print("[DEBUG] Delaying tag_experiment with QTimer")
+            QTimer.singleShot(0, self._handle_experiment_tag)
+
+
+    def _handle_experiment_tag(self):
         row = self.history_table.currentRow()
         if row < 0:
             self._show_warning("Please select a snapshot to tag as 'Creative Take'.")
@@ -1313,10 +1394,13 @@ class DAWGitApp(QWidget):
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
-        self.current_commit_id = sha  # ✅ FIX
-        self.assign_role_to_commit(sha, "Creative Take")
-        self.save_commit_roles()
-        self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
+        self.current_commit_id = sha
+        print(f"[DEBUG] tag_experiment → selected commit: {sha}")  # ✅ SHA confirms row match
+
+        self.assign_commit_role(sha, "Creative Take")  # ✅ Role set
+        self.save_commit_roles()                       # ✅ Saved to .dawgit_roles.json
+        self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")  # ✅ UI feedback
+        self.update_log()                              # ✅ UI refresh (shows role in table)
 
 
     def show_commit_checkout_info(self, commit):
