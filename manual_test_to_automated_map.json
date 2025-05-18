@@ -1,0 +1,20 @@
+{
+  "MT-01": "test_startup_state.py::test_app_launches_correctly",
+  "MT-02": "test_path_handling.py::test_project_path_persists",
+  "MT-03": "test_commit_logic.py::test_commit_with_als_file",
+  "MT-04": "test_safe_commit_checkout.py::test_commit_checkout_restores_file",
+  "MT-05": "test_branch_switching_behavior.py::test_switch_branch_updates_head",
+  "MT-06": "test_safe_version_line.py::test_create_new_version_branch",
+  "MT-07": "test_commit_role_persistence.py::test_tag_main_mix_role",
+  "MT-08": "test_commit_role_persistence.py::test_tag_creative_take_role",
+  "MT-09": "test_commit_role_persistence.py::test_tag_alt_mixdown_role",
+  "MT-10": "test_commit_role_persistence.py::test_tag_role_persists_across_restart",
+  "MT-11": "test_startup_state.py::test_startup_in_detached_head_warns_user",
+  "MT-12": "test_status_label_logic.py::test_status_label_detects_untracked_file",
+  "MT-13": "test_status_label_logic.py::test_status_label_detects_modified_als",
+  "MT-14": "test_latest_commit_flow.py::test_open_latest_daw_project_launches_correct_file",
+  "MT-15": "test_commit_deletion.py::test_delete_commit",
+  "MT-16": "test_version_marker_commits.py::test_placeholder_file_committed_to_repo",
+  "MT-17": "test_status_label_logic.py::test_status_label_shows_clean_on_fresh_start",
+  "MT-18": "test_pages_view_navigation.py::test_can_navigate_between_commits"
+}
