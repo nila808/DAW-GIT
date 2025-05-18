@@ -50,15 +50,16 @@ class DAWGitApp(QWidget):
         self.current_commit_id = None
         self.settings = QSettings("DAWGitApp", "DAWGit")
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
+        self.commit_roles = {}
 
-        # ✅ Fix 1: Respect explicitly passed project_path first
+        # ✅ Respect explicitly passed project_path first
         if project_path is not None:
             self.project_path = Path(project_path)
         elif os.environ.get("DAWGIT_FORCE_TEST_PATH"):
             self.project_path = Path(os.environ["DAWGIT_FORCE_TEST_PATH"])
             print(f"[TEST MODE] Forced project path via env var: {self.project_path}")
         else:
-            self.project_path = None  # fallback to saved path
+            self.project_path = None
 
         # ✅ Build the UI
         if build_ui:
@@ -71,25 +72,30 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"[WARNING] Stylesheet not loaded: {e}")
 
-        # ✅ If still None, try loading last saved path
+        # 1. Load saved path if not already set
         if self.project_path is None:
             last_path = self.load_saved_project_path()
             if last_path:
                 self.project_path = Path(last_path)
 
-
+        # 2. Change directory and initialize Git
         if self.project_path and self.project_path.exists():
             os.chdir(self.project_path)
             print(f"[DEBUG] Loaded project path: {self.project_path}")
             self.init_git()
 
+            # ✅ 3. Load roles only *after* init_git
             if self.repo:
+                self.load_commit_roles()
+
+            if self.repo:
+                self.load_commit_roles()  # ✅ Only call once, after init_git()
+
                 if self.repo.head.is_detached:
                     print("[DEBUG] Repo is in detached HEAD state")
                     self._show_warning(
-                        "⚠️ You're in a detached HEAD state.\n\n"
-                        "This means you're viewing an older snapshot. "
-                        "You can browse, but can't make new commits unless you create a new version line."
+                        "🎛️ You're browsing a past version of your session.\n\n"
+                        "Feel free to explore—but to lay down a new take, you'll need to start a fresh version line."
                     )
 
                 if hasattr(self, "project_label"):
@@ -100,16 +106,20 @@ class DAWGitApp(QWidget):
                     self.load_commit_history()
             else:
                 if hasattr(self, "project_label"):
-                    self.project_label.setText("❌ Failed to load repo.")
+                    self.project_label.setText("❌ Could not load session.")
                 if hasattr(self, "status_label"):
-                    self.status_label.setText("⚠️ Invalid repo state.")
+                    self.status_label.setText("⚠️ Invalid repo setup.")
 
         elif build_ui:
             folder = QFileDialog.getExistingDirectory(self, "🎵 Select Your DAW Project Folder")
             if folder:
                 selected_path = Path(folder)
                 if not self.is_valid_daw_folder(selected_path):
-                    QMessageBox.warning(self, "Invalid Folder", "❌ The selected folder does not contain an .als or .logicx file. Please select a valid DAW project.")
+                    QMessageBox.warning(
+                        self,
+                        "Invalid Folder",
+                        "❌ That folder doesn't contain an Ableton (.als) or Logic (.logicx) file.\n\nPlease select a valid DAW project."
+                    )
                     return
                 self.project_path = selected_path
                 os.chdir(self.project_path)
@@ -118,35 +128,42 @@ class DAWGitApp(QWidget):
                 self.init_git()
 
                 if self.repo:
+                    self.load_commit_roles()  # ✅ Roles loaded here (manual folder selection)
+
                     if self.repo.head.is_detached:
                         print("[DEBUG] Repo is in detached HEAD state (user-selected project)")
                         self._show_warning(
-                            "⚠️ You're in a detached HEAD state.\n\n"
-                            "This means you're viewing an older snapshot. "
-                            "You can browse, but can't make new commits unless you create a new version line."
+                            "🎛️ You're browsing a past version of your session.\n\n"
+                            "To drop a new mixdown or version, start a new version line first."
                         )
 
                     if hasattr(self, "project_label"):
                         self.project_label.setText(f"🎵 Tracking Project: {self.project_path.name}")
                     if hasattr(self, "status_label"):
-                        self.status_label.setText("New project selected.")
+                        self.status_label.setText("🎚️ New project selected.")
                     if hasattr(self, "history_table"):
                         self.load_commit_history()
                 else:
                     if hasattr(self, "project_label"):
-                        self.project_label.setText("❌ Failed to load repo.")
+                        self.project_label.setText("❌ Could not load session.")
                     if hasattr(self, "status_label"):
-                        self.status_label.setText("⚠️ Invalid repo state.")
+                        self.status_label.setText("⚠️ Invalid repo setup.")
             else:
-                QMessageBox.information(self, "No Project Selected", "🎚️ You haven’t selected a music project yet. Click 'Setup Project' to begin tracking a folder.")
+                QMessageBox.information(
+                    self,
+                    "No Project Selected",
+                    "🎛️ No project folder selected. Click 'Setup Project' to start tracking your music session."
+                )
                 if hasattr(self, "project_label"):
                     self.project_label.setText("🎵 Tracking: None")
                 if hasattr(self, "status_label"):
-                    self.status_label.setText("Ready.")
+                    self.status_label.setText("Ready to roll.")
 
         # ✅ Final UI sync safety net
         if hasattr(self, "status_label"):
             self.update_status_label()
+
+
 
 
     def init_git(self):
@@ -291,22 +308,27 @@ class DAWGitApp(QWidget):
         self.commit_label = QLabel("🎶 Commit: unknown")
         main_layout.addWidget(self.commit_label)
 
-        # 🎛️ Dynamic branch buttons
+        # 🎛️ Dynamic branch buttons with role tagging
         main_label = self.get_branch_take_label("main")
         experiment_label = self.get_branch_take_label("experiment")
         altmix_label = self.get_branch_take_label("alt_mix")
 
-        set_version_btn = QPushButton(f"🎛️ Main Mix: {main_label}")
-        set_version_btn.clicked.connect(lambda: self.switch_to_branch_ui("main"))
-        main_layout.addWidget(set_version_btn)
+        # 🎧 Main Mix
+        self.btn_set_version_main = QPushButton(f"🎛️ Main Mix: {main_label}")
+        self.btn_set_version_main.clicked.connect(self.tag_main_mix)
+        self.btn_set_version_main.clicked.connect(lambda: self.switch_to_branch_ui("main"))
+        main_layout.addWidget(self.btn_set_version_main)
 
-        set_experiment_btn = QPushButton(f"🧪 Creative Take: {experiment_label}")
-        set_experiment_btn.clicked.connect(lambda: self.switch_to_branch_ui("experiment"))
-        main_layout.addWidget(set_experiment_btn)
+        # 🎨 Creative Take
+        self.btn_set_experiment = QPushButton(f"🧪 Creative Take: {experiment_label}")
+        self.btn_set_experiment.clicked.connect(self.tag_creative_take)
+        main_layout.addWidget(self.btn_set_experiment)
 
-        set_alt_mix_btn = QPushButton(f"🎚️ Alt Mixdown: {altmix_label}")
-        set_alt_mix_btn.clicked.connect(lambda: self.switch_to_branch_ui("alt_mix"))
-        main_layout.addWidget(set_alt_mix_btn)
+        # 🎚️ Alt Mixdown
+        self.btn_set_alternate = QPushButton(f"🎚️ Alt Mixdown: {altmix_label}")
+        self.btn_set_alternate.clicked.connect(self.tag_alt_mix)
+        main_layout.addWidget(self.btn_set_alternate)
+
 
         # ✅ Remote push option
         self.remote_checkbox = QCheckBox("Push to remote after commit")
@@ -452,6 +474,7 @@ class DAWGitApp(QWidget):
         try:
             repo_path = Path(path or self.project_path)
             self.repo = Repo(repo_path)
+            self.load_commit_roles()  # ✅ Ensure roles are available after rebinding          
 
             if self.repo.head.is_valid():
                 self.current_commit_id = self.repo.head.commit.hexsha
@@ -493,6 +516,7 @@ class DAWGitApp(QWidget):
             print(f"[WARN] Failed to update branch dropdown: {e}")
 
     def update_log(self):
+        self.load_commit_roles()
         if not hasattr(self, "history_table"):
             print("⚠️ Skipping update_log(): no history_table defined yet.")
             return
@@ -503,6 +527,9 @@ class DAWGitApp(QWidget):
         if not self.repo or not hasattr(self.repo, "head") or not self.repo.head or not self.repo.head.is_valid():
             print("ℹ️ Skipping update_log — no valid repo or commits found.")
             return
+        
+        # ✅ Load commit roles from disk if available
+        self.load_commit_roles()
 
         try:
             commits = list(self.repo.iter_commits(max_count=50))
@@ -1139,6 +1166,159 @@ class DAWGitApp(QWidget):
             QMessageBox.critical(self, "Unexpected Error", f"❌ {e}")
 
 
+    def assign_role_to_commit(self, commit_sha: str, role: str):
+        """
+        Assigns a user-facing role label (e.g., 'Main Mix') to a specific commit SHA.
+        Stores this in memory in self.commit_roles.
+        """
+        if not commit_sha:
+            print("[WARN] Skipped assigning role — commit SHA is None or empty.")
+            return
+
+        if not hasattr(self, "commit_roles"):
+            self.commit_roles = {}
+
+        self.commit_roles[commit_sha] = role
+        print(f"[DEBUG] Assigned role '{role}' to commit {commit_sha}")
+
+
+
+    def save_commit_roles(self):
+        """
+        Saves the commit role mapping to a hidden JSON file in the project directory.
+        """
+        if self.project_path:
+            meta_file = Path(self.project_path) / ".dawgit_roles.json"
+            try:
+                with open(meta_file, "w") as f:
+                    json.dump(self.commit_roles, f)
+                print(f"[DEBUG] Saved commit roles to {meta_file}")
+            except Exception as e:
+                print(f"[ERROR] Failed to save commit roles: {e}")
+
+    def assign_commit_role(self, commit_sha: str, role: str):
+        """
+        Assigns a role to a commit and saves the mapping.
+        """
+        if not hasattr(self, "commit_roles"):
+            self.commit_roles = {}
+
+        self.commit_roles[commit_sha] = role
+        self.save_commit_roles()
+        print(f"[DEBUG] Assigned role '{role}' to commit {commit_sha}")
+        self.show_status_message(f"🎧 Snapshot tagged as '{role}': {commit_sha[:7]}")
+
+
+
+    def load_commit_roles(self):
+        roles_path = Path(self.project_path) / ".dawgit_roles.json"
+        if roles_path.exists():
+            try:
+                with roles_path.open("r") as f:
+                    self.commit_roles = json.load(f)
+                    print(f"[DEBUG] Loaded commit roles from {roles_path}")
+            except Exception as e:
+                print(f"[ERROR] Failed to load commit roles: {e}")
+                self.commit_roles = {}
+        else:
+            self.commit_roles = {}
+
+
+    def tag_main_mix(self):
+        """
+        Assigns the 'Main Mix' role to the currently selected commit row.
+        """
+        row = self.history_table.currentRow()
+        if row < 0:
+            self._show_warning("Please select a snapshot to tag as 'Main Mix'.")
+            return
+
+        commit_item = self.history_table.item(row, 1)
+        if not commit_item:
+            self._show_warning("Couldn't retrieve commit info.")
+            return
+
+        sha = commit_item.toolTip()
+        if not sha:
+            self._show_warning("Commit SHA missing — can't assign role.")
+            return
+
+        self.current_commit_id = sha
+        self.assign_commit_role(sha, "Main Mix")  # ✅ persist and save in one step
+
+
+
+    def tag_creative_take(self):
+        row = self.history_table.currentRow()
+        if row < 0:
+            self._show_warning("Please select a snapshot to tag as 'Creative Take'.")
+            return
+
+        commit_item = self.history_table.item(row, 1)
+        if not commit_item:
+            self._show_warning("Couldn't retrieve commit info.")
+            return
+
+        sha = commit_item.toolTip()
+        if not sha:
+            self._show_warning("Commit SHA missing — can't assign role.")
+            return
+
+        self.current_commit_id = sha  # ✅ Critical for test logic
+        self.assign_role_to_commit(sha, "Creative Take")  # ✅ This updates the in-memory dict
+        self.save_commit_roles()  # ✅ This persists it for reload
+        self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
+
+
+    def tag_alt_mix(self):
+        """
+        Assigns the 'Alt Mixdown' role to the currently selected commit row.
+        """
+        row = self.history_table.currentRow()
+        if row < 0:
+            self._show_warning("Please select a snapshot to tag as 'Alt Mixdown'.")
+            return
+
+        commit_item = self.history_table.item(row, 1)
+        if not commit_item:
+            self._show_warning("Couldn't retrieve commit info.")
+            return
+
+        sha = commit_item.toolTip()
+        if not sha:
+            self._show_warning("Commit SHA missing — can't assign role.")
+            return
+
+        self.current_commit_id = sha  # ✅ FIX
+        self.assign_role_to_commit(sha, "Alt Mixdown")
+        self.save_commit_roles()
+        self.status_message(f"🎛️ Commit tagged as 'Alt Mixdown': {sha[:7]}")
+
+    def tag_experiment(self):
+        """
+        Assigns the 'Creative Take' role to the currently selected commit row.
+        """
+        row = self.history_table.currentRow()
+        if row < 0:
+            self._show_warning("Please select a snapshot to tag as 'Creative Take'.")
+            return
+
+        commit_item = self.history_table.item(row, 1)
+        if not commit_item:
+            self._show_warning("Couldn't retrieve commit info.")
+            return
+
+        sha = commit_item.toolTip()
+        if not sha:
+            self._show_warning("Commit SHA missing — can't assign role.")
+            return
+
+        self.current_commit_id = sha  # ✅ FIX
+        self.assign_role_to_commit(sha, "Creative Take")
+        self.save_commit_roles()
+        self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
+
+
     def show_commit_checkout_info(self, commit):
         if not self.repo or not commit:
             return
@@ -1481,6 +1661,8 @@ class DAWGitApp(QWidget):
 
 
     def has_unsaved_changes(self):
+        if isinstance(self.project_path, str):
+            self.project_path = Path(self.project_path)
         try:
             if not self.repo or not self.project_path:
                 return False
@@ -1703,6 +1885,8 @@ class DAWGitApp(QWidget):
         if not self.repo:
             print("❌ No Git repo loaded.")
             return
+        # ✅ Load commit roles from disk if available
+        self.load_commit_roles()
 
         if not self.repo.head.is_valid():
             print("⚠️ Repo exists but has no commits yet.")
