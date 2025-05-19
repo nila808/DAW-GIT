@@ -1,12 +1,32 @@
 {
-  "project": "DAWGitApp",
-  "version": "v1.0.2-restore-latest",
-  "last_commit": "Fixed detached HEAD state on return; test_git_stash_created_on_return now passes",
-  "tag": "v1.0.2-restore-latest",
-  "test_summary": {
-    "passed": 41,
-    "failed": 0,
-    "last_verified": "2025-05-17T05:09:41.163609"
+  "project_name": "TEST 1 Project",
+  "project_version": "v1.0.2-rolepass",
+  "creator": "Niccavendish",
+  "repository_info": {
+    "current_branch": "main",
+    "last_commit_sha": "985c8d1b3f6e925bc6db5a9ebba695ef9ad27e7c",
+    "last_commit_message": "🎧 On version line — version 4",
+    "commit_roles": {
+      "985c8d1b3f6e925bc6db5a9ebba695ef9ad27e7c": "Main Mix"
+    }
   },
-  "notes": "All critical safety and navigation tests are now passing. App is ready for safe manual testing and production use."
+  "project_settings": {
+    "auto_commit": true,
+    "tracked_files": [
+      "*.als",
+      "*.logicx"
+    ]
+  },
+  "backup_info": {
+    "last_backup_time": "2025-05-18T19:36:22",
+    "backup_files": [
+      ".dawgit_roles.json",
+      "Backup/TEST 1 [2025-05-18 193622].als"
+    ]
+  },
+  "metadata": {
+    "tags": {
+      "version_marker": "v1.0.2-rolepass"
+    }
+  }
 }
