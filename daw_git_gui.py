@@ -70,6 +70,10 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"[WARNING] Stylesheet not loaded: {e}")
 
+        # ✅ Show the welcome modal if no project path is set (First-time launch scenario)
+        if self.project_path is None:
+            self.maybe_show_welcome_modal()  # This should trigger the modal when no path is set
+
         # 1. Load saved path if not already set
         if self.project_path is None:
             last_path = self.load_saved_project_path()
@@ -82,7 +86,7 @@ class DAWGitApp(QWidget):
             print(f"[DEBUG] Loaded project path: {self.project_path}")
             self.init_git()
 
-            # ✅ 3. Load roles only *after* init_git
+            # ✅ Load roles only *after* init_git
             if self.repo:
                 self.load_commit_roles()
 
@@ -154,12 +158,10 @@ class DAWGitApp(QWidget):
                 if hasattr(self, "status_label"):
                     self.status_label.setText("Ready to roll.")
 
-        # ✅ Show welcome modal if no project is selected
-        self.maybe_show_welcome_modal()
-
         # ✅ Final UI sync safety net
         if hasattr(self, "status_label"):
             self.update_status_label()
+
 
 
 
