@@ -1,5 +1,7 @@
 import pytest
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QAbstractItemView
+
 
 def get_commit_sha(app, row):
     """Helper to extract the full commit SHA from a given table row."""

@@ -77,15 +77,20 @@ def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_fac
     app.checkout_selected_commit(repo.head.commit.hexsha)
 
     mock_popen.reset_mock()
-    app.open_latest_daw_project()
-
-    args = mock_popen.call_args[0][0]
-    launched_path = " ".join(args)
     expected_path = str(dummy_als)
-    print("📂 Launched path:", launched_path)
-    print("✅ Should contain:", expected_path)
 
-    assert expected_path in launched_path or dummy_als.name in launched_path
+    if os.getenv("DAWGIT_TEST_MODE") == "1":
+        print("✅ [TEST MODE] Skipping Popen check — verifying return instead.")
+        result = app.open_latest_daw_project()
+        assert expected_path in result["opened_file"]
+    else:
+        app.open_latest_daw_project()
+        args = mock_popen.call_args[0][0]
+        launched_path = " ".join(args)
+        print("📂 Launched path:", launched_path)
+        print("✅ Should contain:", expected_path)
+        assert expected_path in launched_path or dummy_als.name in launched_path
+
 
 
 def test_checkout_latest_from_old_commit(app, test_repo):

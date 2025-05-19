@@ -8,11 +8,16 @@ echo "🧪 Running DAW Git App test suite..."
 # ✅ Enable test mode to suppress launching Ableton
 export DAWGIT_TEST_MODE=1
 
-# Runs all tests
-# pytest -v tests_dawgit
+# Runs all tests and logs output
+pytest --color=yes -s -v tests_dawgit/ | tee test_output.log
 
-# Runs individual tests
-pytest "$@"
+# ✂️ If failures are detected, copy from FAILURES to end
+if grep -q "FAILURES" test_output.log; then
+  awk '/=+ FAILURES =+/,0' test_output.log | pbcopy
+  echo "📋 Copied failure block to clipboard."
+else
+  echo "✅ No failures to copy."
+fi
 
 echo "🧹 Cleaning up test artifacts..."
 python3 cleanup_temp_test_folders.py
