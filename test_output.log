@@ -1,0 +1,2591 @@
+[1m============================= test session starts ==============================[0m
+platform darwin -- Python 3.12.3, pytest-8.3.5, pluggy-1.5.0 -- /Users/niccavendish/Projects/DAWGitApp/daw-git-env/bin/python
+cachedir: .pytest_cache
+PyQt6 6.9.0 -- Qt runtime 6.9.0 -- Qt compiled 6.9.0
+rootdir: /Users/niccavendish/Projects/DAWGitApp
+configfile: pytest.ini
+plugins: qt-4.4.0, rich-0.2.0
+[1mcollecting ... [0mcollected 60 items
+
+tests_dawgit/test_branch_info.py::test_create_new_branch_from_commit [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpmbn2wdea
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpmbn2wdea/project.als')]
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpmbn2wdea
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[DEBUG] Repo is in detached HEAD state
+[DEBUG] Tooltip set for row 0: e4b73144af48f90511986b2cad4d5ca6be607ea1
+[DEBUG] Row 0: commit e4b7314 → branches: (HEAD detached at e4b7314), main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: 2c882234b78bf8c3490fcdd28a9a93cc60f97edf
+[DEBUG] Row 1: commit 2c88223 → branches: (HEAD detached at e4b7314), main
+[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line
+[DEBUG] Version line commit: 🎼 Start New Version Line: test_branch
+[DEBUG] Comparing None to 2c88223 (row 0)
+[DEBUG] Comparing None to e4b7314 (row 1)
+[DEBUG] Comparing None to 6ce92b0 (row 2)
+[DEBUG] Selected row: -1
+[DEBUG] Final selected row after update_log(): -1
+🧹 Removing test branch...
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: project.als
+[32mPASSED[0m[CLEANUP] Removed file: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpmbn2wdea/project.als
+
+tests_dawgit/test_branch_info.py::test_branch_creation_in_detached_head_creates_version_line [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpib4aylvx
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpib4aylvx/init_project.als')]
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpib4aylvx
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[DEBUG] Repo is in detached HEAD state
+[DEBUG] Tooltip set for row 0: 8c26763d61cca0f0b140036396bdacfc0eb0db27
+[DEBUG] Row 0: commit 8c26763 → branches: (HEAD detached at 8c26763), main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: c0a0ad155045ef0db7d030df4947834f4ad2268d
+[DEBUG] Row 1: commit c0a0ad1 → branches: (HEAD detached at 8c26763), main
+[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line
+[DEBUG] Version line commit: 🎼 Start New Version Line: version_line_test
+[DEBUG] Comparing None to c0a0ad1 (row 0)
+[DEBUG] Comparing None to 8c26763 (row 1)
+[DEBUG] Comparing None to 1650c37 (row 2)
+[DEBUG] Selected row: -1
+[DEBUG] Final selected row after update_log(): -1
+[DEBUG] Full status --porcelain output:
+  →  D project.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: project.als
+[DEBUG] Unsaved change detected: project.als
+[32mPASSED[0m[CLEANUP] Removed file: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpib4aylvx/init_project.als
+[DEBUG] Full status --porcelain output:
+  →  D init_project.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: init_project.als
+[DEBUG] Unsaved change detected: init_project.als
+
+tests_dawgit/test_branch_switching_behavior.py::test_switching_to_same_branch_does_nothing No local changes to save
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switching_to_same_branch_0/BranchSwitchTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switching_to_same_branch_0/BranchSwitchTest/test.als')]
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switching_to_same_branch_0/BranchSwitchTest
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switching_to_same_branch_0/BranchSwitchTest
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switching_to_same_branch_0/BranchSwitchTest/test.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switching_to_same_branch_0/BranchSwitchTest
+[DEBUG] Repo rebound: HEAD = e3b5f96
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: test.als
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switching_to_same_branch_0/Backup_BranchSwitchTest_20250520_114425
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switching_to_same_branch_0/BranchSwitchTest/test.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switching_to_same_branch_0/BranchSwitchTest
+[DEBUG] Repo rebound: HEAD = e3b5f96
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+⚠️ Skipping update_log(): no history_table defined yet.
+[32mPASSED[0m
+tests_dawgit/test_branching_logic.py::test_create_version_line_from_detached_head [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_create_version_line_from_0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_create_version_line_from_0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_create_version_line_from_0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 7209d437ab1d81b271ff07546219d7341e517431
+[DEBUG] Comparing 7209d43 to 7209d43 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 7209d437ab1d81b271ff07546219d7341e517431
+[DEBUG] Row 0: commit 7209d43 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+  →  D project.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: project.als
+[DEBUG] Unsaved change detected: project.als
+[DEBUG] Version line commit: 🎼 Start New Version Line: new_take
+[DEBUG] Comparing 7209d43 to 7209d43 (row 0)
+[DEBUG] Comparing 7209d43 to ea4907f (row 1)
+[DEBUG] Comparing 7209d43 to e387a2d (row 2)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[32mPASSED[0m
+tests_dawgit/test_branching_logic.py::test_safe_switch_branch_creates_if_missing [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_safe_switch_branch_create0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_safe_switch_branch_create0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_safe_switch_branch_create0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: e385e25cb9168c8e00bca8ebc7a732e85482fdbd
+[DEBUG] Comparing e385e25 to e385e25 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: e385e25cb9168c8e00bca8ebc7a732e85482fdbd
+[DEBUG] Row 0: commit e385e25 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Version line commit: 🎼 Start New Version Line: fresh_mix
+[DEBUG] Comparing e385e25 to e385e25 (row 0)
+[DEBUG] Comparing e385e25 to 4af4e5d (row 1)
+[DEBUG] Comparing e385e25 to 059f56d (row 2)
+[DEBUG] Comparing e385e25 to f772793 (row 3)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[TEST DEBUG] Branch switch result: {'status': 'ok', 'message': "Created and switched to new branch 'fresh_mix'."}
+[DEBUG] Full status --porcelain output:
+  →  D project.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: project.als
+[DEBUG] Unsaved change detected: project.als
+[32mPASSED[0m
+tests_dawgit/test_branching_logic.py::test_update_session_branch_display_reflects_branch_and_commit [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_update_session_branch_dis0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_update_session_branch_dis0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_update_session_branch_dis0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 75ec5bdc54b8a92445fecee9ff44b6b152e06230
+[DEBUG] Comparing 75ec5bd to 75ec5bd (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 75ec5bdc54b8a92445fecee9ff44b6b152e06230
+[DEBUG] Row 0: commit 75ec5bd → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[TEST DEBUG] Branch Label: 🎵 Branch: main
+[TEST DEBUG] Commit Label: 🎶 Commit: a85a1b5
+[32mPASSED[0m
+tests_dawgit/test_branching_logic.py::test_switch_branch_with_unsaved_changes_prompts_backup [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_branch_with_unsave0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_branch_with_unsave0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_branch_with_unsave0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 75ec5bdc54b8a92445fecee9ff44b6b152e06230
+[DEBUG] Comparing 75ec5bd to 75ec5bd (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 75ec5bdc54b8a92445fecee9ff44b6b152e06230
+[DEBUG] Row 0: commit 75ec5bd → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+  →  D project.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: project.als
+[DEBUG] Unsaved change detected: project.als
+[SAFE SWITCH] Uncommitted changes detected — triggering backup.
+[TEST DEBUG] Backup called: True
+[TEST DEBUG] Branch switch result: {'status': 'warning', 'message': 'Uncommitted changes present — backed up.'}
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[32mPASSED[0m
+tests_dawgit/test_branching_logic.py::test_create_new_version_line_commits_version_marker_and_placeholder [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_create_new_version_line_c0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_create_new_version_line_c0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_create_new_version_line_c0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 75ec5bdc54b8a92445fecee9ff44b6b152e06230
+[DEBUG] Comparing 75ec5bd to 75ec5bd (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 75ec5bdc54b8a92445fecee9ff44b6b152e06230
+[DEBUG] Row 0: commit 75ec5bd → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+  →  M dummy.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: dummy.als
+[DEBUG] Unsaved change detected: dummy.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Version line commit: 🎼 Start New Version Line: autotest_branch
+[DEBUG] Comparing 75ec5bd to 75ec5bd (row 0)
+[DEBUG] Comparing 75ec5bd to 99faee1 (row 1)
+[DEBUG] Comparing 75ec5bd to 26f0d3d (row 2)
+[DEBUG] Comparing 75ec5bd to 9603efd (row 3)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[TEST DEBUG] Create version line result: {'status': 'success', 'commit_message': '🎼 Start New Version Line: autotest_branch'}
+[TEST DEBUG] Files in commit: ['.version_marker', 'dummy.als']
+[DEBUG] Full status --porcelain output:
+  →  D project.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: project.als
+[DEBUG] Unsaved change detected: project.als
+[32mPASSED[0m
+tests_dawgit/test_checkout_safety.py::test_checkout_commit_from_other_branch[True] [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmplwaewyr6
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmplwaewyr6/track.als')]
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmplwaewyr6
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[DEBUG] Repo is in detached HEAD state
+[DEBUG] Tooltip set for row 0: 9888f7aa21fe8210fe6e2b45ec64c9b4271d22fe
+[DEBUG] Row 0: commit 9888f7a → branches: (HEAD detached at 9888f7a), branch-explore, main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: 5220046e615da59870814fed9a779b39cd55156f
+[DEBUG] Row 1: commit 5220046 → branches: (HEAD detached at 9888f7a), branch-explore, main
+[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+🔒 Unsaved changes backed up to: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/Backup_tmplwaewyr6_20250520_114430
+[DEBUG] Already on selected commit — skipping checkout.
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+  →  M dummy.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: dummy.als
+[DEBUG] Unsaved change detected: dummy.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+  →  D project.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: project.als
+[DEBUG] Unsaved change detected: project.als
+[32mPASSED[0m[CLEANUP] Removed file: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmplwaewyr6/track.als
+[DEBUG] Full status --porcelain output:
+  →  D track.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: track.als
+[DEBUG] Unsaved change detected: track.als
+
+tests_dawgit/test_checkout_safety.py::test_open_latest_daw_project_launches_correct_file[True] [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmprgdgdpt7
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmprgdgdpt7/session.als'), PosixPath('/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmprgdgdpt7/dummy.als')]
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmprgdgdpt7
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[DEBUG] Repo is in detached HEAD state
+[ERROR] get_tag_for_commit failed for 5e25f31dd130258a3fbd6ac7f19984bc5d509126: not enough values to unpack (expected 2, got 0)
+[DEBUG] Tooltip set for row 0: 5e25f31dd130258a3fbd6ac7f19984bc5d509126
+[ERROR] Failed to get branches for 5e25f31: not enough values to unpack (expected 2, got 0)
+[DEBUG] Row 0: commit 5e25f31 → branches: –
+[DEBUG] Selected current commit row 0
+[ERROR] get_tag_for_commit failed for e9e888cea5502b673906bfd1f0eb87284de79203: not enough values to unpack (expected 2, got 0)
+[DEBUG] Tooltip set for row 1: e9e888cea5502b673906bfd1f0eb87284de79203
+[ERROR] Failed to get branches for e9e888c: not enough values to unpack (expected 2, got 0)
+[DEBUG] Row 1: commit e9e888c → branches: –
+[ERROR] get_tag_for_commit failed for 67ec89c062429bd14ddf13e530ad4461ef3a4831: not enough values to unpack (expected 2, got 0)
+[DEBUG] Tooltip set for row 2: 67ec89c062429bd14ddf13e530ad4461ef3a4831
+[ERROR] Failed to get branches for 67ec89c: not enough values to unpack (expected 2, got 0)
+[DEBUG] Row 2: commit 67ec89c → branches: –
+[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: session.als
+🔒 Unsaved changes backed up to: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/Backup_tmprgdgdpt7_20250520_114432
+[DEBUG] Already on selected commit — skipping checkout.
+✅ [TEST MODE] Skipping Popen check — verifying return instead.
+[TEST MODE] Skipping snapshot confirmation.
+[TEST MODE] Would open: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmprgdgdpt7/dummy.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+  →  M dummy.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: dummy.als
+[DEBUG] Unsaved change detected: dummy.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Full status --porcelain output:
+  →  D project.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: project.als
+[DEBUG] Unsaved change detected: project.als
+[32mPASSED[0m[CLEANUP] Removed file: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmprgdgdpt7/session.als
+[CLEANUP] Removed file: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmprgdgdpt7/dummy.als
+
+tests_dawgit/test_checkout_safety.py::test_checkout_latest_from_old_commit [WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_old_0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_old_0/TestProject/dummy.als')]
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_old_0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_old_0/TestProject
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Full status --porcelain output:
+  →  D dummy.als
+  →  D session.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: dummy.als
+[DEBUG] Unsaved change detected: dummy.als
+[DEBUG] Repo rebound: HEAD = 9da3e94
+⚠️ Skipping update_log(): no history_table defined yet.
+⚠️ Skipping update_log(): no history_table defined yet.
+[DEBUG] Full status --porcelain output:
+  →  D project.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: project.als
+[DEBUG] Unsaved change detected: project.als
+[32mPASSED[0m
+tests_dawgit/test_checkout_safety.py::test_checkout_selected_commit_enters_detached_head [TEST MODE] Forced project path via env var: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_selected_commit_0/DetachedCheck
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_selected_commit_0/DetachedCheck
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_selected_commit_0/DetachedCheck/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_selected_commit_0/DetachedCheck
+[DEBUG] Repo rebound: HEAD = 0341ae0
+[DEBUG] Comparing 0341ae0 to 92f8cd6 (row 0)
+[DEBUG] Comparing 0341ae0 to 0341ae0 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 0341ae05fa9fe6d55bd491037fb422c6830a1bab
+[DEBUG] Comparing 0341ae0 to 92f8cd6 (row 0)
+[DEBUG] Comparing 0341ae0 to 0341ae0 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 0341ae05fa9fe6d55bd491037fb422c6830a1bab
+[DEBUG] Row 0: commit 0341ae0 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: 92f8cd66e7fa640cb461ccd8273a42f7c1146820
+[DEBUG] Row 1: commit 92f8cd6 → branches: 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_selected_commit_0/Backup_DetachedCheck_20250520_114433
+[DEBUG] Checking out commit: 92f8cd66e7fa640cb461ccd8273a42f7c1146820
+[DEBUG] Repo rebound: HEAD = 92f8cd6
+[DEBUG] Comparing 92f8cd6 to 92f8cd6 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_selected_commit_0/DetachedCheck/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_selected_commit_0/DetachedCheck
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[DEBUG] Comparing 92f8cd6 to 92f8cd6 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+[32mPASSED[0m
+tests_dawgit/test_checkout_safety.py::test_checkout_latest_from_detached_state [TEST MODE] Forced project path via env var: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_deta0/ReturnTest
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_deta0/ReturnTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_deta0/ReturnTest/music.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_deta0/ReturnTest
+[DEBUG] Repo rebound: HEAD = 25ca55e
+[DEBUG] Comparing 25ca55e to 25ca55e (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 25ca55eb5a638fcd4fa71d65e216f71ae949bd83
+[DEBUG] Comparing 25ca55e to 25ca55e (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 25ca55eb5a638fcd4fa71d65e216f71ae949bd83
+[DEBUG] Row 0: commit 25ca55e → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Starting commit with message: 'Updated'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_deta0/ReturnTest
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_deta0/ReturnTest/music.als')]
+[DEBUG] Comparing 88b2ab9 to 25ca55e (row 0)
+[DEBUG] Comparing 88b2ab9 to 88b2ab9 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Commit successful: Updated → 88b2ab9
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: music.als
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_deta0/Backup_ReturnTest_20250520_114434
+[DEBUG] Checking out commit: 25ca55eb5a638fcd4fa71d65e216f71ae949bd83
+[DEBUG] Repo rebound: HEAD = 25ca55e
+[DEBUG] Comparing 25ca55e to 25ca55e (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_deta0/ReturnTest/music.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checkout_latest_from_deta0/ReturnTest
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[DEBUG] Comparing 25ca55e to 25ca55e (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Repo rebound: HEAD = 88b2ab9
+[DEBUG] Comparing 88b2ab9 to 25ca55e (row 0)
+[DEBUG] Comparing 88b2ab9 to 88b2ab9 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Comparing 88b2ab9 to 25ca55e (row 0)
+[DEBUG] Comparing 88b2ab9 to 88b2ab9 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: music.als
+[32mPASSED[0m
+tests_dawgit/test_checkout_safety.py::test_backup_folder_created_on_checkout [TEST MODE] Forced project path via env var: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_backup_folder_created_on_0/BackupTest
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_backup_folder_created_on_0/BackupTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_backup_folder_created_on_0/BackupTest/temp.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_backup_folder_created_on_0/BackupTest
+[DEBUG] Repo rebound: HEAD = 913a3c7
+[DEBUG] Comparing 913a3c7 to 8c5ea5d (row 0)
+[DEBUG] Comparing 913a3c7 to 913a3c7 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 913a3c769df856fe5c2b51470989dd82b1296382
+[DEBUG] Comparing 913a3c7 to 8c5ea5d (row 0)
+[DEBUG] Comparing 913a3c7 to 913a3c7 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 913a3c769df856fe5c2b51470989dd82b1296382
+[DEBUG] Row 0: commit 913a3c7 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: 8c5ea5de049cb21627608a74952242c21d3f66ed
+[DEBUG] Row 1: commit 8c5ea5d → branches: 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_backup_folder_created_on_0/Backup_BackupTest_20250520_114436
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: music.als
+[32mPASSED[0m
+tests_dawgit/test_checkout_safety.py::test_git_stash_created_on_return [TEST MODE] Forced project path via env var: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_stash_created_on_retu0/StashTest
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_stash_created_on_retu0/StashTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_stash_created_on_retu0/StashTest/demo.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_stash_created_on_retu0/StashTest
+[DEBUG] Repo rebound: HEAD = 2b407ad
+[DEBUG] Comparing 2b407ad to 2b407ad (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 2b407ada2df3af8c8b2198d999126e666bc3fade
+[DEBUG] Comparing 2b407ad to 2b407ad (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 2b407ada2df3af8c8b2198d999126e666bc3fade
+[DEBUG] Row 0: commit 2b407ad → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Starting commit with message: 'Second'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_stash_created_on_retu0/StashTest
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_stash_created_on_retu0/StashTest/demo.als')]
+[DEBUG] Comparing 5b88a88 to 2b407ad (row 0)
+[DEBUG] Comparing 5b88a88 to 5b88a88 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Commit successful: Second → 5b88a88
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: demo.als
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_stash_created_on_retu0/Backup_StashTest_20250520_114436
+[DEBUG] Checking out commit: 2b407ada2df3af8c8b2198d999126e666bc3fade
+[DEBUG] Repo rebound: HEAD = 2b407ad
+[DEBUG] Comparing 2b407ad to 2b407ad (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_stash_created_on_retu0/StashTest/demo.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_stash_created_on_retu0/StashTest
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[DEBUG] Comparing 2b407ad to 2b407ad (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+[DEBUG] Full status --porcelain output:
+  →  M temp.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: temp.als
+[DEBUG] Unsaved change detected: temp.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: music.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: demo.als
+[32mPASSED[0m[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: music.als
+
+tests_dawgit/test_checkout_safety.py::test_switch_branch_with_uncommitted_changes_warns_or_stashes Saved working directory and index state On main: DAWGitApp auto-stash
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8/track.als')]
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 01b6e01
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Row 0: commit 01b6e01 → branches: alt_branch, 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: daacedd8d6f5417363bf8602e9935d99032f288b
+[DEBUG] Row 1: commit daacedd → branches: alt_branch, 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+  →  M track.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: track.als
+[DEBUG] Unsaved change detected: track.als
+🔒 Unsaved changes backed up to: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/Backup_tmpznm31bb8_20250520_114439
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8/track.als')]
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 1266924
+[DEBUG] Comparing 1266924 to daacedd (row 0)
+[DEBUG] Comparing 1266924 to 01b6e01 (row 1)
+[DEBUG] Comparing 1266924 to 1266924 (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">alt_branch</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">alt_branch</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">alt_branch</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] self.current_commit_id before update_log: 1266924a974a7d45d48bed30eb7f94fdf0353b96
+[DEBUG] Comparing 1266924 to daacedd (row 0)
+[DEBUG] Comparing 1266924 to 01b6e01 (row 1)
+[DEBUG] Comparing 1266924 to 1266924 (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] Comparing 1266924 to daacedd (row 0)
+[DEBUG] Comparing 1266924 to 01b6e01 (row 1)
+[DEBUG] Comparing 1266924 to 1266924 (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+[32mPASSED[0m[CLEANUP] Removed file: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8/track.als
+
+tests_dawgit/test_commit_cancel_modal.py::test_commit_cancel_does_not_change_repo [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_cancel_does_not_ch0/CommitCancelTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_cancel_does_not_ch0/CommitCancelTest/dummy.als')]
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_cancel_does_not_ch0/CommitCancelTest
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_cancel_does_not_ch0/CommitCancelTest
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: b8b0168cfdd267ec54de51391dc02356ccc2ade8
+[DEBUG] Comparing b8b0168 to b8b0168 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: b8b0168cfdd267ec54de51391dc02356ccc2ade8
+[DEBUG] Row 0: commit b8b0168 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_cancel_does_not_ch0/CommitCancelTest/dummy.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_cancel_does_not_ch0/CommitCancelTest
+[DEBUG] Repo rebound: HEAD = b8b0168
+[DEBUG] Comparing b8b0168 to b8b0168 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: b8b0168cfdd267ec54de51391dc02356ccc2ade8
+[DEBUG] Comparing b8b0168 to b8b0168 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+[DEBUG] Full status --porcelain output:
+  →  D track.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: track.als
+[DEBUG] Unsaved change detected: track.als
+[32mPASSED[0m
+tests_dawgit/test_commit_deletion.py::test_delete_commit [WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit0/DeleteCommitRepo
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit0/DeleteCommitRepo/second.als'), PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit0/DeleteCommitRepo/file.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit0/DeleteCommitRepo
+[DEBUG] Repo rebound: HEAD = e0c0f21
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: second.als
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit0/Backup_DeleteCommitRepo_20250520_114442
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit0/DeleteCommitRepo/second.als'), PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit0/DeleteCommitRepo/file.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit0/DeleteCommitRepo
+[DEBUG] Repo rebound: HEAD = e0c0f21
+[DEBUG] Comparing e0c0f21 to 05c17b7 (row 0)
+[DEBUG] Comparing e0c0f21 to e0c0f21 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] self.current_commit_id before update_log: e0c0f2116160348dd690810fa9f1bb8298fe04f0
+[DEBUG] Comparing e0c0f21 to 05c17b7 (row 0)
+[DEBUG] Comparing e0c0f21 to e0c0f21 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: e0c0f2116160348dd690810fa9f1bb8298fe04f0
+[DEBUG] Row 0: commit e0c0f21 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: 05c17b7c29b24ed090b3f3c823f522f77241ae80
+[DEBUG] Row 1: commit 05c17b7 → branches: 🎯 main
+[STATUS] 🗑️ Snapshot deleted using rebase --onto.
+[DEBUG] Skipping test/placeholder file: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit0/DeleteCommitRepo/second.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: track.als
+[DEBUG] Full status --porcelain output:
+  →  D track.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: track.als
+[DEBUG] Unsaved change detected: track.als
+[32mPASSED[0m
+tests_dawgit/test_commit_deletion_effect.py::test_deleted_commit_disappears_from_history [WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest/a.als'), PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest/b.als')]
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest/a.als'), PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest/b.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest
+[DEBUG] Repo rebound: HEAD = 394e28e
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: a.als
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/Backup_DeleteCommitTest_20250520_114443
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest/a.als'), PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest/b.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest
+[DEBUG] Repo rebound: HEAD = a728978
+[DEBUG] Comparing a728978 to 394e28e (row 0)
+[DEBUG] Comparing a728978 to a728978 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] self.current_commit_id before update_log: a728978b2cf6fc8d7a9343413b9e8b339abddb25
+[DEBUG] Comparing a728978 to 394e28e (row 0)
+[DEBUG] Comparing a728978 to a728978 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: a728978b2cf6fc8d7a9343413b9e8b339abddb25
+[DEBUG] Row 0: commit a728978 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: 394e28e1e2eac9dd32f8c052d31c088d01198c0b
+[DEBUG] Row 1: commit 394e28e → branches: 🎯 main
+[STATUS] 🗑️ Snapshot deleted using rebase --onto.
+[DEBUG] Skipping test/placeholder file: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_deleted_commit_disappears0/DeleteCommitTest/b.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  →  D track.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: track.als
+[DEBUG] Unsaved change detected: track.als
+[32mPASSED[0m
+tests_dawgit/test_commit_logic.py::test_commit_requires_daw_file [TEST MODE] Forced project path via env var: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 01b6e01
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Row 0: commit 01b6e01 → branches: alt_branch, 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: daacedd8d6f5417363bf8602e9935d99032f288b
+[DEBUG] Row 1: commit daacedd → branches: alt_branch, 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[32mPASSED[0m
+tests_dawgit/test_commit_logic.py::test_commit_with_als_file [TEST MODE] Forced project path via env var: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 01b6e01
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Row 0: commit 01b6e01 → branches: alt_branch, 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: daacedd8d6f5417363bf8602e9935d99032f288b
+[DEBUG] Row 1: commit daacedd → branches: alt_branch, 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Starting commit with message: 'Updated .als'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_with_als_file0/WithALS
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_with_als_file0/WithALS/song.als')]
+[DEBUG] Comparing ecb9e5c to f5ab175 (row 0)
+[DEBUG] Comparing ecb9e5c to ecb9e5c (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Commit successful: Updated .als → ecb9e5c
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  →  D track.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: track.als
+[DEBUG] Unsaved change detected: track.als
+[32mPASSED[0m
+tests_dawgit/test_commit_logic.py::test_commit_with_logicx_file [TEST MODE] Forced project path via env var: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 01b6e01
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Row 0: commit 01b6e01 → branches: alt_branch, 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: daacedd8d6f5417363bf8602e9935d99032f288b
+[DEBUG] Row 1: commit daacedd → branches: alt_branch, 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Starting commit with message: 'Logic update'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_with_logicx_file0/WithLogic
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_with_logicx_file0/WithLogic/beat.logicx')]
+[DEBUG] Comparing c7084c0 to 801f054 (row 0)
+[DEBUG] Comparing c7084c0 to c7084c0 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Commit successful: Logic update → c7084c0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: song.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  →  D track.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: track.als
+[DEBUG] Unsaved change detected: track.als
+[32mPASSED[0m
+tests_dawgit/test_commit_logic.py::test_placeholder_file_created_if_none_exist [TEST MODE] Forced project path via env var: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 01b6e01
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Row 0: commit 01b6e01 → branches: alt_branch, 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: daacedd8d6f5417363bf8602e9935d99032f288b
+[DEBUG] Row 1: commit daacedd → branches: alt_branch, 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+🎛️ Created auto_placeholder.als file
+[DEBUG] Version line commit: 🎼 Start New Version Line: v1-experiment
+[DEBUG] Comparing 01b6e01 to 25bf910 (row 0)
+[DEBUG] Comparing 01b6e01 to f59ca47 (row 1)
+[DEBUG] Selected row: -1
+[DEBUG] Final selected row after update_log(): -1
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  →  D track.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: track.als
+[DEBUG] Unsaved change detected: track.als
+[32mPASSED[0m
+tests_dawgit/test_commit_role_persistence.py::test_tag_role_persists_across_restart [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: e04c70366e5426aa148c458907b976b1f0109ac1
+[DEBUG] Comparing e04c703 to e04c703 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: e04c70366e5426aa148c458907b976b1f0109ac1
+[DEBUG] Row 0: commit e04c703 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Comparing e04c703 to e04c703 (row 0)
+[DEBUG] Comparing e04c703 to 9e7d410 (row 1)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Starting commit with message: 'Initial test commit'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/dummy.als')]
+[DEBUG] Comparing 08348ee to e04c703 (row 0)
+[DEBUG] Comparing 08348ee to 9e7d410 (row 1)
+[DEBUG] Comparing 08348ee to 08348ee (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Commit successful: Initial test commit → 08348ee
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Selected row = 2, SHA = 08348eee67e826b01d5da873d2b4ddc42c9c97cc
+[DEBUG] ✅ SHA set from selected row: 08348eee67e826b01d5da873d2b4ddc42c9c97cc
+[DEBUG] Selected row = 2, SHA = 08348eee67e826b01d5da873d2b4ddc42c9c97cc
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Main Mix' to commit 08348eee67e826b01d5da873d2b4ddc42c9c97cc
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/.dawgit_roles.json
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/dummy.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/.dawgit_roles.json
+[DEBUG] Repo rebound: HEAD = 08348ee
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/.dawgit_roles.json
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/.dawgit_roles.json
+[DEBUG] Comparing 08348ee to e04c703 (row 0)
+[DEBUG] Comparing 08348ee to 9e7d410 (row 1)
+[DEBUG] Comparing 08348ee to 08348ee (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] self.current_commit_id before update_log: 08348eee67e826b01d5da873d2b4ddc42c9c97cc
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/.dawgit_roles.json
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/.dawgit_roles.json
+[DEBUG] Comparing 08348ee to e04c703 (row 0)
+[DEBUG] Comparing 08348ee to 9e7d410 (row 1)
+[DEBUG] Comparing 08348ee to 08348ee (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/.dawgit_roles.json
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_persists_across_0/TestProject/.dawgit_roles.json
+[DEBUG] Tooltip set for row 0: 08348eee67e826b01d5da873d2b4ddc42c9c97cc
+[DEBUG] Row 0: commit 08348ee → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: 9e7d410ae1c7b6352f88ac9e3bac7b0693527a6d
+[DEBUG] Row 1: commit 9e7d410 → branches: 🎯 main
+[DEBUG] Tooltip set for row 2: e04c70366e5426aa148c458907b976b1f0109ac1
+[DEBUG] Row 2: commit e04c703 → branches: 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  → ?? .dawgit_roles.json
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: .dawgit_roles.json
+[DEBUG] Other file change detected: .dawgit_roles.json
+[DEBUG] Full status --porcelain output:
+  → ?? .dawgit_roles.json
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: .dawgit_roles.json
+[DEBUG] Other file change detected: .dawgit_roles.json
+[DEBUG] Selected row = 3, SHA = 
+[WARN] No SHA found in selected items.
+[WARN] No SHA found after selecting row 3
+[DEBUG] Selected row = 0, SHA = 08348eee67e826b01d5da873d2b4ddc42c9c97cc
+[DEBUG] ✅ SHA set from selected row: 08348eee67e826b01d5da873d2b4ddc42c9c97cc
+[RECOVERY] Found SHA at row 0: 08348eee67e826b01d5da873d2b4ddc42c9c97cc
+[32mPASSED[0m
+tests_dawgit/test_commit_role_persistence.py::test_tag_role_can_be_updated [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_can_be_updated0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_can_be_updated0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_can_be_updated0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: fce8653e97d9914a09592d9dbe91f166073f1770
+[DEBUG] Comparing fce8653 to fce8653 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: fce8653e97d9914a09592d9dbe91f166073f1770
+[DEBUG] Row 0: commit fce8653 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Comparing fce8653 to fce8653 (row 0)
+[DEBUG] Comparing fce8653 to 9dffed4 (row 1)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Starting commit with message: 'Initial test commit'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_can_be_updated0/TestProject
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_can_be_updated0/TestProject/dummy.als')]
+[DEBUG] Comparing 1817cd4 to fce8653 (row 0)
+[DEBUG] Comparing 1817cd4 to 9dffed4 (row 1)
+[DEBUG] Comparing 1817cd4 to 1817cd4 (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Commit successful: Initial test commit → 1817cd4
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Full status --porcelain output:
+  → ?? .dawgit_roles.json
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: .dawgit_roles.json
+[DEBUG] Other file change detected: .dawgit_roles.json
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Selected row = 2, SHA = 1817cd4048c875d4bd32d73f810e2d5674451418
+[DEBUG] ✅ SHA set from selected row: 1817cd4048c875d4bd32d73f810e2d5674451418
+[DEBUG] Selected row = 2, SHA = 1817cd4048c875d4bd32d73f810e2d5674451418
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_can_be_updated0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Creative Take' to commit 1817cd4048c875d4bd32d73f810e2d5674451418
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_role_can_be_updated0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Alt Mixdown' to commit 1817cd4048c875d4bd32d73f810e2d5674451418
+[32mPASSED[0m
+tests_dawgit/test_commit_role_persistence.py::test_multiple_commits_have_distinct_roles [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_multiple_commits_have_dis0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_multiple_commits_have_dis0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_multiple_commits_have_dis0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: aa4a3a09ad5d6f17a7df7dd311fa7668c5523158
+[DEBUG] Comparing aa4a3a0 to aa4a3a0 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: aa4a3a09ad5d6f17a7df7dd311fa7668c5523158
+[DEBUG] Row 0: commit aa4a3a0 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Comparing aa4a3a0 to aa4a3a0 (row 0)
+[DEBUG] Comparing aa4a3a0 to b39cb80 (row 1)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Starting commit with message: 'Initial test commit'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_multiple_commits_have_dis0/TestProject
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_multiple_commits_have_dis0/TestProject/dummy.als')]
+[DEBUG] Comparing 7d1a44f to aa4a3a0 (row 0)
+[DEBUG] Comparing 7d1a44f to b39cb80 (row 1)
+[DEBUG] Comparing 7d1a44f to 7d1a44f (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Commit successful: Initial test commit → 7d1a44f
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Comparing 7d1a44f to aa4a3a0 (row 0)
+[DEBUG] Comparing 7d1a44f to b39cb80 (row 1)
+[DEBUG] Comparing 7d1a44f to 7d1a44f (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_multiple_commits_have_dis0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Main Mix' to commit 7d1a44fd09f2bfc2a556df611b5ddc2973d084c3
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_multiple_commits_have_dis0/TestProject/.dawgit_roles.json
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_multiple_commits_have_dis0/TestProject/.dawgit_roles.json
+[DEBUG] Comparing 7d1a44f to aa4a3a0 (row 0)
+[DEBUG] Comparing 7d1a44f to b39cb80 (row 1)
+[DEBUG] Comparing 7d1a44f to 7d1a44f (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_multiple_commits_have_dis0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Creative Take' to commit b39cb806bc294b913ffc46ffe0ea59a9aba4cdde
+[DEBUG] Full status --porcelain output:
+  → ?? .dawgit_roles.json
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: .dawgit_roles.json
+[DEBUG] Other file change detected: .dawgit_roles.json
+[32mPASSED[0m
+tests_dawgit/test_commit_role_persistence.py::test_retag_commit_with_new_role [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_retag_commit_with_new_rol0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_retag_commit_with_new_rol0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_retag_commit_with_new_rol0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 63f8ae2d4c05e01e5963b6be291416aa91d9ceb2
+[DEBUG] Comparing 63f8ae2 to 63f8ae2 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 63f8ae2d4c05e01e5963b6be291416aa91d9ceb2
+[DEBUG] Row 0: commit 63f8ae2 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Comparing 63f8ae2 to 63f8ae2 (row 0)
+[DEBUG] Comparing 63f8ae2 to 77c7c4f (row 1)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Starting commit with message: 'Initial test commit'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_retag_commit_with_new_rol0/TestProject
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_retag_commit_with_new_rol0/TestProject/dummy.als')]
+[DEBUG] Comparing 1624f4c to 63f8ae2 (row 0)
+[DEBUG] Comparing 1624f4c to 77c7c4f (row 1)
+[DEBUG] Comparing 1624f4c to 1624f4c (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Commit successful: Initial test commit → 1624f4c
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Selected row = 2, SHA = 1624f4c1ba186d447641395b51c88b55ec6148d2
+[DEBUG] ✅ SHA set from selected row: 1624f4c1ba186d447641395b51c88b55ec6148d2
+[DEBUG] Selected row = 2, SHA = 1624f4c1ba186d447641395b51c88b55ec6148d2
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_retag_commit_with_new_rol0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Alt Mixdown' to commit 1624f4c1ba186d447641395b51c88b55ec6148d2
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_retag_commit_with_new_rol0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Main Mix' to commit 1624f4c1ba186d447641395b51c88b55ec6148d2
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[32mPASSED[0m
+tests_dawgit/test_commit_role_persistence.py::test_switch_to_creative_take_commit [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_creative_take_c0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_creative_take_c0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_creative_take_c0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: b902d41ec87588e625b56b23c53126f341e6ff72
+[DEBUG] Comparing b902d41 to b902d41 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: b902d41ec87588e625b56b23c53126f341e6ff72
+[DEBUG] Row 0: commit b902d41 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Comparing b902d41 to b902d41 (row 0)
+[DEBUG] Comparing b902d41 to f555781 (row 1)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Starting commit with message: 'Initial test commit'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_creative_take_c0/TestProject
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_creative_take_c0/TestProject/dummy.als')]
+[DEBUG] Comparing d9b3a45 to b902d41 (row 0)
+[DEBUG] Comparing d9b3a45 to f555781 (row 1)
+[DEBUG] Comparing d9b3a45 to d9b3a45 (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Commit successful: Initial test commit → d9b3a45
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Full status --porcelain output:
+  → ?? .dawgit_roles.json
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: .dawgit_roles.json
+[DEBUG] Other file change detected: .dawgit_roles.json
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Selected row = 2, SHA = d9b3a45817009f933a5592eec4211c0ef6fa054f
+[DEBUG] ✅ SHA set from selected row: d9b3a45817009f933a5592eec4211c0ef6fa054f
+[DEBUG] Selected row = 2, SHA = d9b3a45817009f933a5592eec4211c0ef6fa054f
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_creative_take_c0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Creative Take' to commit d9b3a45817009f933a5592eec4211c0ef6fa054f
+[32mPASSED[0m
+tests_dawgit/test_commit_role_persistence.py::test_switch_to_alt_mixdown_commit [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_alt_mixdown_com0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_alt_mixdown_com0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_alt_mixdown_com0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: b902d41ec87588e625b56b23c53126f341e6ff72
+[DEBUG] Comparing b902d41 to b902d41 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: b902d41ec87588e625b56b23c53126f341e6ff72
+[DEBUG] Row 0: commit b902d41 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Comparing b902d41 to b902d41 (row 0)
+[DEBUG] Comparing b902d41 to 10fd36c (row 1)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Starting commit with message: 'Initial test commit'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_alt_mixdown_com0/TestProject
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_alt_mixdown_com0/TestProject/dummy.als')]
+[DEBUG] Comparing 9e1f241 to b902d41 (row 0)
+[DEBUG] Comparing 9e1f241 to 10fd36c (row 1)
+[DEBUG] Comparing 9e1f241 to 9e1f241 (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Commit successful: Initial test commit → 9e1f241
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Selected row = 2, SHA = 9e1f2414a09864be15ad4eb500714770ce2e1ff9
+[DEBUG] ✅ SHA set from selected row: 9e1f2414a09864be15ad4eb500714770ce2e1ff9
+[DEBUG] Selected row = 2, SHA = 9e1f2414a09864be15ad4eb500714770ce2e1ff9
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_switch_to_alt_mixdown_com0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Alt Mixdown' to commit 9e1f2414a09864be15ad4eb500714770ce2e1ff9
+[32mPASSED[0m
+tests_dawgit/test_commit_role_persistence.py::test_repeated_tag_untag_commit_role [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repeated_tag_untag_commit0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repeated_tag_untag_commit0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repeated_tag_untag_commit0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: d7d7170bee9184cffc1ee9c6995f36fe81549df3
+[DEBUG] Comparing d7d7170 to d7d7170 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: d7d7170bee9184cffc1ee9c6995f36fe81549df3
+[DEBUG] Row 0: commit d7d7170 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Comparing d7d7170 to d7d7170 (row 0)
+[DEBUG] Comparing d7d7170 to a6335ec (row 1)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Starting commit with message: 'Initial test commit'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repeated_tag_untag_commit0/TestProject
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repeated_tag_untag_commit0/TestProject/dummy.als')]
+[DEBUG] Comparing f962216 to d7d7170 (row 0)
+[DEBUG] Comparing f962216 to a6335ec (row 1)
+[DEBUG] Comparing f962216 to f962216 (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Commit successful: Initial test commit → f962216
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  → ?? .dawgit_roles.json
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: .dawgit_roles.json
+[DEBUG] Other file change detected: .dawgit_roles.json
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Selected row = 2, SHA = f9622163aba646df7e6eb16593bf91e5fbc9e078
+[DEBUG] ✅ SHA set from selected row: f9622163aba646df7e6eb16593bf91e5fbc9e078
+[DEBUG] Selected row = 2, SHA = f9622163aba646df7e6eb16593bf91e5fbc9e078
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repeated_tag_untag_commit0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Main Mix' to commit f9622163aba646df7e6eb16593bf91e5fbc9e078
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repeated_tag_untag_commit0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role '' to commit f9622163aba646df7e6eb16593bf91e5fbc9e078
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repeated_tag_untag_commit0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Creative Take' to commit f9622163aba646df7e6eb16593bf91e5fbc9e078
+[32mPASSED[0m
+tests_dawgit/test_commit_role_persistence.py::test_delete_commit_with_role_tagged [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit_with_role_t0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit_with_role_t0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit_with_role_t0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: bc8876fea4cffbf9ad153c80d4a1821441b82c37
+[DEBUG] Comparing bc8876f to bc8876f (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: bc8876fea4cffbf9ad153c80d4a1821441b82c37
+[DEBUG] Row 0: commit bc8876f → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Comparing bc8876f to bc8876f (row 0)
+[DEBUG] Comparing bc8876f to ad69480 (row 1)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Starting commit with message: 'Initial test commit'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit_with_role_t0/TestProject
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit_with_role_t0/TestProject/dummy.als')]
+[DEBUG] Comparing 7b66996 to bc8876f (row 0)
+[DEBUG] Comparing 7b66996 to ad69480 (row 1)
+[DEBUG] Comparing 7b66996 to 7b66996 (row 2)
+[DEBUG] Selected row: 2
+[DEBUG] Final selected row after update_log(): 2
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Commit successful: Initial test commit → 7b66996
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  → ?? .dawgit_roles.json
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: .dawgit_roles.json
+[DEBUG] Other file change detected: .dawgit_roles.json
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] Selected row = 2, SHA = 7b669967cf3b48e0d242ebd42ee36bdf4bd03c3d
+[DEBUG] ✅ SHA set from selected row: 7b669967cf3b48e0d242ebd42ee36bdf4bd03c3d
+[DEBUG] Selected row = 2, SHA = 7b669967cf3b48e0d242ebd42ee36bdf4bd03c3d
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_delete_commit_with_role_t0/TestProject/.dawgit_roles.json
+[DEBUG] Assigned role 'Alt Mixdown' to commit 7b669967cf3b48e0d242ebd42ee36bdf4bd03c3d
+[32mPASSED[0m
+tests_dawgit/test_commits.py::test_commit_requires_als_file[True] [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpoy7c2i78
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpoy7c2i78
+[DEBUG] Repo rebound: HEAD = 7973298
+[DEBUG] Comparing 7973298 to 7973298 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 79732982e2bbe45939c7160f31a5733480178b6a
+[DEBUG] Comparing 7973298 to 7973298 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 79732982e2bbe45939c7160f31a5733480178b6a
+[DEBUG] Row 0: commit 7973298 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[32mPASSED[0m
+tests_dawgit/test_commits.py::test_commit_requires_logicx_file[True] [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpcm1sytiv
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpcm1sytiv
+[DEBUG] Repo rebound: HEAD = 0aeb4d5
+[DEBUG] Comparing 0aeb4d5 to 0aeb4d5 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 0aeb4d5591625a823f7986494011284f3c874836
+[DEBUG] Comparing 0aeb4d5 to 0aeb4d5 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 0aeb4d5591625a823f7986494011284f3c874836
+[DEBUG] Row 0: commit 0aeb4d5 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+  → ?? readme.txt
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: readme.txt
+[DEBUG] Other file change detected: readme.txt
+[32mPASSED[0m
+tests_dawgit/test_commits.py::test_prevent_commit_without_project_loaded [TEST MODE] Forced project path via env var: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 01b6e01
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Row 0: commit 01b6e01 → branches: alt_branch, 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: daacedd8d6f5417363bf8602e9935d99032f288b
+[DEBUG] Row 1: commit daacedd → branches: alt_branch, 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+Returned message: No project loaded.
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[32mPASSED[0m
+tests_dawgit/test_daw_git_app.py::test_no_path_selection_resets_project [TEST MODE] Forced project path via env var: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 01b6e01
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Row 0: commit 01b6e01 → branches: alt_branch, 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: daacedd8d6f5417363bf8602e9935d99032f288b
+[DEBUG] Row 1: commit daacedd → branches: alt_branch, 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+  → ?? readme.txt
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: readme.txt
+[DEBUG] Other file change detected: readme.txt
+[DEBUG] Clearing last project path...
+[DEBUG] Current last_project_path: 
+[DEBUG] Cleared last project path in settings.
+[DEBUG] Current last_project_path: /private/var/folders/.../VersionMarkerTest
+[DEBUG] status label set: ❌ No Git repo loaded.
+[DEBUG] Cleared last project path in settings.
+[32mPASSED[0m
+tests_dawgit/test_first_time_launch_shows_welcome_modal.py::test_first_time_launch_shows_welcome_modal [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Entering maybe_show_welcome_modal()
+[DEBUG] No project path set, showing modal...
+[DEBUG] Skipping last path loading and repo setup after 'No' selected.
+[DEBUG] Current last_project_path: 
+[DEBUG] status label set: ❌ No Git repo loaded.
+[DEBUG] Cleared last project path in settings.
+[32mPASSED[0m
+tests_dawgit/test_full_workflow.py::test_daw_git_end_to_end Updated Git hooks.
+Git LFS initialized.
+Tracking "*.logicx/**"
+Updated Git hooks.
+Git LFS initialized.
+Tracking "*.als"
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  → ?? readme.txt
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: readme.txt
+[DEBUG] Other file change detected: readme.txt
+[32mPASSED[0m
+tests_dawgit/test_latest_commit_flow.py::test_commit_and_return_to_latest Cannot checkout LFS objects, Git LFS is not installed.
+[TEST MODE] Forced project path via env var: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 01b6e01
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Row 0: commit 01b6e01 → branches: alt_branch, 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: daacedd8d6f5417363bf8602e9935d99032f288b
+[DEBUG] Row 1: commit daacedd → branches: alt_branch, 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Starting commit with message: 'Added update'
+[DEBUG] Project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_and_return_to_late0/TestProject
+[DEBUG] Repo is None? False
+[DEBUG] DAW files found: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_and_return_to_late0/TestProject/dummy.als')]
+[DEBUG] Comparing 16be044 to 14ead07 (row 0)
+[DEBUG] Comparing 16be044 to 16be044 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Commit successful: Added update → 16be044
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_and_return_to_late0/Backup_TestProject_20250520_114500
+[DEBUG] Checking out commit: 14ead07a4838b03e9d62bb858c1606548d441923
+[DEBUG] Repo rebound: HEAD = 14ead07
+[DEBUG] Comparing 14ead07 to 14ead07 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_and_return_to_late0/TestProject/dummy.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_and_return_to_late0/TestProject
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[DEBUG] Comparing 14ead07 to 14ead07 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Repo rebound: HEAD = 16be044
+[DEBUG] Comparing 16be044 to 14ead07 (row 0)
+[DEBUG] Comparing 16be044 to 16be044 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Comparing 16be044 to 14ead07 (row 0)
+[DEBUG] Comparing 16be044 to 16be044 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  → ?? readme.txt
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: readme.txt
+[DEBUG] Other file change detected: readme.txt
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[32mPASSED[0m[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  → ?? readme.txt
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: readme.txt
+[DEBUG] Other file change detected: readme.txt
+
+tests_dawgit/test_no_project_path.py::test_repo_no_changes [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repo_no_changes0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repo_no_changes0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repo_no_changes0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 8211891fdb9473932bf39ecd9543e64ffe43a117
+[DEBUG] Comparing 8211891 to 8211891 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 8211891fdb9473932bf39ecd9543e64ffe43a117
+[DEBUG] Row 0: commit 8211891 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 0</span>
+[32mPASSED[0m
+tests_dawgit/test_no_project_path.py::test_repo_unsaved_changes [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repo_unsaved_changes0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repo_unsaved_changes0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repo_unsaved_changes0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: cd3be555b8fa7c56c45f6939325c277c1cd1d1f1
+[DEBUG] Comparing cd3be55 to cd3be55 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: cd3be555b8fa7c56c45f6939325c277c1cd1d1f1
+[DEBUG] Row 0: commit cd3be55 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 0</span>
+[32mPASSED[0m
+tests_dawgit/test_no_project_path.py::test_repo_with_branch_and_commit [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repo_with_branch_and_comm0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repo_with_branch_and_comm0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_repo_with_branch_and_comm0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: cd3be555b8fa7c56c45f6939325c277c1cd1d1f1
+[DEBUG] Comparing cd3be55 to cd3be55 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: cd3be555b8fa7c56c45f6939325c277c1cd1d1f1
+[DEBUG] Row 0: commit cd3be55 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 3</span>
+[32mPASSED[0m
+tests_dawgit/test_path_handling.py::test_path_change_and_clear [TEST MODE] Forced project path via env var: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/tmpznm31bb8
+[DEBUG] Repo rebound: HEAD = 01b6e01
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Comparing 01b6e01 to daacedd (row 0)
+[DEBUG] Comparing 01b6e01 to 01b6e01 (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 01b6e014a8ab4e9eb250f99e083cf719fda4a3e5
+[DEBUG] Row 0: commit 01b6e01 → branches: alt_branch, 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: daacedd8d6f5417363bf8602e9935d99032f288b
+[DEBUG] Row 1: commit daacedd → branches: alt_branch, 🎯 main
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[32mPASSED[0m
+tests_dawgit/test_placeholder_behavior.py::test_placeholder_file_created_on_version_line_start [WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_created_1/PlaceholderTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_created_1/PlaceholderTest
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_created_1/PlaceholderTest
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_created_1/PlaceholderTest
+[DEBUG] Repo rebound: HEAD = b8f7b6c
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+🎛️ Created auto_placeholder.als file
+[DEBUG] Version line commit: 🎼 Start New Version Line: v1-experiment
+⚠️ Skipping update_log(): no history_table defined yet.
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[32mPASSED[0m
+tests_dawgit/test_placeholder_behavior.py::test_placeholder_file_committed_to_repo [WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: []
+🧪 [Test Mode] No DAW files found — continuing with empty project.
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Repo rebound: HEAD = b8f7b6c
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+🎛️ Created auto_placeholder.als file
+[DEBUG] Version line commit: 🎼 Start New Version Line: with-placeholder
+⚠️ Skipping update_log(): no history_table defined yet.
+[32mPASSED[0m
+tests_dawgit/test_repo_setup.py::test_git_init_creates_repo Initialized empty Git repository in /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_init_creates_repo0/.git/
+Updated Git hooks.
+Git LFS initialized.
+[main (root-commit) 3b08161] Initial commit
+ 3 files changed, 10 insertions(+)
+ create mode 100644 .gitattributes
+ create mode 100644 .gitignore
+ create mode 100644 dummy.als
+[TEST MODE] Forced project path via env var: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest/auto_placeholder.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Repo rebound: HEAD = 852192b
+[DEBUG] Comparing 852192b to b8f7b6c (row 0)
+[DEBUG] Comparing 852192b to 852192b (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">with-placeholder</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">with-placeholder</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">with-placeholder</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 852192b3eb9639d5d88d6604fac077c9fc397ee3
+[DEBUG] Comparing 852192b to b8f7b6c (row 0)
+[DEBUG] Comparing 852192b to 852192b (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 852192b3eb9639d5d88d6604fac077c9fc397ee3
+[DEBUG] Row 0: commit 852192b → branches: 🎯 with-placeholder
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: b8f7b6c2e9be9b71429a3149b21a9145d7e95e7c
+[DEBUG] Row 1: commit b8f7b6c → branches: main, 🎯 with-placeholder
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">with-placeholder</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+✅ User confirmed project setup.
+🚀 Initializing Git at: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_init_creates_repo0
+[DEBUG] Added to .gitignore: ['*.als~', '*.logicx~', '*.asd', '*.tmp', '.DS_Store', 'Backup/']
+[DEBUG] HEAD not valid or detached
+ℹ️ Skipping update_log — no valid repo or commits found.
+[DEBUG] status label set: ⚠️ Git status error: Reference at 'refs/heads/main' does not exist
+[DEBUG] Repo rebound: HEAD = 3b08161
+[DEBUG] Comparing 3b08161 to 3b08161 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_init_creates_repo0/dummy.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_git_init_creates_repo0
+[DEBUG] Repo rebound: HEAD = 3b08161
+[DEBUG] Comparing 3b08161 to 3b08161 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 3b08161a8f758b3e33be04e2ba41c69b8c96fd37
+[DEBUG] Comparing 3b08161 to 3b08161 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[32mPASSED[0m
+tests_dawgit/test_rich_output.py::test_colored_output 🔥 This is red
+✅ This is green
+⚠️ This is yellow
+[32mPASSED[0m
+tests_dawgit/test_safe_branch_switching.py::test_prevent_branch_switch_with_uncommitted_changes [WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_prevent_branch_switch_wit0
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_prevent_branch_switch_wit0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_prevent_branch_switch_wit0
+[DEBUG] Repo rebound: HEAD = 0a0aaf3
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+[SAFE SWITCH] Uncommitted changes detected — triggering backup.
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/Backup_test_prevent_branch_switch_wit0_20250520_114504
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[32mPASSED[0m
+tests_dawgit/test_safe_commit_checkout.py::test_untracked_file_warning_on_checkout [WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_untracked_file_warning_on0
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_untracked_file_warning_on0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_untracked_file_warning_on0
+[DEBUG] Repo rebound: HEAD = f5a4c28
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Full status --porcelain output:
+  → ?? extra.wav
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: extra.wav
+[DEBUG] Other file change detected: extra.wav
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/Backup_test_untracked_file_warning_on0_20250520_114504
+[DEBUG] Already on selected commit — skipping checkout.
+[32mPASSED[0m
+tests_dawgit/test_safe_version_line.py::test_autocommit_marker_before_version_branch [WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_autocommit_marker_before_0
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_autocommit_marker_before_0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_autocommit_marker_before_0
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+❌ Failed to initialize Git repo: 'DAWGitApp' object has no attribute 'status_label'
+[DEBUG] Version line commit: 🎼 Start New Version Line: MyNewIdea
+⚠️ Skipping update_log(): no history_table defined yet.
+🔖 Commit message: 🎼 Start New Version Line: MyNewIdea
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[32mPASSED[0m[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+
+tests_dawgit/test_snapshot_restore.py::test_restore_snapshot [TEST MODE] Forced project path via env var: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest/auto_placeholder.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Repo rebound: HEAD = 852192b
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+[32mPASSED[0m
+tests_dawgit/test_startup_state.py::test_startup_loads_saved_project_path [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_startup_loads_saved_proje0/MyProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_startup_loads_saved_proje0/MyProject/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_startup_loads_saved_proje0/MyProject
+[DEBUG] Repo rebound: HEAD = 1b63c49
+[DEBUG] Comparing 1b63c49 to 1b63c49 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 1b63c49cdecab9396595836c546ab9c64df2b881
+[DEBUG] Comparing 1b63c49 to 1b63c49 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 1b63c49cdecab9396595836c546ab9c64df2b881
+[DEBUG] Row 0: commit 1b63c49 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[32mPASSED[0m
+tests_dawgit/test_startup_state.py::test_commit_log_display_on_startup [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_log_display_on_sta0/StartupLog
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_log_display_on_sta0/StartupLog/song.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_log_display_on_sta0/StartupLog
+[DEBUG] Repo rebound: HEAD = ed4ae13
+[DEBUG] Comparing ed4ae13 to ed4ae13 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: ed4ae134c9267a3a215636084c1122f05505d1f0
+[DEBUG] Comparing ed4ae13 to ed4ae13 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: ed4ae134c9267a3a215636084c1122f05505d1f0
+[DEBUG] Row 0: commit ed4ae13 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_log_display_on_sta0/StartupLog/song.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_commit_log_display_on_sta0/StartupLog
+[DEBUG] Repo rebound: HEAD = ed4ae13
+[DEBUG] Comparing ed4ae13 to ed4ae13 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: ed4ae134c9267a3a215636084c1122f05505d1f0
+[DEBUG] Comparing ed4ae13 to ed4ae13 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Comparing ed4ae13 to ed4ae13 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[32mPASSED[0m
+tests_dawgit/test_startup_state.py::test_checked_out_commit_highlighted_on_startup [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checked_out_commit_highli0/HighlightStart
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checked_out_commit_highli0/HighlightStart/a.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checked_out_commit_highli0/HighlightStart
+[DEBUG] Repo rebound: HEAD = 2190895
+[DEBUG] Comparing 2190895 to 2190895 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 21908955193d2ec96ab516bb4637251afbe52627
+[DEBUG] Comparing 2190895 to 2190895 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: 21908955193d2ec96ab516bb4637251afbe52627
+[DEBUG] Row 0: commit 2190895 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checked_out_commit_highli0/HighlightStart/a.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_checked_out_commit_highli0/HighlightStart
+[DEBUG] Repo rebound: HEAD = 2190895
+[DEBUG] Comparing 2190895 to 2190895 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: 21908955193d2ec96ab516bb4637251afbe52627
+[DEBUG] Comparing 2190895 to 2190895 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Comparing 2190895 to 2190895 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: dummy.als
+[32mPASSED[0m
+tests_dawgit/test_startup_state.py::test_branch_dropdown_shows_active_branch No local changes to save
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_branch_dropdown_shows_act0/BranchDrop
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_branch_dropdown_shows_act0/BranchDrop/a.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_branch_dropdown_shows_act0/BranchDrop
+[DEBUG] Repo rebound: HEAD = bcaeba5
+[DEBUG] Comparing bcaeba5 to bcaeba5 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: bcaeba57394878ca785372aa18e1cb15fee072bd
+[DEBUG] Comparing bcaeba5 to bcaeba5 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: bcaeba57394878ca785372aa18e1cb15fee072bd
+[DEBUG] Row 0: commit bcaeba5 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_branch_dropdown_shows_act0/BranchDrop/a.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_branch_dropdown_shows_act0/BranchDrop
+[DEBUG] Repo rebound: HEAD = bcaeba5
+[DEBUG] Comparing bcaeba5 to bcaeba5 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: bcaeba57394878ca785372aa18e1cb15fee072bd
+[DEBUG] Comparing bcaeba5 to bcaeba5 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: a.als
+🔒 Unsaved changes backed up to: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_branch_dropdown_shows_act0/Backup_BranchDrop_20250520_114507
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_branch_dropdown_shows_act0/BranchDrop/a.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_branch_dropdown_shows_act0/BranchDrop
+[DEBUG] Repo rebound: HEAD = bcaeba5
+[DEBUG] Comparing bcaeba5 to bcaeba5 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: bcaeba57394878ca785372aa18e1cb15fee072bd
+[DEBUG] Comparing bcaeba5 to bcaeba5 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Comparing bcaeba5 to bcaeba5 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: a.als
+[32mPASSED[0m
+tests_dawgit/test_startup_state.py::test_startup_in_detached_head_warns_user [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_startup_in_detached_head_0/DetachedStartup
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_startup_in_detached_head_0/DetachedStartup/clip.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_startup_in_detached_head_0/DetachedStartup
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[DEBUG] Repo is in detached HEAD state
+[DEBUG] Tooltip set for row 0: 251befe1a31103a5409ffbba2c6200c0e0a77ece
+[DEBUG] Row 0: commit 251befe → branches: (HEAD detached at 251befe), main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_startup_in_detached_head_0/DetachedStartup/clip.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_startup_in_detached_head_0/DetachedStartup
+🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.
+[32mPASSED[0m
+tests_dawgit/test_status_label_logic.py::test_status_label_shows_clean_on_fresh_start [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_shows_clean_0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_shows_clean_0/TestProject/dummy.als')]
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_shows_clean_0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_shows_clean_0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: aedfe68dbabe154912a3233b61dd29d26b2a7360
+[DEBUG] Comparing aedfe68 to aedfe68 (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: aedfe68dbabe154912a3233b61dd29d26b2a7360
+[DEBUG] Row 0: commit aedfe68 → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: a.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[32mPASSED[0m
+tests_dawgit/test_status_label_logic.py::test_status_label_ignores_non_daw_files [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_ignores_non_0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_ignores_non_0/TestProject/dummy.als')]
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_ignores_non_0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_ignores_non_0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: fdcbeaf588671fb69199a5e553a96fcf76abb443
+[DEBUG] Comparing fdcbeaf to fdcbeaf (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: fdcbeaf588671fb69199a5e553a96fcf76abb443
+[DEBUG] Row 0: commit fdcbeaf → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: a.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[32mPASSED[0m
+tests_dawgit/test_status_label_logic.py::test_status_label_detects_modified_als [DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_detects_modi0/TestProject
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_detects_modi0/TestProject/dummy.als')]
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_detects_modi0/TestProject
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_status_label_detects_modi0/TestProject
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] self.current_commit_id before update_log: ecf8f1ec57dca993cd957376724ca17485020cf9
+[DEBUG] Comparing ecf8f1e to ecf8f1e (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] Tooltip set for row 0: ecf8f1ec57dca993cd957376724ca17485020cf9
+[DEBUG] Row 0: commit ecf8f1e → branches: 🎯 main
+[DEBUG] Selected current commit row 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Comparing ecf8f1e to ecf8f1e (row 0)
+[DEBUG] Selected row: 0
+[DEBUG] Final selected row after update_log(): 0
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">main</span> — Current take: <span style="color:#00BCD4;">version 1</span>
+[DEBUG] Full status --porcelain output:
+  →  M dummy.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: dummy.als
+[DEBUG] Unsaved change detected: dummy.als
+[32mPASSED[0m
+tests_dawgit/test_ui_logic.py::test_project_display_label [TEST MODE] Forced project path via env var: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+📌 No version locked in — staying on current HEAD
+[WARN] Could not load take label for branch main: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch experiment: 'NoneType' object has no attribute 'head'
+[WARN] Could not load take label for branch alt_mix: 'NoneType' object has no attribute 'head'
+DEBUG COLUMN 3: None
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest/auto_placeholder.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_placeholder_file_committe0/PlaceholderTest
+[DEBUG] Repo rebound: HEAD = 852192b
+[DEBUG] Comparing 852192b to b8f7b6c (row 0)
+[DEBUG] Comparing 852192b to 852192b (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">with-placeholder</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">with-placeholder</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+ℹ️ Existing Git repo found — checking status...
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">with-placeholder</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] self.current_commit_id before update_log: 852192b3eb9639d5d88d6604fac077c9fc397ee3
+[DEBUG] Comparing 852192b to b8f7b6c (row 0)
+[DEBUG] Comparing 852192b to 852192b (row 1)
+[DEBUG] Selected row: 1
+[DEBUG] Final selected row after update_log(): 1
+[DEBUG] Tooltip set for row 0: 852192b3eb9639d5d88d6604fac077c9fc397ee3
+[DEBUG] Row 0: commit 852192b → branches: 🎯 with-placeholder
+[DEBUG] Selected current commit row 0
+[DEBUG] Tooltip set for row 1: b8f7b6c2e9be9b71429a3149b21a9145d7e95e7c
+[DEBUG] Row 1: commit b8f7b6c → branches: main, 🎯 with-placeholder
+[DEBUG] status label set: ✅ 🎧 On version line — 🎵 Session branch: <span style="color:#00BCD4;">with-placeholder</span> — Current take: <span style="color:#00BCD4;">version 2</span>
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Recently modified .als detected: a.als
+[DEBUG] Full status --porcelain output:
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] has_unsaved_changes() = False
+[DEBUG] Full status --porcelain output:
+  →  M dummy.als
+[DEBUG] Raw Git status --porcelain:
+[DEBUG] Checking cleaned file path: dummy.als
+[DEBUG] Unsaved change detected: dummy.als
+[32mPASSED[0m
+tests_dawgit/test_version_marker_commits.py::test_version_marker_commit_creates_file_and_commit [WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_version_marker_commit_cre0/VersionMarkerTest
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_version_marker_commit_cre0/VersionMarkerTest/dummy.als')]
+[DEBUG] No existing repo found. Initializing new repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_version_marker_commit_cre0/VersionMarkerTest
+✅ New Git repo initialized.
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_version_marker_commit_cre0/VersionMarkerTest
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_version_marker_commit_cre0/VersionMarkerTest/dummy.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_version_marker_commit_cre0/VersionMarkerTest
+[DEBUG] Repo rebound: HEAD = b2d58e5
+⚠️ Skipping update_log(): no history_table defined yet.
+ℹ️ Existing Git repo found — checking status...
+⚠️ Skipping update_log(): history_table not initialized yet.
+[DEBUG] Version line commit: 🎼 Start New Version Line: version_marker_test
+⚠️ Skipping update_log(): no history_table defined yet.
+[32mPASSED[0m
+
+[32m============================= [32m[1m60 passed[0m[32m in 52.52s[0m[32m ==============================[0m
