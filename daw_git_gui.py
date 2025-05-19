@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # --- Standard Library ---
+import tempfile
 import os
 import sys
 import json
@@ -161,22 +162,6 @@ class DAWGitApp(QWidget):
         # ✅ Final UI sync safety net
         if hasattr(self, "status_label"):
             self.update_status_label()
-
-
-
-
-    def init_git(self):
-        if not self.project_path:
-            return
-
-        self.repo = Repo(self.project_path)
-
-        # ✅ FIX 3: Don't override HEAD in test mode
-        if os.getenv("DAWGIT_TEST_MODE") != "1":
-            if not self.repo.head.is_detached and "main" in self.repo.heads:
-                self.repo.git.switch("main")
-
-        print(f"[DEBUG] Repo rebound: HEAD = {self.repo.head.commit.hexsha[:7]}")
 
 
     def setup_ui(self):
@@ -371,43 +356,118 @@ class DAWGitApp(QWidget):
 
 
     def maybe_show_welcome_modal(self):
+        print("[DEBUG] Entering maybe_show_welcome_modal()")  # Debug entry point
+
+        # Show the modal only if no project path is set
         if not self.project_path:
+            print("[DEBUG] No project path set, showing modal...")  # Debug check for project path
+
+            # Show modal asking the user if they want to open a project
             choice = QMessageBox.warning(
                 self,
                 "🎉 Welcome to DAW Git",
                 "No project folder selected. Would you like to open a project now?",
-                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No  # Yes and No buttons
             )
 
-            if choice == QMessageBox.StandardButton.Ok:
+            if choice == QMessageBox.StandardButton.Yes:
+                print("[DEBUG] User chose 'Yes'")  # Debug choice "Yes"
+                # User chose Yes: Open the file dialog to select a project folder
                 selected = QFileDialog.getExistingDirectory(self, "Select Your Project Folder")
+                print(f"[DEBUG] User selected folder: {selected}")  # Debug folder selection
                 if selected:
                     self.project_path = Path(selected)
-                    self.init_git()
-                    self.update_log()
+                    self.init_git()  # Initialize git in the selected folder
+                    self.update_log()  # Update the project log
                     return
-            # Exit if cancelled
-            self.close()
+                else:
+                    # User cancelled the selection, close the setup
+                    print("[DEBUG] No folder selected, exiting setup.")  # Debug cancellation
+                    self.close()  # Explicitly close if the user cancels
+
+            elif choice == QMessageBox.StandardButton.No:  # If "No" is selected
+                print("[DEBUG] User chose 'No'")  # Debug choice "No"
+                # User chose No: Do not open Finder, just close the window
+                self.close()  # Close the setup without opening Finder
+                # **Reset the project path** and **clear last path in settings**
+                self.project_path = None
+                self.clear_last_project_path()  # Explicitly clear last path in settings
+                print("[DEBUG] Last path reset after 'No' selected.")  # Explicit reset of project_path
+                
+                # **Update status label to reflect no Git repo loaded**
+                self.status_label.setText("❌ No Git repo loaded.")  # Update status label for no repo
+                self.update()  # Force the UI to update and reflect the new status
+                return  # **Ensure no further code runs after 'No' selection**
+
+        # After "No" was selected, skip all path loading and repo initialization:
+        print("[DEBUG] Skipping last path loading and repo setup after 'No' selected.")  # Debug message confirming skipping
+        
+        # **Explicitly clear settings and last path**
+        self.clear_last_project_path()  # Ensure settings don't hold the last invalid path
+        self.project_path = None  # Explicitly clear the project path to prevent any further operations
+
+        # Update status label to reflect no repo loaded
+        self.status_label.setText("❌ No Git repo loaded.")  # Set the status label text
+        self.update()  # Force the UI to refresh and update with new status
+        return  # End method flow after "No"
+ 
+
+    def clear_last_project_path(self):
+        """
+        Clears the last saved project path in the settings.
+        This method explicitly sets the `last_project_path` to an empty string
+        and forces the settings to sync immediately.
+        """
+        # Initialize QSettings
+        settings = QSettings("DAWGitApp", "DAWGit")
+
+        # Debug: Print the current value of 'last_project_path' before clearing
+        print(f"[DEBUG] Current last_project_path: {settings.value('last_project_path')}")
+
+        # Set the last_project_path to an empty string
+        settings.setValue("last_project_path", "")
+
+        # Reset internal project path and repo
+        self.project_path = None
+        self.repo = None
+        self.has_unsaved_changes = False  # Clear unsaved changes flag
+        self.update_status_label()  # Update status label
+
+        # Sync the settings to ensure the change is immediately written to disk
+        settings.sync()  # Ensures that the change is saved immediately
+
+        # Debug: Confirm that the last project path has been cleared
+        print("[DEBUG] Cleared last project path in settings.")
+
 
 
     def get_tag_for_commit(self, commit_sha):
         """Returns the first tag associated with a given commit hash."""
         try:
+            # Run the git command to get tags associated with the given commit
             result = subprocess.run(
-                ["git", "tag", "--points-at", commit_sha],
-                cwd=self.project_path,
-                env=self.custom_env(),
-                capture_output=True,
-                text=True
+                ["git", "tag", "--points-at", commit_sha],  # Git command to get the tag
+                cwd=self.project_path,  # Set the working directory to the project path
+                env=self.custom_env(),  # Set the environment variables (custom_env() is assumed to be defined elsewhere)
+                capture_output=True,  # Capture both stdout and stderr from the git command
+                text=True  # Ensure the output is returned as a string
             )
+            
+            # Strip any leading/trailing whitespace and split by lines to get the tags
             tags = result.stdout.strip().splitlines()
+            
+            # Return the first tag if found, otherwise return an empty string
             return tags[0] if tags else ""
+        
         except Exception as e:
+            # In case of an error, print the error and return an empty string
             print(f"[ERROR] get_tag_for_commit failed for {commit_sha}: {e}")
             return ""
 
 
+
     def init_git(self):
+        print("[DEBUG] Initializing Git...")  # Debug entry point
         # Get the folder where this script lives — DAWGitApp root
         app_root = Path(__file__).resolve().parent
 
@@ -424,7 +484,7 @@ class DAWGitApp(QWidget):
 
         # Validate DAW project contains .als or .logicx
         daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
-        print("🎛️ Found DAW files:", daw_files)
+        print(f"[DEBUG] Found DAW files: {daw_files}")  # Debug DAW files found
 
         is_test_mode = os.getenv("DAWGIT_TEST_MODE") == "1"
         if not daw_files and not is_test_mode:
@@ -436,23 +496,31 @@ class DAWGitApp(QWidget):
 
         try:
             if (self.project_path / ".git").exists():
-                temp_repo = Repo(self.project_path)
-                self.repo = temp_repo  # ✅ Always assign
+                try:
+                    # Try to load the existing repo
+                    print(f"[DEBUG] Found existing Git repo at {self.project_path}")
+                    temp_repo = Repo(self.project_path)
+                    self.repo = temp_repo  # ✅ Always assign
 
-                if self.repo.head.is_detached:
-                    print("🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.")
-                    return {"status": "detached", "message": "Detached HEAD state detected."}
-                else:
-                    self.bind_repo()
+                    if self.repo.head.is_detached:
+                        print("🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.")
+                        return {"status": "detached", "message": "Detached HEAD state detected."}
+                    else:
+                        self.bind_repo()
 
                     print("ℹ️ Existing Git repo found — checking status...")
 
-                # ✅ Auto-commit any DAW files if repo has no commits
-                if not self.repo.head.is_valid():
-                    print("🧪 No commits found — auto-committing initial DAW files...")
-                    self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
-                    self.repo.index.commit("Initial commit")
+                    # ✅ Auto-commit any DAW files if repo has no commits
+                    if not self.repo.head.is_valid():
+                        print("🧪 No commits found — auto-committing initial DAW files...")
+                        self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
+                        self.repo.index.commit("Initial commit")
+                except InvalidGitRepositoryError:
+                    print("❌ Invalid Git repository. Re-initializing repository...")
+                    self.repo = None
+                    return {"status": "invalid", "message": "Invalid Git repository."}
             else:
+                print(f"[DEBUG] No existing repo found. Initializing new repo at {self.project_path}")
                 self.repo = Repo.init(self.project_path)
                 print("✅ New Git repo initialized.")
                 self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
@@ -1938,9 +2006,16 @@ class DAWGitApp(QWidget):
 
         
     def load_commit_history(self):
+        # Ensure project path is always set
+        if not self.project_path:
+            # Set a default path if project_path is None
+            self.project_path = Path(tempfile.mkdtemp())  # Creates a temporary directory
+            print(f"[INFO] No project path set, using temporary path: {self.project_path}")
+        
         if not self.repo:
             print("❌ No Git repo loaded.")
             return
+
         # ✅ Load commit roles from disk if available
         self.load_commit_roles()
 
@@ -1949,6 +2024,7 @@ class DAWGitApp(QWidget):
             self.history_table.setRowCount(0)
             return
 
+        # Proceed with loading commit history
         self.history_table.setRowCount(0)
         self.history_table.clearSelection()  # ✅ Clear any previous selection
 
@@ -2288,10 +2364,23 @@ class DAWGitApp(QWidget):
         if not hasattr(self, "status_label"):
             return
 
+        # Check if a project path is set
+        if not self.project_path:
+            self.status_label.setText("❌ No Git repo loaded.")
+            print("[DEBUG] status label set: ❌ No Git repo loaded.")
+            return
+
+        # Check if a repo is loaded
         if not self.repo:
             self.status_label.setText("❌ No Git repo loaded.")
             print("[DEBUG] status label set: ❌ No Git repo loaded.")
             return
+
+        # Check for unsaved changes only if the repo is loaded
+        if self.has_unsaved_changes():
+            self.status_label.setText("⚠️ Unsaved changes detected in your DAW project.")
+        else:
+            self.status_label.setText("✔️ Project loaded successfully.")
 
         try:
             # 🧠 Handle detached HEAD safely
@@ -2374,42 +2463,48 @@ class DAWGitApp(QWidget):
 
     
     def load_saved_project_path(self):
+        # Check if the settings file exists
         if not self.settings_path.exists():
             print("⚠️ No saved project path found.")
             return None
 
         try:
+            # Attempt to read the saved project path from the settings file
             with open(self.settings_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 last_path = data.get("last_project_path", "")
-                print(f"[DEBUG] Loaded last_path from file: {last_path}")  # ✅ HERE
+                print(f"[DEBUG] Loaded last_path from file: {last_path}")
         except Exception as e:
             print(f"⚠️ Failed to load saved project path: {e}")
             return None
 
+        # If no saved path exists, return None
         if not last_path:
             return None
 
+        # Resolve the path to its absolute form
         resolved_path = Path(last_path).resolve()
 
-        # 🛑 Block DAWGitApp folder
+        # 🛑 Block DAWGitApp root folder from being set as a project
         app_root = Path(__file__).resolve().parent
         if resolved_path == app_root or "DAWGitApp" in str(resolved_path):
             print("⚠️ Refusing to track DAWGitApp root folder — not a valid project.")
             return None
 
+        # Check if the folder at the resolved path exists
         if not resolved_path.exists():
             print("⚠️ Last path no longer exists.")
             return None
 
-        has_daw_file = any(resolved_path.glob("*.als")) or any(resolved_path.glob("*.logicx"))
-        if not has_daw_file:
+        # Ensure that there is at least one DAW file in the folder (.als or .logicx)
+        daw_files = list(resolved_path.glob("*.als")) + list(resolved_path.glob("*.logicx"))
+        if not daw_files:
             print("⚠️ No DAW file found in saved folder.")
             return None
 
+        # Return the resolved path if everything is valid
         print(f"✅ Loaded saved project path: {resolved_path}")
         return str(resolved_path)
-
 
 
 

@@ -65,6 +65,11 @@ Run this in your terminal before running tests:
 unset DAWGIT_FORCE_TEST_PATH
 ./run_tests.sh
 
+E.G. 
+
+./run_tests.sh -k test_no_path_selection_resets_project
+
+
 
 This removes the override and allows each test to create its own clean temp folder.
 

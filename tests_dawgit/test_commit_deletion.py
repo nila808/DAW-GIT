@@ -15,7 +15,15 @@ def repo_with_commits(tmp_path):
     repo = Repo.init(str(project_dir))
     repo.index.add([str(file.relative_to(project_dir))])
     repo.index.commit("Initial commit")
+
+    # Create a second commit so we aren't deleting the root commit
+    second_file = project_dir / "second.als"
+    second_file.write_text("more content")
+    repo.index.add([str(second_file.relative_to(project_dir))])
+    repo.index.commit("Second commit")
+
     return project_dir, repo
+
 
 def test_delete_commit(qtbot, repo_with_commits, monkeypatch):
     project_dir, repo = repo_with_commits
@@ -23,10 +31,10 @@ def test_delete_commit(qtbot, repo_with_commits, monkeypatch):
     app.repo = repo
     qtbot.addWidget(app)
 
-    # ✅ Create a second commit so we're not deleting the root
+    # Create a second commit so we're not deleting the root
     second_file = project_dir / "second.als"
     second_file.write_text("more content")
-    repo.index.add(["second.als"])
+    repo.index.add([str(second_file.relative_to(project_dir))])
     repo.index.commit("Second commit")
 
     # Target the latest commit (second one)
@@ -51,3 +59,6 @@ def test_delete_commit(qtbot, repo_with_commits, monkeypatch):
     # Verify the deleted commit is gone
     commits_after = list(app.repo.iter_commits())
     assert commit_sha not in [c.hexsha for c in commits_after], "Commit was not deleted"
+
+    # Optionally, reset the repo for clean state after test
+    app.repo.git.reset('--hard')  # Ensure any changes are discarded

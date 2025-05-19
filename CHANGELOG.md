@@ -35,3 +35,11 @@ Stable milestone tagged as `v1.0.2-rolepass`
 🔐 Security: [mention any security-related fixes or enhancements]
 🔄 Other changes: [mention other changes made]
 
+
+## [v1.x.x] – [Release Date]
+
+✅ Full test suite passing
+🆕 New features: [brief summary of added features]
+./run_test.shecurity-related fixes or enhancements]
+🔄 Other changes: [mention other changes made]
+
