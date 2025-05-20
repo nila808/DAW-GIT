@@ -15,7 +15,6 @@ def get_commit_sha(app, row):
     return sha
 
 def select_latest_commit(app, qtbot, wait_ms=250):
-    """Select the last row in the history table and return its SHA."""
     qtbot.wait(wait_ms)
     row_count = app.history_table.rowCount()
     if row_count == 0:
@@ -29,19 +28,19 @@ def select_latest_commit(app, qtbot, wait_ms=250):
     sha = app.current_commit_id
 
     if not sha:
-        print(f"[WARN] No SHA found after selecting row {row}")
-        for r in range(row_count):
-            app.history_table.selectRow(r)
-            qtbot.wait(100)
-            app._set_commit_id_from_selected_row()
-            sha = app.current_commit_id
-            if sha:
-                print(f"[RECOVERY] Found SHA at row {r}: {sha}")
-                return sha
-        return None
+        # 🛠️ Fallback to column 2 (Commit ID)
+        sha_item = app.history_table.item(row, 2)
+        if sha_item:
+            sha = sha_item.toolTip()
+            app.current_commit_id = sha
+            print(f"[FALLBACK] SHA from column 2: {sha}")
+        else:
+            print(f"[ERROR] Could not find SHA at row {row}")
+            return None
 
     print(f"[DEBUG] Selected row = {row}, SHA = {sha}")
     return sha
+
 
 
 def ensure_test_commit(app):
@@ -83,31 +82,37 @@ def test_tag_role_can_be_updated(qtbot, app_with_commit):
     app.assign_commit_role(commit_sha, "Alt Mixdown")
     assert app.commit_roles.get(commit_sha) == "Alt Mixdown"
 
-def test_multiple_commits_have_distinct_roles(qtbot, app_with_commit):
-    app = app_with_commit
-    ensure_test_commit(app)
-    if app.history_table.rowCount() < 2:
-        pytest.skip("Need at least 2 commits")
+    def test_multiple_commits_have_distinct_roles(qtbot, app_with_commit):
+        app = app_with_commit
+        ensure_test_commit(app)  # Create first commit
+        ensure_test_commit(app)  # Create second commit
 
-    row1 = app.history_table.rowCount() - 1
-    row2 = app.history_table.rowCount() - 2
+        if app.history_table.rowCount() < 2:
+            pytest.skip("Need at least 2 commits for this test")
 
-    app.history_table.selectRow(row1)
-    qtbot.wait(100)
-    app.update_log()
-    commit1 = get_commit_sha(app, row1)
-    assert commit1 is not None
-    app.assign_commit_role(commit1, "Main Mix")
+        row1 = app.history_table.rowCount() - 1
+        row2 = app.history_table.rowCount() - 2
 
-    app.history_table.selectRow(row2)
-    qtbot.wait(100)
-    app.update_log()
-    commit2 = get_commit_sha(app, row2)
-    assert commit2 is not None
-    app.assign_commit_role(commit2, "Creative Take")
+        # ✅ Select first row and tag it
+        app.history_table.selectRow(row1)
+        qtbot.wait(100)
+        app._set_commit_id_from_selected_row()
+        sha1 = app.current_commit_id
+        assert sha1 is not None
+        app.assign_commit_role(sha1, "Main Mix")
 
-    assert app.commit_roles.get(commit1) == "Main Mix"
-    assert app.commit_roles.get(commit2) == "Creative Take"
+        # ✅ Select second row and tag it differently
+        app.history_table.selectRow(row2)
+        qtbot.wait(100)
+        app._set_commit_id_from_selected_row()
+        sha2 = app.current_commit_id
+        assert sha2 is not None
+        app.assign_commit_role(sha2, "Creative Take")
+
+        # ✅ Confirm roles were applied and distinct
+        assert app.commit_roles.get(sha1) == "Main Mix"
+        assert app.commit_roles.get(sha2) == "Creative Take"
+
 
 def test_retag_commit_with_new_role(qtbot, app_with_commit):
     app = app_with_commit

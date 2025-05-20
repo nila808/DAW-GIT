@@ -30,14 +30,13 @@ def test_commit_with_als_file(tmp_path, qtbot):
     repo.index.add(["song.als"])
     repo.index.commit("Initial")
 
-    app = DAWGitApp()
-    app.project_path = str(project_path)
+    app = DAWGitApp(project_path=project_path)  # ✅ FIXED: Pass it in here
     app.repo = repo
 
     (project_path / "song.als").write_text("v2")
     app.commit_changes(commit_message="Updated .als")
 
-    assert app.repo.head.commit.message == "Updated .als"
+    assert app.repo.head.commit.message.strip() == "Updated .als"
     assert "song.als" in app.repo.git.show("--name-only")
 
 
@@ -50,14 +49,17 @@ def test_commit_with_logicx_file(tmp_path, qtbot):
     repo.index.add(["beat.logicx"])
     repo.index.commit("Initial")
 
-    app = DAWGitApp()
-    app.project_path = str(project_path)
+    app = DAWGitApp(project_path=project_path)  # ✅ FIXED: Pass it in here
     app.repo = repo
 
     (project_path / "beat.logicx").write_text("v2")
     app.commit_changes(commit_message="Logic update")
 
-    assert app.repo.head.commit.message == "Logic update"
+    # ✅ Confirm commit message, safely ignoring trailing newline
+    assert app.repo.head.commit.message.strip() == "Logic update"
+
+    # ✅ Confirm the file was actually committed
+    assert "beat.logicx" in app.repo.git.show("--name-only")
 
 
 def test_placeholder_file_created_if_none_exist(tmp_path, qtbot):

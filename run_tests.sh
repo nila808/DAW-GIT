@@ -9,7 +9,9 @@ echo "🧪 Running DAW Git App test suite..."
 export DAWGIT_TEST_MODE=1
 
 # Runs all tests and logs output
-pytest --color=yes -s -v tests_dawgit/ | tee test_output.log
+# pytest --color=yes -s -v tests_dawgit/ | tee test_output.log
+# Runs single tests and logs output
+pytest "$@"
 
 # ✂️ If failures are detected, copy from FAILURES to end
 if grep -q "FAILURES" test_output.log; then
