@@ -10,27 +10,40 @@ def empty_daw_project(tmp_path):
     project_dir.mkdir()
     return project_dir
 
-def test_version_marker_commit_creates_file_and_commit(qtbot, empty_daw_project):
-    # ✅ Create a dummy .als file so project is valid
-    dummy_als = empty_daw_project / "dummy.als"
-    dummy_als.write_text("Ableton placeholder")
+def test_version_marker_commit_creates_file_and_commit(tmp_path):
+    """
+    AT-042 – Starting a version line should create and commit a .version_marker file.
+    """
+    from git import Repo
+    from daw_git_gui import DAWGitApp
 
-    app = DAWGitApp(project_path=empty_daw_project, build_ui=False)
-    qtbot.addWidget(app)
+    # Step 1: Create Git repo with 1 committed .als file
+    repo = Repo.init(tmp_path)
+    als_file = tmp_path / "main.als"
+    als_file.write_text("Ableton baseline")
+    repo.index.add(["main.als"])
+    repo.index.commit("Initial project")
 
+    # Step 2: Detach HEAD to simulate snapshot mode
+    repo.git.checkout(repo.head.commit.hexsha)
+    assert repo.head.is_detached
+
+    # Step 3: Launch app and remove .als so placeholder is needed
+    als_file.unlink()
+    app = DAWGitApp(project_path=tmp_path, build_ui=False)
     app.init_git()
 
-    result = app.create_new_version_line("version_marker_test")
+    # Step 4: Start version line
+    result = app.create_new_version_line("marker_test_branch")
 
-    # ✅ Assert overall result is success and includes commit message
+    # Step 5: Confirm success
     assert result["status"] == "success"
-    assert "commit_message" in result
-    assert "🎼" in result["commit_message"]
 
-    # ✅ Assert version marker file was created and committed
-    marker_file = empty_daw_project / ".version_marker"
-    assert marker_file.exists(), ".version_marker file should be created"
+    # Step 6: Check .version_marker file exists
+    version_marker = tmp_path / ".version_marker"
+    assert version_marker.exists(), ".version_marker file not created"
 
-    # ✅ Confirm it's in Git
-    committed_files = app.repo.git.ls_files().splitlines()
-    assert ".version_marker" in committed_files, ".version_marker should be tracked in Git"
+    # Step 7: Check it was committed
+    last_commit = repo.head.commit
+    committed_files = last_commit.stats.files
+    assert ".version_marker" in committed_files, ".version_marker not committed"

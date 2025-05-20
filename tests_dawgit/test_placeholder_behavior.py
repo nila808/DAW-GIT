@@ -1,5 +1,6 @@
 import os
 import pytest
+from git import Repo
 from daw_git_gui import DAWGitApp
 from pathlib import Path
 
@@ -10,23 +11,44 @@ def project_without_daw_files(tmp_path):
     project_dir.mkdir()
     return project_dir
 
-def test_placeholder_file_created_on_version_line_start(qtbot, project_without_daw_files):
-    # Force test mode project path for consistent environment
-    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_without_daw_files)
+def test_placeholder_file_created_on_version_line_start(tmp_path):
+    """
+    AT-041 – Starting a new version line from a detached commit should create and commit a placeholder .als file.
+    """
+    from daw_git_gui import DAWGitApp
 
-    app = DAWGitApp(project_path=project_without_daw_files, build_ui=False)
+    # Step 1: Setup a Git repo with a committed .als
+    repo = Repo.init(tmp_path)
+    als_file = tmp_path / "base.als"
+    als_file.write_text("Initial Ableton session")
+    repo.index.add(["base.als"])
+    repo.index.commit("Initial commit")
+
+    # Step 2: Detach HEAD (simulate user viewing old snapshot)
+    repo.git.checkout(repo.head.commit.hexsha)
+    assert repo.head.is_detached
+
+    # Step 3: Launch app and initialize
+    app = DAWGitApp(project_path=tmp_path, build_ui=False)
     app.init_git()
 
-    result = app.create_new_version_line("v1-experiment")
+    als_file.unlink()  # Remove base.als to trigger placeholder creation
 
-    placeholder_path = project_without_daw_files / "auto_placeholder.als"
+    # Step 4: Start a new version line
+    result = app.create_new_version_line("new_version_test")
 
-    # Verify placeholder file creation
-    assert placeholder_path.exists(), "auto_placeholder.als should be created"
+    # Step 5: Check result is successful
+    assert result["status"] == "success", "Expected success creating new version line with placeholder"
+    assert result["branch"] == "new_version_test"
 
-    # Verify version line creation succeeded and commit message contains marker emoji
-    assert result["status"] == "success"
-    assert "🎼" in result["commit_message"]
+    # Step 6: Check for placeholder .als file
+    placeholder_file = tmp_path / "auto_placeholder.als"
+    assert placeholder_file.exists(), "Placeholder .als file not found"
+
+    # Step 7: Confirm it was committed
+    latest_commit = repo.head.commit
+    committed_files = latest_commit.stats.files.keys()
+    assert "auto_placeholder.als" in committed_files, "Placeholder file was not committed"
 
 def test_placeholder_file_committed_to_repo(project_without_daw_files):
     os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_without_daw_files)

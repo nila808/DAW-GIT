@@ -169,10 +169,8 @@ class DAWGitApp(QWidget):
 
 
     def setup_ui(self):
-        from PyQt6.QtCore import QTimer
-        from PyQt6.QtWidgets import QAbstractItemView  # Required for scrollToItem
+        # ⏱ Initial timed commit history load
         self.safe_single_shot(250, self.load_commit_history, parent=self)
-
         self.setWindowTitle("DAW Git Version Control")
         self.setWindowIcon(QIcon(str(self.resource_path("icon.png"))))
         self.resize(900, 700)
@@ -187,7 +185,7 @@ class DAWGitApp(QWidget):
         self.unsaved_timer = self.startTimer(800)
         main_layout.addWidget(self.unsaved_indicator)
 
-        # 📁 Project tracking label
+        # 📁 Project tracking info label
         self.project_label = QLabel()
         self.project_label.setObjectName("project_label")
         self.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
@@ -202,145 +200,118 @@ class DAWGitApp(QWidget):
 
         self.update_project_label()
 
-        # Status label
+        # 📊 Project status label
         self.status_label = QLabel("Status: Ready")
         self.status_label.setObjectName("status_label")
         main_layout.addWidget(self.status_label)
 
-        # Project Setup button
-        setup_label = QLabel("🎚️ Step 1: Choose your Ableton or Logic project folder")
-        setup_label.setStyleSheet("font-weight: bold; margin-bottom: 4px;")
-        setup_btn = QPushButton("Start Tracking")
-        setup_btn.setToolTip("This will start tracking the folder where your current Ableton or Logic project is saved.")
-        setup_btn.clicked.connect(self.run_setup)
-        main_layout.addWidget(setup_btn)
+        # 🎚️ Project Setup Section
+        self.setup_label = QLabel("🎚️ Step 1: Choose your Ableton or Logic project folder")
+        self.setup_label.setStyleSheet("font-weight: bold; margin-bottom: 4px;")
+        self.setup_btn = QPushButton("Start Tracking")
+        self.setup_btn.setToolTip("This will start tracking the folder where your current Ableton or Logic project is saved.")
+        self.setup_btn.clicked.connect(self.run_setup)
+        main_layout.addWidget(self.setup_btn)
 
-        # ✅ Branch dropdown
+        # ✅ Branch Dropdown
         self.branch_dropdown = QComboBox()
         self.branch_dropdown.setToolTip("🎚️ Switch to another version line")
         self.branch_dropdown.currentIndexChanged.connect(self.on_branch_selected)
         main_layout.addWidget(self.branch_dropdown)
 
-        # 🧰 Control buttons row
+        # 🧰 Control Buttons
         controls_layout = QHBoxLayout()
-        
-        change_btn = QPushButton("Change Project Folder")
-        change_btn.clicked.connect(self.change_project_folder)
-        
-        clear_btn = QPushButton("Clear Saved Project")
-        clear_btn.clicked.connect(self.clear_saved_project)
-
-        snapshot_export_btn = QPushButton("Export Snapshot")
-        snapshot_export_btn.clicked.connect(self.export_snapshot)
-        snapshot_import_btn = QPushButton("Import Snapshot")
-        snapshot_import_btn.clicked.connect(self.import_snapshot)
-        
-        restore_btn = QPushButton("Restore Last Backup")
-        restore_btn.clicked.connect(self.restore_last_backup)
-
-        controls_layout.addWidget(change_btn)
-        controls_layout.addWidget(clear_btn)
-        controls_layout.addWidget(snapshot_export_btn)
-        controls_layout.addWidget(snapshot_import_btn)
-        controls_layout.addWidget(restore_btn)
-
+        self.change_folder_btn = QPushButton("Change Project Folder")
+        self.change_folder_btn.clicked.connect(self.change_project_folder)
+        self.clear_project_btn = QPushButton("Clear Saved Project")
+        self.clear_project_btn.clicked.connect(self.clear_saved_project)
+        self.export_btn = QPushButton("Export Snapshot")
+        self.export_btn.clicked.connect(self.export_snapshot)
+        self.import_btn = QPushButton("Import Snapshot")
+        self.import_btn.clicked.connect(self.import_snapshot)
+        self.restore_backup_btn = QPushButton("Restore Last Backup")
+        self.restore_backup_btn.clicked.connect(self.restore_last_backup)
+        controls_layout.addWidget(self.change_folder_btn)
+        controls_layout.addWidget(self.clear_project_btn)
+        controls_layout.addWidget(self.export_btn)
+        controls_layout.addWidget(self.import_btn)
+        controls_layout.addWidget(self.restore_backup_btn)
         main_layout.addLayout(controls_layout)
 
-        # 📝 Commit inputs (renamed to Snapshot Notes / Label)
+        # 📝 Commit / Snapshot Notes
         self.commit_message = QTextEdit()
         self.commit_message.setPlaceholderText("Describe what changed in this snapshot")
         self.commit_message.setFixedHeight(60)
-
         self.commit_tag = QTextEdit()
         self.commit_tag.setPlaceholderText("Add a tag or label (optional)")
         self.commit_tag.setFixedHeight(40)
-
-        # Renamed Commit buttons
-        commit_btn = QPushButton("💾 Save Snapshot")
-        commit_btn.setMinimumHeight(36)
-        commit_btn.setToolTip("Save the current version of your DAW project")
-        commit_btn.clicked.connect(lambda: self.commit_changes(self.commit_message.toPlainText()))
-
-        auto_commit_btn = QPushButton("🎹 Auto-Save Snapshot")
-        auto_commit_btn.setMinimumHeight(36)
-        auto_commit_btn.setToolTip("Automatically save snapshots while working")
-        auto_commit_btn.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
-
+        self.commit_btn = QPushButton("💾 Save Snapshot")
+        self.commit_btn.setMinimumHeight(36)
+        self.commit_btn.setToolTip("Save the current version of your DAW project")
+        self.commit_btn.clicked.connect(lambda: self.commit_changes(self.commit_message.toPlainText()))
+        self.auto_save_checkbox = QPushButton("🎹 Auto-Save Snapshot")
+        self.auto_save_checkbox.setMinimumHeight(36)
+        self.auto_save_checkbox.setToolTip("Automatically save snapshots while working")
+        self.auto_save_checkbox.clicked.connect(lambda: self.auto_commit("Auto snapshot", "auto"))
         commit_layout = QVBoxLayout()
         commit_layout.addWidget(QLabel("Snapshot Notes:"))
         commit_layout.addWidget(self.commit_message)
         commit_layout.addWidget(QLabel("Optional Label:"))
         commit_layout.addWidget(self.commit_tag)
-        commit_layout.addWidget(commit_btn)
-        commit_layout.addWidget(auto_commit_btn)
+        commit_layout.addWidget(self.commit_btn)
+        commit_layout.addWidget(self.auto_save_checkbox)
         main_layout.addLayout(commit_layout)
 
-        # ⬅️ Checkout + Info buttons (renamed)
+        # ⬅️ Checkout + Info Buttons
         checkout_layout = QHBoxLayout()
-        checkout_selected_btn = QPushButton("🎧 Load This Snapshot")
-        checkout_selected_btn.setToolTip("Load this version of your project safely")
-        checkout_selected_btn.clicked.connect(self.checkout_selected_commit)
-
-        if self.current_commit_id:
-            self.checkout_selected_commit(self.current_commit_id)
-        else:
-            print("📌 No version locked in — staying on current HEAD")
-
-        what_commit_btn = QPushButton("📍 Where Am I?")
-        what_commit_btn.setToolTip("Show current snapshot version")
-        what_commit_btn.clicked.connect(self.show_current_commit)
-
-        branch_switch_btn = QPushButton("🔀 Switch Version Line")
-        branch_switch_btn.setToolTip("Switch to another creative path or saved version")
-        branch_switch_btn.clicked.connect(self.switch_branch)
-
-        checkout_layout.addWidget(checkout_selected_btn)
-        checkout_layout.addWidget(what_commit_btn)
-        checkout_layout.addWidget(branch_switch_btn)
+        self.load_snapshot_btn = QPushButton("🎧 Load This Snapshot")
+        self.load_snapshot_btn.setToolTip("Load this version of your project safely")
+        self.load_snapshot_btn.clicked.connect(self.checkout_selected_commit)
+        self.where_am_i_btn = QPushButton("📍 Where Am I?")
+        self.where_am_i_btn.setToolTip("Show current snapshot version")
+        self.where_am_i_btn.clicked.connect(self.show_current_commit)
+        self.switch_branch_btn = QPushButton("🔀 Switch Version Line")
+        self.switch_branch_btn.setToolTip("Switch to another creative path or saved version")
+        self.switch_branch_btn.clicked.connect(self.switch_branch)
+        checkout_layout.addWidget(self.load_snapshot_btn)
+        checkout_layout.addWidget(self.where_am_i_btn)
+        checkout_layout.addWidget(self.switch_branch_btn)
         main_layout.addLayout(checkout_layout)
 
-        # 🎼 Start New Version Line
-        self.new_version_line_button = QPushButton("🎼 Start New Version Line")
-        self.new_version_line_button.setToolTip("Start a new creative branch from here")
-        self.new_version_line_button.clicked.connect(self.start_new_version_line)
-        main_layout.addWidget(self.new_version_line_button)
+        # 🎼 New Version Branch
+        self.new_branch_btn = QPushButton("🎼 Start New Version Line")
+        self.new_branch_btn.setToolTip("Start a new creative branch from here")
+        self.new_branch_btn.clicked.connect(self.start_new_version_line)
+        main_layout.addWidget(self.new_branch_btn)
 
-        # 🎯 Return to Latest button
-        self.return_latest_btn = QPushButton("🎯 Return to Latest")
-        self.return_latest_btn.setToolTip("Return to the most recent version")
-        self.return_latest_btn.clicked.connect(self.return_to_latest_clicked)
-        main_layout.addWidget(self.return_latest_btn)
+        # 🎯 Return to Latest Button
+        self.return_to_latest_btn = QPushButton("🎯 Return to Latest")
+        self.return_to_latest_btn.setToolTip("Return to the most recent version")
+        self.return_to_latest_btn.clicked.connect(self.return_to_latest_clicked)
+        main_layout.addWidget(self.return_to_latest_btn)
 
-        # 🔥 Detached HEAD warning and version line status block
+        # 🔥 Detached HEAD + Version Status Labels
         self.detached_warning_label = QLabel("")
         self.detached_warning_label.setStyleSheet("color: orange; font-style: italic; padding: 4px;")
         self.detached_warning_label.setWordWrap(True)
         self.detached_warning_label.hide()
-
         self.version_line_label = QLabel("🎚️ No active version line")
         self.version_line_label.setStyleSheet("color: #999; font-style: italic;")
-
         self.branch_label = QLabel("Session branch: unknown • Current take: unknown")
         self.branch_label.setObjectName("branchLabel")
-
         self.commit_label = QLabel("🎶 Commit: unknown")
 
-        # 🎛️ Role buttons
+        # 🧷 Role Buttons (Main / Creative / Alt)
         main_label = self.get_branch_take_label("main")
         experiment_label = self.get_branch_take_label("experiment")
         altmix_label = self.get_branch_take_label("alt_mix")
-
         self.btn_set_version_main = QPushButton(f"🎛️ Main Mix: {main_label}")
         self.btn_set_version_main.clicked.connect(self.tag_main_mix)
         self.btn_set_version_main.clicked.connect(lambda: self.switch_to_branch_ui("main"))
-
         self.btn_set_experiment = QPushButton(f"🧪 Creative Take: {experiment_label}")
         self.btn_set_experiment.clicked.connect(self.tag_creative_take)
-
         self.btn_set_alternate = QPushButton(f"🎚️ Alt Mixdown: {altmix_label}")
         self.btn_set_alternate.clicked.connect(self.tag_alt_mix)
-
-        # 🧩 Group for status + role buttons
         self.lower_commit_info_widget = QWidget()
         lower_commit_layout = QVBoxLayout()
         lower_commit_layout.addWidget(self.detached_warning_label)
@@ -353,22 +324,28 @@ class DAWGitApp(QWidget):
         self.lower_commit_info_widget.setLayout(lower_commit_layout)
         main_layout.addWidget(self.lower_commit_info_widget)
 
-        # ✅ Remote push option
+        # ✅ Remote Checkbox
         self.remote_checkbox = QCheckBox("Push to remote after snapshot")
         main_layout.addWidget(self.remote_checkbox)
 
-        # 🎧 Launch Ableton button
+        # 🎧 DAW Launch Button
         self.open_in_daw_btn = QPushButton("🎧 Open This Version in DAW")
         self.open_in_daw_btn.setVisible(False)
         self.open_in_daw_btn.clicked.connect(self.open_latest_daw_project)
         main_layout.addWidget(self.open_in_daw_btn)
 
-        # 📜 Commit History Table (renamed section title)
+        # 📜 Version History Table
         history_group = QGroupBox("Version History")
         history_layout = QVBoxLayout()
-        self.history_table = QTableWidget(0, 4)
-        self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+
+        self.history_table = QTableWidget()
+        self.history_table.setColumnCount(4)
         self.history_table.setHorizontalHeaderLabels(["Tag", "Commit ID", "Message", "Branch"])
+        self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.history_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.history_table.setWordWrap(False)
+        self.history_table.setShowGrid(True)
+        self.history_table.verticalHeader().setVisible(False)
 
         header = self.history_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -379,19 +356,25 @@ class DAWGitApp(QWidget):
 
         self.history_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.history_table.customContextMenuRequested.connect(self.show_commit_context_menu)
-        self.history_table.setMinimumHeight(300)
 
-        item = self.history_table.item(0, 3)
-        print("DEBUG COLUMN 3:", item.text() if item else "None")
+        # ✅ Wrap in scroll area
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(self.history_table)
 
-        self.history_table.resizeColumnsToContents()
-        history_layout.addWidget(self.history_table)
+        history_layout.addWidget(scroll_area)
         history_group.setLayout(history_layout)
         main_layout.addWidget(history_group)
 
-        self.setLayout(main_layout)
-        self.safe_single_shot(250, self.load_commit_history, parent=self)
+        # 🔘 Tooltip Toggle (Footer)
+        self.show_tooltips_checkbox = QCheckBox("Show Tooltips")
+        self.show_tooltips_checkbox.setChecked(True)
+        self.show_tooltips_checkbox.stateChanged.connect(self.toggle_tooltips)
+        main_layout.addWidget(self.show_tooltips_checkbox)
 
+        self.setLayout(main_layout)
+        self.update_role_buttons()
+        self.safe_single_shot(250, self.load_commit_history, parent=self)
 
 
     def maybe_show_welcome_modal(self):
@@ -417,7 +400,7 @@ class DAWGitApp(QWidget):
                 if selected:
                     self.project_path = Path(selected)
                     self.init_git()  # Initialize git in the selected folder
-                    self.update_log()  # Update the project log
+                    self.load_commit_history()  # Update the project log
                     return
                 else:
                     # User cancelled the selection, close the setup
@@ -511,25 +494,20 @@ class DAWGitApp(QWidget):
 
     def init_git(self):
         print("[DEBUG] Initializing Git...")  # Debug entry point
-        
-        # Get the folder where this script lives — DAWGitApp root
-        app_root = Path(__file__).resolve().parent
 
-        # Check if the project path is the app root — safety check to prevent tracking the app itself
+        app_root = Path(__file__).resolve().parent
         if self.project_path and self.project_path.resolve() == app_root:
             print("⚠️ Refusing to track DAWGitApp root folder — not a valid project.")
             self.project_path = None
             return {"status": "invalid", "message": "Cannot track app root folder."}
 
-        # ✅ Safety: ensure project_path is valid before proceeding
         if not self.project_path or not self.project_path.exists():
             print("❌ Invalid or missing project path. Aborting Git setup.")
             self.project_path = None
             return {"status": "invalid", "message": "Missing or invalid project path."}
 
-        # Validate DAW project contains .als or .logicx files
         daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
-        print(f"[DEBUG] Found DAW files: {daw_files}")  # Debug DAW files found
+        print(f"[DEBUG] Found DAW files: {daw_files}")
 
         is_test_mode = os.getenv("DAWGIT_TEST_MODE") == "1"
         if not daw_files and not is_test_mode:
@@ -542,16 +520,14 @@ class DAWGitApp(QWidget):
         try:
             if (self.project_path / ".git").exists():
                 try:
-                    # Try to load the existing repo
                     print(f"[DEBUG] Found existing Git repo at {self.project_path}")
-                    temp_repo = Repo(self.project_path)
-                    self.repo = temp_repo  # ✅ Always assign
+                    self.repo = Repo(self.project_path)
 
-                    # If repo is in detached HEAD state, handle appropriately
                     if self.repo.head.is_detached:
                         print("🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.")
                         
-                        self.status_label.setText("🔍 Detached snapshot • Not on a version line")
+                        if hasattr(self, "status_label"):
+                            self.status_label.setText("🔍 Detached snapshot • Not on a version line")
                         if hasattr(self, "detached_warning_label"):
                             self.detached_warning_label.setText(
                                 "🧭 You’re viewing a snapshot — to save changes, return to latest or start a new version line."
@@ -560,12 +536,12 @@ class DAWGitApp(QWidget):
 
                         return {"status": "detached", "message": "Detached HEAD state detected."}
                     else:
-                        self.bind_repo()  # Bind the repo to the app (if not detached)
-                        self.update_status_label()
+                        self.bind_repo()
+                        if hasattr(self, "update_status_label"):
+                            self.update_status_label()
 
                     print("ℹ️ Existing Git repo found — checking status...")
 
-                    # Auto-commit any DAW files if repo has no commits
                     if not self.repo.head.is_valid():
                         print("🧪 No commits found — auto-committing initial DAW files...")
                         self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
@@ -578,22 +554,27 @@ class DAWGitApp(QWidget):
 
             else:
                 print(f"[DEBUG] No existing repo found. Initializing new repo at {self.project_path}")
-                self.repo = Repo.init(self.project_path)  # Initialize a new Git repo
+                self.repo = Repo.init(self.project_path)
                 print("✅ New Git repo initialized.")
-                self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])  # Add DAW files
-                self.repo.index.commit("Initial commit")  # Make the first commit
-                self.save_last_project_path(self.project_path)  # Save the project path in settings
-                QMessageBox.information(self, "Repo Initialized", "✅ Git repository initialized for this DAW project.")
+                self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
+                self.repo.index.commit("Initial commit")
+                self.save_last_project_path(self.project_path)
+                if hasattr(self, "project_label"):
+                    QMessageBox.information(
+                        self,
+                        "Repo Initialized",
+                        "✅ Git repository initialized for this DAW project."
+                    )
 
-            self.update_status_label()  # Update status after repo setup
+            if hasattr(self, "update_status_label"):
+                self.update_status_label()
 
-            # Refresh commit log if we can
             try:
                 if self.repo and self.repo.head.is_valid():
                     if hasattr(self, "history_table"):
-                        self.current_commit_id = self.repo.head.commit.hexsha  # Make sure this is always set here
+                        self.current_commit_id = self.repo.head.commit.hexsha
                         print(f"[DEBUG] self.current_commit_id before update_log: {self.current_commit_id}")
-                        self.update_log()
+                        self.load_commit_history()
                     else:
                         print("⚠️ Skipping update_log(): history_table not initialized yet.")
             except Exception as log_err:
@@ -604,18 +585,18 @@ class DAWGitApp(QWidget):
             self.repo = None
             return {"status": "error", "message": str(e)}
 
-        return {"status": "ok"}  # Successful initialization
+        return {"status": "ok"}
+
 
 
     def bind_repo(self, path=None):
         """
         Safely rebind the repo object, update commit ID and refresh UI state.
         """
-        from git import Repo
         try:
             repo_path = Path(path or self.project_path)
             self.repo = Repo(repo_path)
-            self.load_commit_roles()  # ✅ Ensure roles are available after rebinding          
+            self.load_commit_roles()
 
             if self.repo.head.is_valid():
                 self.current_commit_id = self.repo.head.commit.hexsha
@@ -624,18 +605,22 @@ class DAWGitApp(QWidget):
                 self.current_commit_id = None
                 print("[DEBUG] HEAD not valid or detached")
 
-            # ✅ Refresh commit log UI
-            if hasattr(self, "update_log"):
-                self.update_log()
+            # ✅ Only refresh history UI if table exists
+            if hasattr(self, "history_table"):
+                self.load_commit_history()
 
-            # ✅ Force Git status label refresh after rebinding
             if hasattr(self, "update_status_label"):
                 self.update_status_label()
+
+            if hasattr(self, "update_role_buttons"):
+                self.update_role_buttons()
 
         except Exception as e:
             print(f"[ERROR] Failed to bind repo: {e}")
             self.repo = None
             self.current_commit_id = None
+
+
 
 
     def update_branch_dropdown(self):
@@ -656,80 +641,90 @@ class DAWGitApp(QWidget):
         except Exception as e:
             print(f"[WARN] Failed to update branch dropdown: {e}")
 
-    def update_log(self):
-        self.load_commit_roles()
-        if not hasattr(self, "history_table"):
-            print("⚠️ Skipping update_log(): no history_table defined yet.")
-            return
 
-        self.history_table.setRowCount(0)  # Clear previous rows
-        self.history_table.clearSelection()  # ✅ Also clear previous selection
-
-        if not self.repo or not hasattr(self.repo, "head") or not self.repo.head or not self.repo.head.is_valid():
-            print("ℹ️ Skipping update_log — no valid repo or commits found.")
-            return
-        
-        # ✅ Load commit roles from disk if available
-        self.load_commit_roles()
-
+    def return_to_latest_clicked(self):
         try:
-            commits = list(self.repo.iter_commits(max_count=50))
-        except Exception as e:
-            print(f"[DEBUG] Could not retrieve commits: {e}")
-            return
+            if not self.repo:
+                self._show_warning("No Git repository loaded.")
+                return
 
-        commits.reverse()  # ✅ Align row order with modals
-        current_id = getattr(self, "current_commit_id", "")
-        id_short = current_id[:7] if isinstance(current_id, str) else "None"
+            # 🎯 If in detached HEAD, switch back to main
+            if self.repo.head.is_detached:
+                print("[DEBUG] Repo is in detached HEAD. Attempting to switch to 'main'")
 
-        for i, commit in enumerate(commits):
-            self.history_table.insertRow(i)
-            tag = next((t.name for t in self.repo.tags if t.commit == commit), '')
-            tag_item = QTableWidgetItem(tag)
-            marker = " 🎯" if current_id == commit.hexsha else ""
-            commit_id_item = QTableWidgetItem(
-                f"[#{i+1}] [{commit.hexsha[:7]}]{marker} ({commit.committed_datetime.strftime('%Y-%m-%d')} by {commit.author.name})"
-            )
-            message_item = QTableWidgetItem(commit.message.strip())
-
-            self.history_table.setItem(i, 0, tag_item)
-            self.history_table.setItem(i, 1, commit_id_item)
-            self.history_table.setItem(i, 2, message_item)
-
-            tag_item.setToolTip(tag)
-            commit_id_item.setToolTip(commit.hexsha)
-            message_item.setToolTip(commit.message.strip())
-
-            if current_id == commit.hexsha:
-                for col in range(self.history_table.columnCount()):
-                    item = self.history_table.item(i, col)
-                    if item:
-                        item.setBackground(Qt.GlobalColor.green)
-                self.history_table.selectRow(i)
-
-            print(f"[DEBUG] Comparing {id_short} to {commit.hexsha[:7]} (row {i})")
-
-        self.history_table.resizeColumnsToContents()
-
-        # ✅ Auto-scroll to selected row
-        selected_row = self.history_table.currentRow()
-        print(f"[DEBUG] Selected row: {selected_row}")
-        if selected_row >= 0:
-            self.history_table.scrollToItem(self.history_table.item(selected_row, 0), QTableWidget.ScrollHint.PositionAtCenter)
-
-        # ✅ Enable or disable the delete commit button
-        if hasattr(self, "delete_commit_button") and isinstance(current_id, str) and current_id:
-            try:
-                can_delete = self.is_commit_deletable(current_id)
-                self.delete_commit_button.setEnabled(can_delete)
-                self.delete_commit_button.setToolTip(
-                    "Delete this commit from history." if can_delete else
-                    "This commit is protected or not part of the current branch."
+                subprocess.run(
+                    ["git", "switch", "main"],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
                 )
-            except Exception as e:
-                print(f"[WARN] Could not evaluate commit deletability: {e}")
 
-        print(f"[DEBUG] Final selected row after update_log(): {selected_row}")
+                subprocess.run(
+                    ["git", "lfs", "checkout"],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
+
+                # ✅ Rebind and refresh everything
+                self.bind_repo()
+                self.current_commit_id = self.repo.head.commit.hexsha
+                print(f"[DEBUG] Repo rebound: HEAD = {self.current_commit_id[:7]}")
+
+                self.load_commit_history()
+
+                # ✅ Update UI labels and role buttons
+                self.update_status_label()
+                self.update_role_buttons()
+                self.update_project_label()
+                self.branch_label.setText(f"Session branch: {self.repo.active_branch.name} • Current take: {self.get_current_take_name()}")
+                self.commit_label.setText(f"🎶 Commit: {self.current_commit_id[:7]}")
+                self.detached_warning_label.hide()
+                self.open_in_daw_btn.setVisible(True)
+
+                # ✅ Scroll to HEAD row after UI settles
+                head_sha = self.repo.head.commit.hexsha[:7]
+                selected_row = None
+                for row in range(self.history_table.rowCount()):
+                    item = self.history_table.item(row, 1)
+                    if item and item.toolTip().startswith(head_sha):
+                        selected_row = row
+                        break
+
+                if selected_row is not None:
+                    QTimer.singleShot(0, lambda: (
+                        self.history_table.scrollToItem(
+                            self.history_table.item(selected_row, 1),
+                            QTableWidget.ScrollHint.PositionAtCenter
+                        ),
+                        self.history_table.selectRow(selected_row)
+                    ))
+                    print(f"[DEBUG] ✅ Delayed scroll and select to HEAD row {selected_row}")
+
+                # ✅ Notify user
+                QMessageBox.information(
+                    self,
+                    "Returned to Latest",
+                    "🎯 You’re now back on the latest version line: 'main'"
+                )
+
+            else:
+                # 🧠 Already on a branch (e.g., main)
+                current_branch = self.repo.active_branch.name
+                self._show_info(f"Already on branch '{current_branch}'. No action needed.")
+
+                # 🔄 Still refresh UI just in case
+                self._set_commit_id_from_selected_row()
+                self.update_status_label()
+                self.update_role_buttons()
+                self.update_project_label()
+                self.branch_label.setText(f"Session branch: {current_branch} • Current take: {self.get_current_take_name()}")
+                self.commit_label.setText(f"🎶 Commit: {self.current_commit_id[:7]}")
+                self.detached_warning_label.hide()
+                self.open_in_daw_btn.setVisible(True)
+
+        except Exception as e:
+            self._show_error(f"❌ Failed to return to the latest commit:\n\n{e}")
 
     
     def run_setup(self):
@@ -903,7 +898,8 @@ class DAWGitApp(QWidget):
             )
             self.bind_repo()
             self.init_git()
-            self.update_log()
+            self.load_commit_history()
+
             self.update_session_branch_display()
             return {"status": "ok", "message": f"Switched to branch '{target_branch}'."}
 
@@ -977,7 +973,8 @@ class DAWGitApp(QWidget):
             self.repo.index.commit(commit_message)
             # ✅ Refresh HEAD and UI
             self.current_commit_id = self.repo.head.commit.hexsha
-            self.update_log()
+            self.load_commit_history()
+
             self.update_status_label()
             if hasattr(self, "commit_message"):
                 self.commit_message.clear()
@@ -1002,6 +999,39 @@ class DAWGitApp(QWidget):
             if hasattr(self, "_show_warning"):
                 self._show_warning(f"Error committing changes: {e}")
             return {"status": "error", "message": str(e)}
+
+
+    def update_role_buttons(self):
+        """
+        Enable/disable role assignment buttons based on Git HEAD state.
+        Update tooltips accordingly to guide the user.
+        """
+        if not self.repo or not self.repo.head.is_valid():
+            return
+
+        in_detached = self.repo.head.is_detached
+
+        # Guard and safely update btn_set_version_main
+        if hasattr(self, "btn_set_version_main"):
+            self.btn_set_version_main.setEnabled(not in_detached)
+            self.btn_set_version_main.setToolTip(
+                "❌ You’re not on a version line. Use 'Start New Version Line' to enable tagging."
+                if in_detached else "Assign this snapshot as your Main Mix"
+            )
+
+        if hasattr(self, "btn_set_experiment"):
+            self.btn_set_experiment.setEnabled(not in_detached)
+            self.btn_set_experiment.setToolTip(
+                "❌ Tagging disabled. You're viewing a snapshot."
+                if in_detached else "Assign this snapshot as a Creative Take"
+            )
+
+        if hasattr(self, "btn_set_alternate"):
+            self.btn_set_alternate.setEnabled(not in_detached)
+            self.btn_set_alternate.setToolTip(
+                "❌ Tagging disabled. You're viewing a snapshot."
+                if in_detached else "Assign this snapshot as an Alternate Mixdown"
+            )
 
 
 
@@ -1034,47 +1064,56 @@ class DAWGitApp(QWidget):
         QMessageBox.information(self, "Current Commit", body)
 
     
-    def create_new_version_line(self, branch_name):
+    def create_new_version_line(self, branch_name: str):
+        if not self.project_path:
+            return {"status": "error", "message": "No project path set"}
+
         try:
-            if branch_name in [b.name for b in self.repo.branches]:
-                self._show_warning(f"Branch '{branch_name}' already exists.")
-                return {"status": "error", "message": f"Branch '{branch_name}' already exists."}
+            if self.repo is None:
+                self.repo = Repo(self.project_path)
 
-            # ✅ Handle detached HEAD case safely
-            base_commit = self.repo.head.commit.hexsha
-            self.repo.git.switch("-c", branch_name, base_commit)
+            # Safety: if not detached, detach to start new version line from commit
+            if not self.repo.head.is_detached:
+                self.repo.git.checkout(self.repo.head.commit.hexsha)
 
-            # Refresh repo object to reflect new branch context
-            self.repo = Repo(self.repo.working_tree_dir)
+            # ✅ Step 1: Create and checkout the new branch
+            new_branch = self.repo.create_head(branch_name)
+            new_branch.checkout()
 
-            # ✅ Add version marker
-            marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
-            marker_path.write_text(f"Version line started: {branch_name}")
+            # ✅ Step 2: Create .version_marker file
+            marker_path = Path(self.project_path) / ".version_marker"
+            marker_path.write_text("🎼 Auto-created marker")
 
-            if marker_path.exists():
-                self.repo.index.add([str(marker_path.relative_to(self.repo.working_tree_dir))])
-            else:
-                print(f"[WARN] .version_marker not created at {marker_path}")
+            files_to_commit = [".version_marker"]
 
-            # ✅ Ensure there's at least one DAW file committed
-            project_file = next(Path(self.repo.working_tree_dir).glob("*.als"), None)
-            if not project_file:
-                placeholder_file = Path(self.repo.working_tree_dir) / "auto_placeholder.als"
-                placeholder_file.write_text("Placeholder DAW content")
-                self.repo.index.add([str(placeholder_file.relative_to(self.repo.working_tree_dir))])
-                print("🎛️ Created auto_placeholder.als file")
+            # ✅ Step 3: Create a placeholder .als if none are found
+            daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
+            if not daw_files:
+                placeholder = Path(self.project_path) / "auto_placeholder.als"
+                placeholder.write_text("This is a placeholder Ableton file")
+                files_to_commit.append(str(placeholder.name))
 
-            # ✅ Commit all added files
+            # ✅ Step 4: Commit all new files together
+            self.repo.index.add(files_to_commit)
             commit_message = f"🎼 Start New Version Line: {branch_name}"
             self.repo.index.commit(commit_message)
-            print(f"[DEBUG] Version line commit: {commit_message}")
-            self.update_log()
-            self.update_session_branch_display()
 
-            return {"status": "success", "commit_message": commit_message}
+            # ✅ Step 5: Refresh app state (safe for test mode)
+            if hasattr(self, "update_log"):
+                self.update_log()
+            if hasattr(self, "update_status_label"):
+                self.update_status_label()
+            if hasattr(self, "update_role_buttons"):
+                self.update_role_buttons()
+
+            return {
+                "status": "success",
+                "branch": branch_name,
+                "commit_message": commit_message
+            }
 
         except Exception as e:
-            print(f"❌ Failed to create new version line: {e}")
+            print(f"[ERROR] create_new_version_line: {e}")
             return {"status": "error", "message": str(e)}
 
 
@@ -1316,7 +1355,8 @@ class DAWGitApp(QWidget):
             )
 
             self.init_git()
-            self.update_log()
+            self.load_commit_history()
+
             self.open_latest_daw_project()
 
         except subprocess.CalledProcessError as e:
@@ -1594,7 +1634,8 @@ class DAWGitApp(QWidget):
                 except subprocess.CalledProcessError:
                     print("[WARN] Skipping remote push: no remote set")
 
-            self.update_log()
+            self.load_commit_history()
+
             self.update_status_label()
             msg = f"✅ Auto-commit completed:\n\n{message}"
             QMessageBox.information(
@@ -1738,16 +1779,29 @@ class DAWGitApp(QWidget):
                     "You have untracked files in your project folder.\n\n"
                     "They won’t be deleted, but may be ignored in this snapshot view."
                 )
-                self._show_warning(msg)
-                result["status"] = "warning"
-                result["untracked"] = untracked
-                result["message"] = msg  # ✅ Add this line
+                print(f"[WARNING] Untracked files: {untracked}")
+                result = {
+                    "status": "warning",
+                    "untracked": untracked,
+                    "message": msg,
+                }
+
+                # ✅ Return early — skip full checkout
+                return result
+
 
             # Avoid re-checkout if we're already on this commit
             current_sha = self.repo.head.commit.hexsha
             if current_sha == commit_sha:
                 print("[DEBUG] Already on selected commit — skipping checkout.")
-                return result  # ✅ Early return now respects warning status
+                QMessageBox.information(
+                    self,
+                    "Already Viewing Snapshot",
+                    "🎧 You're already viewing this snapshot.\n\n"
+                    f"Commit ID: {commit_sha[:7]}"
+                )
+                result["message"] = "Already on this commit — no checkout needed."
+                return result
             else:
                 print(f"[DEBUG] Checking out commit: {commit_sha}")
                 subprocess.run(
@@ -1765,9 +1819,19 @@ class DAWGitApp(QWidget):
             )
 
             self.bind_repo()
-            self.current_commit_id = self.repo.head.commit.hexsha
+
+            # ✅ Only update current commit if repo is valid
+            if self.repo and self.repo.head.is_valid():
+                self.current_commit_id = self.repo.head.commit.hexsha
+
+            # ✅ Reinitialize Git safely
             self.init_git()
-            self.update_log()
+
+            # ✅ Only update history if UI is active
+            if hasattr(self, "history_table"):
+                self.load_commit_history()
+
+            self.update_role_buttons()
 
             checked_out_commit = self.repo.commit(commit_sha)
             self.show_commit_checkout_info(checked_out_commit)
@@ -1776,6 +1840,7 @@ class DAWGitApp(QWidget):
                 item = self.history_table.item(row, 1)
                 if item and commit_sha.startswith(item.text().strip()):
                     self.history_table.selectRow(row)
+                    self.history_table.scrollToItem(item)
                     break
 
             QMessageBox.information(
@@ -1852,7 +1917,8 @@ class DAWGitApp(QWidget):
 
                 self.repo.git.checkout(selected)
                 self.current_commit_id = self.repo.head.commit.hexsha
-                self.update_log()
+                self.load_commit_history()
+
                 self.status_message(f"🎚 Switched to version line: {selected}")
                 latest_commit = self.repo.head.commit
                 self.show_commit_checkout_info(latest_commit)
@@ -1973,23 +2039,88 @@ class DAWGitApp(QWidget):
                 self._show_warning("No Git repository loaded.")
                 return
 
+            # 🎯 If in detached HEAD, switch back to main
             if self.repo.head.is_detached:
-                self.repo.git.switch("main")
-                self.repo = Repo(self.repo.working_tree_dir)
-                self.repo.head.reference = self.repo.heads.main  # ✅ Explicitly bind HEAD to 'main'
-                self.repo.head.reset(index=True, working_tree=True)
+                print("[DEBUG] Repo is in detached HEAD. Attempting to switch to 'main'")
+
+                subprocess.run(
+                    ["git", "switch", "main"],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
+
+                subprocess.run(
+                    ["git", "lfs", "checkout"],
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
+
+                # ✅ Rebind and refresh everything
                 self.bind_repo()
-                self._show_info("Returned to latest version on 'main'.")
+                self.current_commit_id = self.repo.head.commit.hexsha
+                self.highlight_and_scroll_to_head()
+                print(f"[DEBUG] Repo rebound: HEAD = {self.current_commit_id[:7]}")
+
+                self.load_commit_history()
+
+                # ✅ Scroll to HEAD SHA using tooltip match
+                head_sha = self.repo.head.commit.hexsha
+                found_row = None
+                for row in range(self.history_table.rowCount()):
+                    item = self.history_table.item(row, 1)  # column 1 = commit SHA
+                    if item and item.toolTip() == head_sha:
+                        self.history_table.selectRow(row)
+                        self.history_table.scrollToItem(item, QTableWidget.ScrollHint.PositionAtCenter)
+                        found_row = row
+                        print(f"[DEBUG] ✅ Matched HEAD SHA in tooltip — selected row {row}")
+                        break
+                if found_row is None:
+                    print("[WARN] HEAD commit not found in history table.")
+
+                # ✅ Update UI elements
+                self.update_status_label()
+                self.update_role_buttons()
+                self.update_project_label()
+                self.branch_label.setText(
+                    f"Session branch: {self.repo.active_branch.name} • Current take: {self.get_current_take_name()}"
+                )
+                self.commit_label.setText(f"🎶 Commit: {self.current_commit_id[:7]}")
+                self.detached_warning_label.hide()
+                self.open_in_daw_btn.setVisible(True)
+
+                # ✅ Notify user
+                QMessageBox.information(
+                    self,
+                    "Returned to Latest",
+                    "🎯 You’re now back on the latest version line: 'main'"
+                )
+
             else:
+                # 🧠 Already on a branch (e.g., main)
                 current_branch = self.repo.active_branch.name
                 self._show_info(f"Already on branch '{current_branch}'. No action needed.")
 
-            self.update_log()
-            self.update_status_label()
+                # 🔄 Refresh UI just in case
+                self._set_commit_id_from_selected_row()
+                self.update_status_label()
+                self.update_role_buttons()
+                self.update_project_label()
+                self.branch_label.setText(
+                    f"Session branch: {current_branch} • Current take: {self.get_current_take_name()}"
+                )
+                self.commit_label.setText(f"🎶 Commit: {self.current_commit_id[:7]}")
+                self.detached_warning_label.hide()
+                self.open_in_daw_btn.setVisible(True)
 
         except Exception as e:
-            self._show_error(f"Failed to return to latest: {e}")
+            self._show_error(f"❌ Failed to return to the latest commit:\n\n{e}")
 
+
+
+    def get_current_take_name(self):
+        return "(unknown)"
 
 
     def export_snapshot(self):
@@ -2120,58 +2251,57 @@ class DAWGitApp(QWidget):
 
         
     def load_commit_history(self):
-        # Ensure project path is always set
         if not self.project_path:
-            # Set a default path if project_path is None
-            self.project_path = Path(tempfile.mkdtemp())  # Creates a temporary directory
+            self.project_path = Path(tempfile.mkdtemp())
             print(f"[INFO] No project path set, using temporary path: {self.project_path}")
-        
+
         if not self.repo:
             print("❌ No Git repo loaded.")
             return
 
-        # ✅ Load commit roles from disk if available
         self.load_commit_roles()
 
         if not self.repo.head.is_valid():
             print("⚠️ Repo exists but has no commits yet.")
             self.history_table.setRowCount(0)
+            self.history_table.insertRow(0)
+            self.history_table.setItem(0, 0, QTableWidgetItem("–"))
+            self.history_table.setItem(0, 1, QTableWidgetItem("–"))
+            self.history_table.setItem(0, 2, QTableWidgetItem("No commits yet"))
+            self.history_table.setItem(0, 3, QTableWidgetItem("–"))
+            self.update_status_label()
+            self.update_role_buttons()
             return
 
-        # Proceed with loading commit history
         self.history_table.setRowCount(0)
-        self.history_table.clearSelection()  # ✅ Clear any previous selection
+        self.history_table.clearSelection()
+        selected_row = None
+        head_sha = self.repo.head.commit.hexsha
 
-        self.history_table.insertRow(0)
-        self.history_table.setItem(0, 0, QTableWidgetItem("–"))
-        self.history_table.setItem(0, 1, QTableWidgetItem("–"))
-        self.history_table.setItem(0, 2, QTableWidgetItem("No commits yet"))
-        self.history_table.setItem(0, 3, QTableWidgetItem("–"))
-
-        # ✅ Detect current branch safely
         try:
             current_branch = self.repo.active_branch.name
         except TypeError:
             current_branch = "(detached HEAD)"
 
-        for row, commit in enumerate(self.repo.iter_commits("HEAD", max_count=100)):
-            self.history_table.insertRow(row)
+        commits = list(self.repo.iter_commits("HEAD", max_count=100))
+        commits.reverse()  # ✅ Newest-first display (row 0 = latest commit)
 
+        for row, commit in enumerate(commits):
+            self.history_table.insertRow(row)
+            sha_short = commit.hexsha[:7]
             tag = self.get_tag_for_commit(commit.hexsha)
             short_msg = commit.message.strip().split("\n")[0]
-            commit_id = commit.hexsha[:7]
 
-            # ✅ Tooltip-preserving SHA item
-            commit_item = QTableWidgetItem(commit_id)
+            # Commit ID cell
+            commit_item = QTableWidgetItem(sha_short)
             commit_item.setToolTip(commit.hexsha)
             self.history_table.setItem(row, 1, commit_item)
-            print(f"[DEBUG] Tooltip set for row {row}: {commit.hexsha}")
 
-            # ✅ Insert tag and message
+            # Tag, Message, Branch columns
             self.history_table.setItem(row, 0, QTableWidgetItem(tag or ""))
             self.history_table.setItem(row, 2, QTableWidgetItem(short_msg))
 
-            # 🔍 Branch info
+            # Branch list
             try:
                 result = subprocess.run(
                     ["git", "branch", "--contains", commit.hexsha],
@@ -2185,7 +2315,7 @@ class DAWGitApp(QWidget):
                     for line in result.stdout.strip().splitlines()
                 ]
             except Exception as e:
-                print(f"[ERROR] Failed to get branches for {commit_id}: {e}")
+                print(f"[ERROR] Failed to get branches for {sha_short}: {e}")
                 branch_list = []
 
             if current_branch in branch_list:
@@ -2193,19 +2323,33 @@ class DAWGitApp(QWidget):
 
             branch_str = ", ".join(branch_list) if branch_list else "–"
             self.history_table.setItem(row, 3, QTableWidgetItem(branch_str))
-            print(f"[DEBUG] Row {row}: commit {commit_id} → branches: {branch_str}")
 
-            # ✅ Auto-select the row that matches HEAD
-            if commit.hexsha == self.repo.head.commit.hexsha:
+            # ✅ Mark the HEAD commit row
+            if commit.hexsha == head_sha:
                 self.history_table.selectRow(row)
-                print(f"[DEBUG] Selected current commit row {row}")
+                selected_row = row
+                print(f"[DEBUG] ✅ Matched HEAD SHA: {sha_short} → row {row}")
+                for col in range(self.history_table.columnCount()):
+                    item = self.history_table.item(row, col)
+                    if item:
+                        item.setBackground(Qt.GlobalColor.green)
+
+        self._set_commit_id_from_selected_row()
+        self.update_status_label()
+        self.update_role_buttons()
+
+        # ✅ Final scroll
+        if selected_row is not None:
+            self.history_table.scrollToItem(self.history_table.item(selected_row, 1), QTableWidget.ScrollHint.PositionAtCenter)
+            print(f"[DEBUG] ✅ Final scroll to HEAD row {selected_row}")
 
 
     def highlight_current_commit(self):
         try:
             current_commit = self.repo.head.commit.hexsha[:7]
             self.current_commit_id = self.repo.head.commit.hexsha
-            self.update_log()
+            self.load_commit_history()
+
 
             QMessageBox.information(
                 self,
@@ -2219,6 +2363,49 @@ class DAWGitApp(QWidget):
                 "Couldn’t Highlight",
                 f"⚠️ We couldn’t locate your current version in the history:\n\n{e}"
             )
+
+
+    def highlight_and_scroll_to_head(self):
+        if not self.repo or not self.history_table:
+            return
+
+        head_sha = self.repo.head.commit.hexsha
+        print(f"[DEBUG] Seeking to highlight SHA: {head_sha[:7]}")
+
+        # Clear highlights
+        for r in range(self.history_table.rowCount()):
+            for c in range(self.history_table.columnCount()):
+                cell = self.history_table.item(r, c)
+                if cell:
+                    cell.setBackground(Qt.GlobalColor.white)
+
+        for row in range(self.history_table.rowCount()):
+            item = self.history_table.item(row, 1)
+            if item and item.toolTip() == head_sha:
+                self.history_table.selectRow(row)
+
+                # ✅ Add temp spacer row if last row is visible
+                if self.history_table.rowCount() < 10:  # Tune threshold
+                    self.history_table.insertRow(self.history_table.rowCount())
+                    for c in range(self.history_table.columnCount()):
+                        self.history_table.setItem(self.history_table.rowCount()-1, c, QTableWidgetItem(""))
+
+                QTimer.singleShot(150, lambda r=row: (
+                    self.history_table.setCurrentCell(r, 1),
+                    self.history_table.scrollToItem(self.history_table.item(r, 1), QTableWidget.ScrollHint.PositionAtCenter),
+                    print(f"[DEBUG] ✅ Forced scroll to row {r}"),
+                ))
+
+                for col in range(self.history_table.columnCount()):
+                    cell = self.history_table.item(row, col)
+                    if cell:
+                        cell.setBackground(Qt.GlobalColor.green)
+
+                self.selected_head_row = row
+                break
+
+
+
 
 
     def clear_highlight_on_click(self):
@@ -2274,6 +2461,11 @@ class DAWGitApp(QWidget):
                     check=True
                 )
 
+                # ✅ Refresh UI state
+                self.load_commit_history()
+                self.update_status_label()
+                self.update_role_buttons()
+
                 QMessageBox.information(
                     self,
                     "Version Line Created",
@@ -2286,6 +2478,7 @@ class DAWGitApp(QWidget):
                     "Error Creating Version",
                     f"❌ Could not create version line:\n\n{e}"
                 )
+
 
 
     def safe_single_shot(self, delay_ms, callback, parent=None):    
@@ -2333,7 +2526,6 @@ class DAWGitApp(QWidget):
                 if choice != QMessageBox.StandardButton.Yes:
                     return {"status": "cancelled", "message": "User cancelled branch switch from detached HEAD."}
 
-            # If branch name wasn't passed (e.g. from dropdown), show picker
             if not branch_name:
                 selected_branch, ok = QInputDialog.getItem(
                     self,
@@ -2347,6 +2539,11 @@ class DAWGitApp(QWidget):
             else:
                 selected_branch = branch_name
 
+            # ✅ NEW: Return early if already on the selected branch
+            if not self.repo.head.is_detached and selected_branch == self.repo.active_branch.name:
+                print("[DEBUG] Already on selected branch — no switch needed.")
+                return {"status": "success", "message": "Already on this branch"}
+
             if self.has_unsaved_changes():
                 choice = QMessageBox.question(
                     self,
@@ -2357,7 +2554,6 @@ class DAWGitApp(QWidget):
                 if choice == QMessageBox.StandardButton.Yes:
                     self.backup_unsaved_changes()
                 elif os.getenv("DAWGIT_TEST_MODE") == "1":
-                    # Force backup in test mode even without user input
                     self.backup_unsaved_changes()
 
                 subprocess.run(
@@ -2376,8 +2572,10 @@ class DAWGitApp(QWidget):
 
             self.init_git()
 
-            self.update_log()
-            self.update_session_branch_display()
+            if hasattr(self, "load_commit_history"):
+                self.load_commit_history()
+            if hasattr(self, "update_session_branch_display"):
+                self.update_session_branch_display()
 
             QMessageBox.information(
                 self,
@@ -2401,6 +2599,7 @@ class DAWGitApp(QWidget):
                 f"⚠️ Something unexpected happened:\n\n{e}"
             )
             return {"status": "error", "message": str(e)}
+
 
 
     def open_project_folder(self, event):
@@ -2489,6 +2688,14 @@ class DAWGitApp(QWidget):
         return Path(__file__).parent / relative_path
     
 
+    def update_log(self):
+        if not hasattr(self, "history_table"):
+            print("[DEBUG] Skipping update_log(): no history_table in test mode.")
+            return
+        """Legacy compatibility method used in tests — safely redirects to commit history update."""
+        self.load_commit_history()
+        
+
     def update_status_label(self):
         if not hasattr(self, "status_label"):
             return
@@ -2542,6 +2749,13 @@ class DAWGitApp(QWidget):
             print(f"[DEBUG] status label set: ⚠️ Git status error: {e}")
 
 
+    def toggle_tooltips(self):
+        """Enable or disable tooltips for all interactive elements."""
+        enabled = self.show_tooltips_checkbox.isChecked()
+        self.settings.setValue("show_tooltips", enabled)
+
+        for widget, tip in self.tooltips.items():
+            widget.setToolTip(tip if enabled else "")
 
 
     def save_last_project_path(self, path): 
@@ -2572,6 +2786,10 @@ class DAWGitApp(QWidget):
         if not self.settings_path.exists():
             print("⚠️ No saved project path found.")
             return None
+        
+
+        # ✅ Print the path being used (For Testing Only)
+        # print(f"[DEBUG] Settings path = {self.settings_path}")
 
         try:
             # Attempt to read the saved project path from the settings file
@@ -2579,6 +2797,10 @@ class DAWGitApp(QWidget):
                 data = json.load(f)
                 last_path = data.get("last_project_path", "")
                 print(f"[DEBUG] Loaded last_path from file: {last_path}")
+            # ✅ Skip leftover test paths
+            if "pytest-" in str(last_path):
+                print("⚠️ Skipping test repo path.")
+                return None
         except Exception as e:
             print(f"⚠️ Failed to load saved project path: {e}")
             return None

@@ -93,23 +93,32 @@ def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_fac
 
 
 
-def test_checkout_latest_from_old_commit(app, test_repo):
+def test_checkout_latest_from_old_commit(test_repo):
+    from git import Repo
+    from daw_git_gui import DAWGitApp
+
+    # ✅ Setup real Git repo first
+    repo = Repo.init(test_repo)
     for i in range(5):
         file = test_repo / f"track_v{i}.als"
         file.write_text(f"version {i}")
-        app.repo.index.add([str(file.relative_to(test_repo))])
-        app.repo.index.commit(f"Version {i}")
+        repo.index.add([str(file.relative_to(test_repo))])
+        repo.index.commit(f"Version {i}")
 
-    app.repo = Repo(test_repo)
+    # 📍 Checkout old commit (detached HEAD)
+    old_commit_sha = list(repo.iter_commits("HEAD", max_count=5))[2].hexsha
+    repo.git.checkout(old_commit_sha)
+    assert repo.head.is_detached
 
-    all_commits = list(app.repo.iter_commits("HEAD", max_count=5))
-    old_commit_sha = all_commits[2].hexsha
+    # ✅ Now launch DAWGitApp — it will load the repo correctly
+    app = DAWGitApp(project_path=test_repo, build_ui=False)
+    app.init_git()
 
-    app.repo.git.checkout(old_commit_sha)
-    assert app.repo.head.is_detached
-
+    # 🎯 Return to latest
     app.return_to_latest_clicked()
 
+    # ✅ Verify result
+    assert app.repo is not None
     assert not app.repo.head.is_detached
     assert app.repo.active_branch.name in ["main", "master"]
     latest_commit_sha = next(app.repo.iter_commits("HEAD", max_count=1)).hexsha

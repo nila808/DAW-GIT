@@ -30,11 +30,27 @@ def app_with_commit(app, qtbot):
     return app
 
 @pytest.fixture
+def simple_daw_repo(tmp_path):
+    """Creates a repo with one committed .als file and returns initialized app."""
+    file = tmp_path / "init.als"
+    file.write_text("Audio content")
+    repo = Repo.init(tmp_path)
+    repo.index.add(["init.als"])
+    repo.index.commit("Initial commit")
+    repo.git.branch("-M", "main")  # Ensure branch is named 'main'
+
+    app = DAWGitApp(project_path=tmp_path, build_ui=False)
+    app.init_git()  # ✅ Required to bind repo
+    return app
+
+
+@pytest.fixture
 def app(qtbot, temp_project):
     test_app = DAWGitApp(project_path=str(temp_project))
+    test_app.init_git()  # ✅ ensure .git repo and self.repo
+    test_app.repo = Repo(test_app.project_path)  # ✅ ensure self.repo is bound
     qtbot.addWidget(test_app)
     return test_app
-
 
 @pytest.fixture(autouse=True)
 def clear_last_path_file():

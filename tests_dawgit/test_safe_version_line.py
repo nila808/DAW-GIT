@@ -19,7 +19,7 @@ def test_autocommit_marker_before_version_branch(tmp_path):
 
     # 🧪 Launch app with proper initialization
     app = DAWGitApp(project_path=tmp_path, build_ui=False)
-    app.repo = Repo(tmp_path)
+    app.init_git()
 
     # 🧪 Call method under test
     result = app.create_new_version_line("MyNewIdea")
