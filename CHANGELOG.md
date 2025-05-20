@@ -2,6 +2,15 @@
 
 ## [v1.0.3-testpass] – 2025-05-21
 **Author:** @niccavendish
+- 📦 v1.0.3-testpass: 📝 updated changelog, 📊 updated project status
+- [v1.0.2-testpass] ✅ Full test suite passing, placeholder + marker commit unified, no-op branch switch added
+- updated changelog
+- ✅ Add rich output test file (not yet integrated)
+- ✅ Add failure output script and test log after test suite pass
+
+
+## [v1.0.3-testpass] – 2025-05-21
+**Author:** @niccavendish
 - ⏳ Placeholder entry
 
 
