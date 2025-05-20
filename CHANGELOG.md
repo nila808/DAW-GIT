@@ -1,4 +1,44 @@
+
+
+## [v1.0.3-testpass] – 2025-05-21
+**Author:** @niccavendish
+- ⏳ Placeholder entry
+
+
+## [head -n 10 CHANGELOG.md] – 2025-05-21
+**Author:** @niccavendish
+- ⏳ Placeholder entry
 # 🎼 DAWGitApp – Changelog
+
+## [v1.0.3-testpass] – 2025-05-21  
+**Author:** @nila808
+
+### ✅ Full Test Suite Passing
+- 🟢 83/83 unit and integration tests passing  
+- 🧪 1 full end-to-end flow verified (`test_daw_git_end_to_end`)  
+- ✅ No skipped, xfailed, or unstable tests remain
+
+### 🔧 Key Fixes
+- Fixed `commit_changes()` to safely handle missing `repo` or `project_path`
+- Hardened `load_commit_roles()` to skip when `project_path is None`
+- Normalized newline-stripped Git commit message assertions
+- Improved error messaging on failed commits due to invalid state
+- Validated and cleaned modal feedback and label state updates
+
+### 🧪 Test Improvements
+- Injected `.als`/`.logicx` file diffs into snapshot commit tests to force real Git commits
+- Expanded snapshot and commit UI feedback tests to verify modal text and label accuracy
+- Patched first-time launch logic for welcome modal display and safe startup
+- Fully covered edge cases involving no project loaded, detached HEADs, and dummy test modes
+
+### 🧼 Final Cleanup
+- All temp paths cleaned via test teardown
+- `.dawgit_roles.json` safely bypassed in test mode if project path is unset
+- Tests now run cleanly on both first-time and repeat launches
+
+📌 **Status:** Test suite stable.  
+🧪 **Next:** Manual UI walkthrough & final QA.
+
 
 ## v1.0.3 – Commit Role Test Coverage
 **Date:** 2025-05-18  
@@ -72,3 +112,7 @@ Stable milestone tagged as `v1.0.2-rolepass`
 🔧 Bug fixes: [summarize any fixes]  
 🔐 Security: [mention any security-related fixes or enhancements]  
 🔄 Other changes: [mention other changes made]  
+
+
+## [Unreleased]
+- ⏳ Placeholder for next release
