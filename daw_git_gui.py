@@ -80,6 +80,11 @@ class DAWGitApp(QMainWindow):
         if build_ui:
             self.setup_ui()
 
+        # ✅ Auto-restore project ONLY if one wasn't already set
+        if self.project_path is None:
+            self.try_restore_last_project()
+            
+
         # ✅ Apply custom stylesheet (QSS)
         try:
             with open("styles/dawgit_styles.qss", "r") as f:
@@ -140,7 +145,7 @@ class DAWGitApp(QMainWindow):
                 self.project_path = selected_path
                 os.chdir(self.project_path)
                 print(f"[DEBUG] User selected valid DAW project: {self.project_path}")
-                self.save_last_project_path(self.project_path)
+                self.save_last_project_path()
                 self.init_git()
 
                 if self.repo:
@@ -774,7 +779,7 @@ class DAWGitApp(QMainWindow):
                 print("✅ New Git repo initialized.")
                 self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
                 self.repo.index.commit("Initial commit")
-                self.save_last_project_path(self.project_path)
+                self.save_last_project_path()
                 if hasattr(self, "project_label"):
                     QMessageBox.information(
                         self,
@@ -1973,10 +1978,13 @@ class DAWGitApp(QMainWindow):
 
             commit_item = self.history_table.item(selected_row, 1)
             if not commit_item:
-                return {"status": "error", "message": "No commit selected."}
+                print("[WARN] No SHA found in selected items.")
+                QMessageBox.warning(self, "Commit Not Found", "❌ Could not find a valid commit at this row.")
+                return {"status": "error", "message": "No commit item found."}
 
             commit_sha = commit_item.toolTip() or commit_item.text().strip()
             if not commit_sha:
+                print("[WARN] Commit item has no SHA.")
                 return {"status": "error", "message": "Unable to resolve commit SHA."}
 
         try:
@@ -2911,12 +2919,11 @@ class DAWGitApp(QMainWindow):
             widget.setToolTip(tip if enabled else "")
 
 
-    def save_last_project_path(self, path): 
+    def save_last_project_path(self):
         if not self.project_path or str(self.project_path) == "None":
             print("⚠️ Not saving — project_path is None.")
             return
 
-        # 🧪 Avoid saving test environments or app folder
         app_root = Path(__file__).resolve().parent
         if Path(self.project_path).resolve() == app_root:
             print("⚠️ Refusing to save DAWGitApp folder as last project.")
@@ -2928,6 +2935,38 @@ class DAWGitApp(QMainWindow):
             print(f"✅ Saved last project path: {self.project_path}")
         except Exception as e:
             print(f"⚠️ Failed to save project path: {e}")
+
+
+    def try_restore_last_project(self):
+        if not self.settings_path.exists():
+            return
+
+        try:
+            with open(self.settings_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+                last_path = config.get("last_project_path")
+
+            if last_path and Path(last_path).exists() and Path(last_path, ".git").exists():
+                print(f"🔁 Restoring last project: {last_path}")
+                self.load_project(last_path)
+            else:
+                print("⚠️ Last project path invalid or no .git folder.")
+        except Exception as e:
+            print(f"⚠️ Failed to restore last project: {e}")
+
+
+    def select_folder_clicked(self):
+        if self.project_path and Path(self.project_path, ".git").exists():
+            QMessageBox.information(
+                self,
+                "Project Already Loaded",
+                f"🎶 You’re already working in:\n{self.project_path}"
+            )
+            return
+
+        selected = QFileDialog.getExistingDirectory(self, "Select DAW Project Folder")
+        if selected:
+            self.load_project(selected)
 
 
     def is_valid_daw_folder(self, path):
