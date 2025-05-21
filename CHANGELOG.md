@@ -161,4 +161,4 @@ Stable milestone tagged as `v1.0.2-rolepass`
 - [ ] Return to latest
 - [ ] Delete snapshot
 - [ ] Stash on switch
-- [ ] Tag snapshots and verify
+- [ ] Tag snapshots and verify- [2025-05-21 18:30] Tagged v1.0.4-cleanup – test suite green (83/83), fixed commit safety, status label, detached HEAD logic

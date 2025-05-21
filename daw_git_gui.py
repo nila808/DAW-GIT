@@ -285,22 +285,25 @@ class DAWGitApp(QMainWindow):
         self.commit_message.setPlaceholderText("Describe what changed in this snapshot")
         self.commit_message.setFixedHeight(60)
 
-        self.commit_tag = QTextEdit()
-        self.commit_tag.setPlaceholderText("Add a tag or label (optional)")
-        self.commit_tag.setFixedHeight(40)
+        # self.commit_tag = QTextEdit()
+        # self.commit_tag.setPlaceholderText("Add a tag or label (optional)")
+        # self.commit_tag.setFixedHeight(40)
 
         commit_layout = QVBoxLayout()
         commit_layout.addWidget(QLabel("Snapshot Notes:"))
         commit_layout.addWidget(self.commit_message)
-        commit_layout.addWidget(QLabel("Optional Label:"))
-        commit_layout.addWidget(self.commit_tag)
+        # commit_layout.addWidget(QLabel("Optional Label:"))
+        # commit_layout.addWidget(self.commit_tag)
 
         # 💾 Snapshot Buttons Row
         snapshot_buttons_layout = QHBoxLayout()
         self.commit_btn = QPushButton("💾 Save Snapshot")
         self.commit_btn.setMinimumHeight(36)
         self.commit_btn.setToolTip("Save the current version of your DAW project")
-        self.commit_btn.clicked.connect(lambda: self.commit_changes(self.commit_message.toPlainText()))
+        self.commit_btn.clicked.connect(lambda: self.commit_changes(
+            self.commit_message.toPlainText().strip() or None
+        ))
+
         snapshot_buttons_layout.addWidget(self.commit_btn)
 
         self.auto_save_checkbox = QPushButton("🎹 Auto-Save Snapshot")
@@ -1171,40 +1174,30 @@ class DAWGitApp(QMainWindow):
                     self._show_warning("Commit cancelled. Please enter a valid commit message.")
                 return {"status": "error", "message": "Empty or cancelled commit message."}
 
-        # --- Perform Git operations ---
+        # Enforce DAW file presence
+        daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
+        if not daw_files:
+            return {"status": "error", "message": "No DAW file to commit."}
+
         try:
-            # Stage all changes
             self.repo.git.add(A=True)
-
-            # Create the commit
             self.repo.git.commit("-m", commit_message)
-            self.update_log()
 
-            # ✅ Update UI labels
+            # Update UI state
+            self.update_log()
             self.update_branch_label()
             self.update_commit_label()
+            self.update_status_label()
 
-            # ✅ Show modal with branch and SHA info
-            if self.repo.head.is_valid():
-                try:
-                    branch = self.repo.active_branch.name
-                except TypeError:
-                    # Handle detached HEAD case gracefully
-                    branch = str(self.repo.head.ref) if self.repo.head.ref else "detached"
+            short_sha = self.repo.head.commit.hexsha[:7]
+            try:
+                branch = self.repo.active_branch.name
+            except TypeError:
+                branch = str(self.repo.head.ref) if self.repo.head.ref else "detached"
 
-                short_sha = self.repo.head.commit.hexsha[:7]
-                msg = f"Branch: {branch}\nCommit: {short_sha}"
-            else:
-                msg = "Branch: unknown\nCommit: unknown"
+            QMessageBox.information(self, "Commit Successful", f"Branch: {branch}\nCommit: {short_sha}")
+            self.update_status_label()
 
-            print(f"[DEBUG] HEAD valid? {self.repo.head.is_valid()}")
-            print(f"[DEBUG] HEAD SHA: {self.repo.head.commit.hexsha}")
-            print(f"[DEBUG] Branch shown in modal: {branch}")    
-
-            QMessageBox.information(self, "Commit Successful", msg)
-            self.show_status_message(f"✅ Committed: {short_sha}", timeout=4000)
-
-            # ✅ Update and save PROJECT_MARKER.json
             if hasattr(self, "project_marker") and self.repo.head.is_valid():
                 sha = self.repo.head.commit.hexsha
                 msg = self.repo.head.commit.message.strip()
@@ -1212,13 +1205,13 @@ class DAWGitApp(QMainWindow):
                 self.project_marker["repository_info"]["last_commit_message"] = msg
                 self.save_project_marker()
 
-
             return {"status": "success", "sha": short_sha, "branch": branch}
 
         except Exception as e:
             traceback.print_exc()
             self._show_error(f"Commit failed: {e}")
             return {"status": "error", "message": str(e)}
+
 
 
 
@@ -1786,30 +1779,6 @@ class DAWGitApp(QMainWindow):
         self.save_commit_roles()
         self.status_message(f"🎛️ Commit tagged as 'Alt Mixdown': {sha[:7]}")
 
-    # def tag_experiment(self):
-    #     """
-    #     Assigns the 'Creative Take' role to the currently selected commit row.
-    #     """
-    #     row = self.history_table.currentRow()
-    #     if row < 0:
-    #         self._show_warning("Please select a snapshot to tag as 'Creative Take'.")
-    #         return
-
-    #     commit_item = self.history_table.item(row, 1)
-    #     if not commit_item:
-    #         self._show_warning("Couldn't retrieve commit info.")
-    #         return
-
-    #     sha = commit_item.toolTip()
-    #     if not sha:
-    #         self._show_warning("Commit SHA missing — can't assign role.")
-    #         return
-
-    #     self.current_commit_id = sha  # ✅ FIX
-    #     self.assign_commit_role(sha, "Creative Take")
-    #     self.save_commit_roles()
-    #     self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
-
 
     def show_commit_checkout_info(self, commit):
         if not self.repo or not commit:
@@ -1851,6 +1820,15 @@ class DAWGitApp(QMainWindow):
             )
             return
 
+        # ✅ Immediately disable UI to prevent double clicks
+        if hasattr(self, "auto_save_checkbox") and self.auto_save_checkbox:
+            self.auto_save_checkbox.setEnabled(False)
+            self.auto_save_checkbox.setToolTip("⏳ Saving snapshot...")
+
+        if hasattr(self, "snapshot_button") and self.snapshot_button:
+            self.snapshot_button.setEnabled(False)
+            self.snapshot_button.setToolTip("⏳ Saving snapshot...")
+
         try:
             subprocess.run(["git", "add", "-A"], cwd=self.project_path, env=self.custom_env(), check=True)
 
@@ -1863,12 +1841,13 @@ class DAWGitApp(QMainWindow):
                 return
 
             commit = self.repo.index.commit(message)
+            commit_sha = commit.hexsha
 
             if tag:
                 if tag in [t.name for t in self.repo.tags]:
                     print(f"⚠️ Tag '{tag}' already exists. Skipping tag creation.")
                 else:
-                    self.repo.create_tag(tag, ref=commit.hexsha)
+                    self.repo.create_tag(tag, ref=commit_sha)
 
             if self.remote_checkbox.isChecked():
                 try:
@@ -1882,15 +1861,24 @@ class DAWGitApp(QMainWindow):
                     print("[WARN] Skipping remote push: no remote set")
 
             self.load_commit_history()
-
             self.update_status_label()
+            self.show_status_message("✅ Auto-committed: Auto snapshot")
+
+            # ✅ Update tooltips to reflect final state
+            if hasattr(self, "auto_save_checkbox") and self.auto_save_checkbox:
+                self.auto_save_checkbox.setToolTip("✅ Snapshot saved. Auto-commit disabled until further changes.")
+
+            if hasattr(self, "snapshot_button") and self.snapshot_button:
+                self.snapshot_button.setToolTip("✅ Snapshot saved. Waiting for new changes.")
+
+            # Final confirmation
             msg = f"✅ Auto-commit completed:\n\n{message}"
-            QMessageBox.information(
-                self,
-                "Auto Save Complete",
-                msg
-            )
+            QMessageBox.information(self, "Auto Save Complete", msg)
             print(f"✅ Auto-committed: {message}")
+
+            # ✅ Refresh UI state to re-enable if new changes
+            if hasattr(self, "refresh_ui_state"):
+                self.refresh_ui_state()
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(
@@ -1898,12 +1886,14 @@ class DAWGitApp(QMainWindow):
                 "Auto Commit Failed",
                 f"❌ Something went wrong while saving your version:\n\n{e}"
             )
+
         except Exception as e:
             QMessageBox.critical(
                 self,
                 "Auto Commit Failed",
                 f"⚠️ Unexpected error while saving your session:\n\n{e}"
             )
+
 
 
     def switch_to_branch_ui(self, branch_name: str):
@@ -1968,133 +1958,78 @@ class DAWGitApp(QMainWindow):
             
 
     def checkout_selected_commit(self, commit_sha=None):
-        """⬅️ Checkout a specific commit by SHA or from selected table row."""
+        """⬅️ Checkout a specific commit by SHA or from selected table row, even if benign untracked files exist."""
         result = {"status": "success"}
 
         if not commit_sha:
             selected_row = self.history_table.currentRow()
-            print(f"[DEBUG] Selected row: {selected_row}")
-
             if selected_row < 0:
                 current_sha = self.repo.head.commit.hexsha[:7] if self.repo else "unknown"
                 if self.sender():
-                    QMessageBox.information(
-                        self,
-                        "No Version Selected",
+                    QMessageBox.information(self, "No Version Selected",
                         f"🎚️ You didn’t select a version to load.\n\n"
-                        f"We’re keeping your current session active:\n\n"
-                        f"Commit ID: {current_sha}"
-                    )
-                else:
-                    print(f"🎚️ No version selected — sticking with your current project setup for now. Commit: {current_sha}")
+                        f"We’re keeping your current session active:\n\nCommit ID: {current_sha}")
                 return {"status": "cancelled", "message": "No version selected."}
 
             commit_item = self.history_table.item(selected_row, 1)
             if not commit_item:
-                print("[DEBUG] No commit item found in row.")
                 return {"status": "error", "message": "No commit selected."}
 
-            commit_sha = commit_item.toolTip()
+            commit_sha = commit_item.toolTip() or commit_item.text().strip()
             if not commit_sha:
-                visible_id = commit_item.text().strip()
-                for commit in self.repo.iter_commits("HEAD", max_count=100):
-                    if commit.hexsha.startswith(visible_id):
-                        commit_sha = commit.hexsha
-                        print(f"[DEBUG] Resolved full SHA from text fallback: {commit_sha}")
-                        break
-
-            if not commit_sha:
-                print("[DEBUG] Still no SHA after fallback — aborting.")
                 return {"status": "error", "message": "Unable to resolve commit SHA."}
 
         try:
             if self.als_recently_modified():
-                QMessageBox.warning(
-                    self,
-                    "Ableton Save Warning",
+                QMessageBox.warning(self, "Ableton Save Warning",
                     "🎛️ The Ableton project file was modified in the last minute.\n\n"
-                    "To avoid a 'Save As' prompt, please close Ableton or save your project."
-                )
+                    "To avoid a 'Save As' prompt, please close Ableton or save your project.")
 
             if self.has_unsaved_changes():
                 self.backup_unsaved_changes()
 
-            # Check for untracked files
-            untracked = self.repo.untracked_files
-            if untracked:
-                msg = (
-                    "You have untracked files in your project folder.\n\n"
-                    "They won’t be deleted, but may be ignored in this snapshot view."
-                )
-                print(f"[WARNING] Untracked files: {untracked}")
-                result = {
+            # PATCH: Ignore harmless untracked files like marker configs
+            ignore_untracked = {"PROJECT_MARKER.json", ".dawgit_roles.json"}
+            problematic = [f for f in self.repo.untracked_files if Path(f).name not in ignore_untracked]
+            if problematic:
+                print(f"[WARNING] Untracked files: {problematic}")
+                return {
                     "status": "warning",
-                    "untracked": untracked,
-                    "message": msg,
+                    "untracked": problematic,
+                    "message": "Untracked files found – checkout aborted for safety."
                 }
 
-                # ✅ Return early — skip full checkout
-                return result
+            # Avoid unnecessary checkout
+            if self.repo.head.commit.hexsha == commit_sha:
+                QMessageBox.information(self, "Already Viewing Snapshot",
+                    f"🎧 You're already viewing this snapshot.\n\nCommit ID: {commit_sha[:7]}")
+                return {"status": "noop", "message": "Already on this commit."}
 
-
-            # Avoid re-checkout if we're already on this commit
-            current_sha = self.repo.head.commit.hexsha
-            if current_sha == commit_sha:
-                print("[DEBUG] Already on selected commit — skipping checkout.")
-                QMessageBox.information(
-                    self,
-                    "Already Viewing Snapshot",
-                    "🎧 You're already viewing this snapshot.\n\n"
-                    f"Commit ID: {commit_sha[:7]}"
-                )
-                result["message"] = "Already on this commit — no checkout needed."
-                return result
-            else:
-                print(f"[DEBUG] Checking out commit: {commit_sha}")
-                subprocess.run(
-                    ["git", "checkout", commit_sha],
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
-
-            subprocess.run(
-                ["git", "lfs", "checkout"],
-                cwd=self.project_path,
-                env=self.custom_env(),
-                check=True
-            )
+            # Perform checkout
+            subprocess.run(["git", "checkout", commit_sha], cwd=self.project_path, env=self.custom_env(), check=True)
+            subprocess.run(["git", "lfs", "checkout"], cwd=self.project_path, env=self.custom_env(), check=True)
 
             self.bind_repo()
-
-            # ✅ Only update current commit if repo is valid
             if self.repo and self.repo.head.is_valid():
                 self.current_commit_id = self.repo.head.commit.hexsha
 
-            # ✅ Reinitialize Git safely
             self.init_git()
-
-            # ✅ Only update history if UI is active
             if hasattr(self, "history_table"):
                 self.load_commit_history()
-
             self.update_role_buttons()
 
-            checked_out_commit = self.repo.commit(commit_sha)
-            self.show_commit_checkout_info(checked_out_commit)
+            self.show_commit_checkout_info(self.repo.commit(commit_sha))
 
+            # Scroll to row
             for row in range(self.history_table.rowCount()):
                 item = self.history_table.item(row, 1)
-                if item and commit_sha.startswith(item.text().strip()):
+                if item and commit_sha.startswith(item.toolTip()):
                     self.history_table.selectRow(row)
                     self.history_table.scrollToItem(item)
                     break
 
-            QMessageBox.information(
-                self,
-                "Project Restored",
-                f"✅ This version of your project has been restored.\n\n🎛️ Commit ID: {commit_sha[:7]}"
-            )
+            QMessageBox.information(self, "Project Restored",
+                f"✅ This version of your project has been restored.\n\n🎛️ Commit ID: {commit_sha[:7]}")
             self.open_in_daw_btn.setVisible(True)
 
             return result
@@ -2106,6 +2041,7 @@ class DAWGitApp(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Unexpected Error", f"⚠️ Something unexpected happened:\n\n{e}")
             return {"status": "error", "message": str(e)}
+
 
           
 
@@ -2189,73 +2125,60 @@ class DAWGitApp(QMainWindow):
             # ✅ Known noise files to ignore
             excluded_patterns = [
                 "Ableton Project Info/*",
-                "*.asd",
-                "*.tmp",
-                "*.bak",
-                ".DS_Store",
-                "._*",
-                "auto_placeholder.als",
-                "Icon\r",
-                '"Icon\r"',
-                "Icon?",
+                "*.asd", "*.tmp", "*.bak", "*.log", "*.swp",
+                ".DS_Store", "._*", "auto_placeholder.als",
+                "PROJECT_MARKER.json", "PROJECT_STATUS.md",
+                "Icon\r", '"Icon\r"', "Icon?"
             ]
 
-            # ✅ Invalidate GitPython cache
             self.repo.git.clear_cache()
-
-            # ✅ Check Git status directly
             status_output = self.repo.git.status("--porcelain").splitlines()
-            print("[DEBUG] Full status --porcelain output:")
-            for line in status_output:
-                print(f"  → {line}")
 
-            print("[DEBUG] Raw Git status --porcelain:")
             for line in status_output:
                 if len(line) < 4:
                     continue
 
                 file_path = line[3:].strip()
-                # Remove quotes, normalize weird characters (like \r), trim
                 file_path_clean = (
                     unicodedata.normalize("NFKD", file_path.strip('"').strip())
                     .replace("\r", "")
                     .replace("\u000d", "")
                     .strip()
                 )
-                print(f"[DEBUG] Checking cleaned file path: {file_path_clean}")
 
-                # 🧹 Ignore known DAW metadata and noise
                 if any(fnmatch.fnmatch(file_path_clean, pat) for pat in excluded_patterns):
-                    print(f"[DEBUG] Ignoring known metadata file: {file_path_clean}")
                     continue
 
-                # ✅ Detect actual tracked changes
-                if file_path_clean.endswith(".als") or file_path_clean.endswith(".logicx"):
-                    print(f"[DEBUG] Unsaved change detected: {file_path_clean}")
-                    return True  # early exit — real DAW file changed
-                else:
-                    print(f"[DEBUG] Other file change detected: {file_path_clean}")
-                    return True
+                print(f"[DEBUG] Detected file change: {file_path_clean}")
+                self._last_dirty_state = True
+                return True
 
-            # ✅ If Git is clean, check for recently updated DAW files
+            # ✅ Check recently modified DAW files
             for daw_file in self.project_path.glob("*.als"):
                 modified_time = datetime.fromtimestamp(daw_file.stat().st_mtime)
                 if datetime.now() - modified_time < timedelta(seconds=10):
                     print(f"[DEBUG] Recently modified .als detected: {daw_file.name}")
+                    self._last_dirty_state = True
                     return True
 
             for daw_file in self.project_path.glob("*.logicx"):
                 modified_time = datetime.fromtimestamp(daw_file.stat().st_mtime)
                 if datetime.now() - modified_time < timedelta(seconds=10):
                     print(f"[DEBUG] Recently modified .logicx detected: {daw_file.name}")
+                    self._last_dirty_state = True
                     return True
 
-            print("[DEBUG] has_unsaved_changes() = False")
+            # ✅ Only log once when status goes clean
+            if getattr(self, "_last_dirty_state", None) is not False:
+                print("[DEBUG] has_unsaved_changes() = False")
+                self._last_dirty_state = False
+
             return False
 
         except Exception as e:
             print(f"[DEBUG] has_unsaved_changes() failed: {e}")
             return False
+
 
 
     def backup_unsaved_changes(self):
@@ -2854,18 +2777,48 @@ class DAWGitApp(QMainWindow):
 
 
     def timerEvent(self, event):
-        if self.repo and self.has_unsaved_changes():
+        has_changes = self.repo and self.has_unsaved_changes()
+
+        if has_changes:
             self.unsaved_flash = not self.unsaved_flash
             self.unsaved_indicator.setProperty("alert", self.unsaved_flash)
         else:
             self.unsaved_flash = False
             self.unsaved_indicator.setProperty("alert", False)
 
-        # Re-apply styles and show/hide based on flash state
+        # ✅ Normalize state to boolean to avoid NoneType issues
+        has_changes = bool(self.repo and self.has_unsaved_changes())
+
+        # ✅ Save Snapshot button logic
+        if hasattr(self, "commit_btn") and self.commit_btn:
+            self.commit_btn.setEnabled(has_changes)
+            self.commit_btn.setToolTip(
+                "Save a snapshot of your DAW session." if has_changes else
+                "No changes detected — nothing new to snapshot."
+            )
+
+        # ✅ Auto-snapshot button logic
+        if hasattr(self, "auto_save_checkbox") and self.auto_save_checkbox:
+            self.auto_save_checkbox.setEnabled(has_changes)
+            self.auto_save_checkbox.setToolTip(
+                "Auto-snapshot ready — changes detected." if has_changes else
+                "✅ Snapshot saved. Auto-commit disabled until further changes."
+            )
+
+        # ✅ Manual commit button logic
+        if hasattr(self, "commit_button") and self.commit_button:
+            self.commit_button.setEnabled(has_changes)
+            self.commit_button.setToolTip(
+                "Commit changes to your DAW version history." if has_changes else
+                "No changes detected to commit."
+            )
+
+        # 🔁 Refresh visual styles
         self.unsaved_indicator.style().unpolish(self.unsaved_indicator)
         self.unsaved_indicator.style().polish(self.unsaved_indicator)
 
-        self.unsaved_indicator.setVisible(bool(self.repo and self.has_unsaved_changes()))
+        # ✅ Visibility control
+        self.unsaved_indicator.setVisible(bool(has_changes))
 
 
 
@@ -2915,7 +2868,6 @@ class DAWGitApp(QMainWindow):
                     btn.setEnabled(False)
                     btn.setToolTip("Tagging is only available on active version lines.")
                     btn.hide()
-                    btn.setToolTip("Tagging is only available on active version lines.")
 
             else:
                 try:
@@ -2947,6 +2899,7 @@ class DAWGitApp(QMainWindow):
         except Exception as e:
             self.status_label.setText(f"⚠️ Git status error: {e}")
             print(f"[DEBUG] status label set: ⚠️ Git status error: {e}")
+
 
 
     def toggle_tooltips(self):
@@ -3051,7 +3004,8 @@ class DAWGitApp(QMainWindow):
                 print(f"❌ Failed to open DAW project file: {e}")
 
 
-    def show_status_message(self, message):
+    def show_status_message(self, message, timeout=3000):
+        self.statusBar().showMessage(message, timeout)
         """🎵 Display a status message to the user in the status label."""
         if hasattr(self, 'status_label'):
             self.status_label.setText(f"Status: {message}")
