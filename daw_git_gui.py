@@ -1786,29 +1786,29 @@ class DAWGitApp(QMainWindow):
         self.save_commit_roles()
         self.status_message(f"🎛️ Commit tagged as 'Alt Mixdown': {sha[:7]}")
 
-    def tag_experiment(self):
-        """
-        Assigns the 'Creative Take' role to the currently selected commit row.
-        """
-        row = self.history_table.currentRow()
-        if row < 0:
-            self._show_warning("Please select a snapshot to tag as 'Creative Take'.")
-            return
+    # def tag_experiment(self):
+    #     """
+    #     Assigns the 'Creative Take' role to the currently selected commit row.
+    #     """
+    #     row = self.history_table.currentRow()
+    #     if row < 0:
+    #         self._show_warning("Please select a snapshot to tag as 'Creative Take'.")
+    #         return
 
-        commit_item = self.history_table.item(row, 1)
-        if not commit_item:
-            self._show_warning("Couldn't retrieve commit info.")
-            return
+    #     commit_item = self.history_table.item(row, 1)
+    #     if not commit_item:
+    #         self._show_warning("Couldn't retrieve commit info.")
+    #         return
 
-        sha = commit_item.toolTip()
-        if not sha:
-            self._show_warning("Commit SHA missing — can't assign role.")
-            return
+    #     sha = commit_item.toolTip()
+    #     if not sha:
+    #         self._show_warning("Commit SHA missing — can't assign role.")
+    #         return
 
-        self.current_commit_id = sha  # ✅ FIX
-        self.assign_commit_role(sha, "Creative Take")
-        self.save_commit_roles()
-        self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
+    #     self.current_commit_id = sha  # ✅ FIX
+    #     self.assign_commit_role(sha, "Creative Take")
+    #     self.save_commit_roles()
+    #     self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
 
 
     def show_commit_checkout_info(self, commit):
