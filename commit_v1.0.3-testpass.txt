@@ -1,0 +1,24 @@
+📦 v1.0.3-testpass: Full Test Suite Pass + Manual QA Phase Started
+
+### ✅ Core Fixes
+- Fixed `timerEvent()` crash when `has_unsaved_changes()` returns None
+- Added `bool(...)` wrapper to `setVisible()` call for safety
+- Improved first-time launch and welcome modal logic
+- Ensured stylesheet load fails silently in test mode
+- Hardened commit logic when project path or repo is missing
+
+### 🧪 Test Suite Improvements
+- Injected `app_with_repo` fixture across test files for safe Qt context
+- Standardized `qtbot.addWidget()` + `show()` calls in all UI tests
+- Cleaned all Qt event loop crashes from test suite
+- 83/83 tests passing including full end-to-end
+- Role tagging, branch switching, and DAW file logic fully verified
+
+### 🧼 Infra + Project Sync
+- Synced `CHANGELOG.md`, `PROJECT_MARKER.json`, `PROJECT_STATUS.md`
+- Updated to version `v1.0.3-testpass` across all metadata
+- Manual QA checklist added and marked as in progress
+
+### 🚧 Next Phase
+- Begin real-world manual testing of commits, versioning, DAW opens
+- Final tagging for `v1.0.3` release after QA checklist passes
