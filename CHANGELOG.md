@@ -1,5 +1,14 @@
 
 
+## [v1.0.4-cleanup] – 2025-05-21
+**Author:** @niccavendish
+- commit note
+- 🚧 v1.0.5-dev: begin role-tagging refactor + cleanup staging
+- 📦 1.0.4-cleanup: 📝 updated changelog, 📊 updated project status
+- commit notes
+- 📦 v1.0.3-testpass: Full Test Suite Pass + Manual QA Phase Started
+
+
 ## [1.0.4-cleanup] – 2025-05-21
 **Author:** @niccavendish
 - commit notes
@@ -7,6 +16,8 @@
 - 📦 v1.0.3-testpass: QA phase started, test suite stable
 - 📦 v1.0.3-testpass: added PROJECT_MARKER + backup system, UI enhancements, and metadata tracking
 - 📦 v1.0.3-testpass: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.0.3-testpass] – 2025-05-21
 **Author:** @niccavendish
 - 📦 v1.0.3-testpass: 📝 updated changelog, 📊 updated project status
