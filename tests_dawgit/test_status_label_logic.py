@@ -12,29 +12,28 @@ def strip_html(text):
 @pytest.fixture
 def clean_daw_project(tmp_path):
     """Creates a dummy DAW project folder with a valid .als file and no dirty state."""
-    project_dir = tmp_path / "TestProject"
+    project_dir = tmp_path / f"TestProject_{time.time_ns()}"
     project_dir.mkdir()
     als_path = project_dir / "dummy.als"
     als_path.write_text("Ableton data")
 
-    # ⏳ Set mtime to 2 minutes ago to avoid "recently modified" detection
     past = time.time() - 120
     os.utime(als_path, (past, past))
 
     return project_dir
 
-def test_status_label_shows_clean_on_fresh_start(qtbot, clean_daw_project):
+def test_status_label_shows_clean_on_fresh_start(qtbot, clean_daw_project, app):
     time.sleep(1.5)  # Ensure no race with mtime check
     app = DAWGitApp(project_path=clean_daw_project, build_ui=True)
     qtbot.addWidget(app)
 
     label_text = strip_html(app.status_label.text())
-    assert "🎧 On version line" in label_text or "✅" in label_text
+    assert "Session branch" in label_text and "Take:" in label_text
     assert "Unsaved" not in label_text
 
-def test_status_label_ignores_non_daw_files(qtbot, clean_daw_project):
+def test_status_label_ignores_non_daw_files(qtbot, clean_daw_project, app):
     # Add ignored metadata file (commonly created by macOS)
-    ignored_file = clean_daw_project / "Icon\r"
+    ignored_file = clean_daw_project / ".DS_Store"
     ignored_file.write_text("junk")
     os.utime(ignored_file, (time.time() - 120, time.time() - 120))
 
@@ -44,9 +43,9 @@ def test_status_label_ignores_non_daw_files(qtbot, clean_daw_project):
 
     label_text = strip_html(app.status_label.text())
     assert "Unsaved" not in label_text
-    assert "🎧 On version line" in label_text or "✅" in label_text
+    assert "Session branch" in label_text and "Take:" in label_text
 
-def test_status_label_detects_modified_als(qtbot, clean_daw_project):
+def test_status_label_detects_modified_als(qtbot, clean_daw_project, app):
     als_path = clean_daw_project / "dummy.als"
     als_path.write_text("original")
     os.utime(als_path, (time.time() - 120, time.time() - 120))

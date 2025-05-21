@@ -22,3 +22,38 @@ QPushButton#setAltMixBtn {
     color: #ffffff;
     font-weight: bold;
 }
+
+QLabel#unsaved_indicator {
+    font-weight: bold;
+    padding-left: 6px;
+}
+
+QLabel#unsaved_indicator[alert="true"] {
+    color: orange;
+}
+
+QLabel#unsaved_indicator[alert="false"] {
+    color: transparent;
+}
+
+QLabel#setup_label {
+    font-weight: bold;
+}
+
+QLabel#status_label {
+    color: #00BCD4;
+    font-weight: bold;
+    padding: 6px 10px;
+    font-size: 14px;
+}
+
+QLabel#unsaved_indicator {
+    font-weight: bold;
+}
+
+QLabel#detached_warning_label {
+    color: orange;
+    font-style: italic;
+    padding: 4px;
+}
+

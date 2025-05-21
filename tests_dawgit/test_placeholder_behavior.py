@@ -3,6 +3,7 @@ import pytest
 from git import Repo
 from daw_git_gui import DAWGitApp
 from pathlib import Path
+import pytest
 
 @pytest.fixture
 def project_without_daw_files(tmp_path):
@@ -11,7 +12,7 @@ def project_without_daw_files(tmp_path):
     project_dir.mkdir()
     return project_dir
 
-def test_placeholder_file_created_on_version_line_start(tmp_path):
+def test_placeholder_file_created_on_version_line_start(tmp_path, qtbot):
     """
     AT-041 – Starting a new version line from a detached commit should create and commit a placeholder .als file.
     """
@@ -50,7 +51,7 @@ def test_placeholder_file_created_on_version_line_start(tmp_path):
     committed_files = latest_commit.stats.files.keys()
     assert "auto_placeholder.als" in committed_files, "Placeholder file was not committed"
 
-def test_placeholder_file_committed_to_repo(project_without_daw_files):
+def test_placeholder_file_committed_to_repo(project_without_daw_files, qtbot):
     os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_without_daw_files)
 
     app = DAWGitApp(project_path=project_without_daw_files, build_ui=False)

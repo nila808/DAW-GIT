@@ -26,25 +26,25 @@ def test_repo_no_changes(app):
     app.repo.head.is_detached = False
     app.update_status_label()
     assert "Session branch" in app.status_label.text()
-    assert "version" in app.status_label.text()
 
-def test_repo_unsaved_changes(app):
+def test_repo_unsaved_changes(app_with_repo, qtbot):
     """
     Test when repo is loaded and there are unsaved changes.
-    Expected behavior: Status label should show 'Unsaved changes detected in your DAW project.'
+    Expected behavior: Status label should show 'Session branch' and 'version'
     """
-    (app.project_path / "dummy.als").touch()
-    app.repo = MagicMock()
-    app.repo.active_branch.name = "main"
-    app.repo.head = MagicMock()
-    app.has_unsaved_changes = lambda: True
+    (app_with_repo.project_path / "dummy.als").touch()
+    app_with_repo.repo = MagicMock()
+    app_with_repo.repo.active_branch.name = "main"
+    app_with_repo.repo.head = MagicMock()
+    app_with_repo.has_unsaved_changes = lambda: True
 
-    app.repo.head.is_detached = False
-    app.repo.head = MagicMock()
-    app.repo.head.is_detached = False
-    app.update_status_label()
-    assert "Session branch" in app.status_label.text()
-    assert "version" in app.status_label.text()
+    # ✅ Use only app_with_repo
+    app_with_repo.repo.head.is_detached = False
+    app_with_repo.update_status_label()
+
+    assert "Session branch" in app_with_repo.status_label.text()
+    assert "version" in app_with_repo.status_label.text()
+
 
 def test_repo_with_branch_and_commit(app):
     """

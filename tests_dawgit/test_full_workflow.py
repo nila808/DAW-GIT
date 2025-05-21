@@ -4,8 +4,9 @@ import tempfile
 from pathlib import Path
 from git import Repo, GitCommandError
 import pytest
+import pytest
 
-def test_daw_git_end_to_end():
+def test_daw_git_end_to_end( qtbot):
     with tempfile.TemporaryDirectory() as temp_dir:
         project_path = Path(temp_dir) / "TestProject"
         project_path.mkdir()

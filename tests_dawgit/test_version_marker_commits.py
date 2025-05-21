@@ -2,6 +2,7 @@ import pytest
 from daw_git_gui import DAWGitApp
 from pathlib import Path
 import subprocess
+import pytest
 
 @pytest.fixture
 def empty_daw_project(tmp_path):
@@ -10,7 +11,7 @@ def empty_daw_project(tmp_path):
     project_dir.mkdir()
     return project_dir
 
-def test_version_marker_commit_creates_file_and_commit(tmp_path):
+def test_version_marker_commit_creates_file_and_commit(tmp_path, qtbot):
     """
     AT-042 – Starting a version line should create and commit a .version_marker file.
     """
