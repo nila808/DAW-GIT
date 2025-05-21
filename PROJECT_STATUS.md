@@ -1,6 +1,6 @@
 # 📊 DAWGitApp – Project Status
 
-_Last updated: 2025-05-21_
+_Last updated: 2025-05-21_  
 _Maintainer: @nila808_
 
 ---
@@ -22,7 +22,7 @@ _Maintainer: @nila808_
 - 🧼 Cleanup of temp folders and test artifacts on teardown
 - ✅ Clean run on PyQt6 (6.9.0) + Python 3.12.3
 
-### 📝 Manual QA (Pending)
+### 📝 Manual QA (In Progress)
 - [ ] Confirm visual label updates after commit (branch/version labels)
 - [ ] Verify welcome modal appears on first-time launch
 - [ ] Snapshot tagging and DAW-launch behavior under real conditions
@@ -33,12 +33,12 @@ _Maintainer: @nila808_
 
 ## ⏳ Next Up
 
-| Task                              | Status  | Owner      |
-|-----------------------------------|---------|------------|
-| Manual UI walkthrough             | ⏳ TODO | @nila808   |
-| Snapshot role context menus       | 🧠 Planned | —        |
-| Git LFS version file preview      | 🧠 Planned | —        |
-| Release tagging (`v1.0.3`)        | ⏳ TODO | @nila808   |
+| Task                              | Status     | Owner      |
+|-----------------------------------|------------|------------|
+| Manual UI walkthrough             | 🚧 In Progress | @nila808 |
+| Snapshot role context menus       | 🧠 Planned | —          |
+| Git LFS version file preview      | 🧠 Planned | —          |
+| Release tagging (`v1.0.3`)        | ⏳ TODO    | @nila808   |
 | Optional: GitHub Actions setup    | ❌ Not started | —     |
 
 ---

@@ -1,11 +1,11 @@
 {
   "project_name": "TEST 1 Project",
-  "project_version": "v1.0.2-rolepass",
+  "project_version": "v1.0.3-testpass",
   "creator": "Niccavendish",
   "repository_info": {
     "current_branch": "main",
     "last_commit_sha": "985c8d1b3f6e925bc6db5a9ebba695ef9ad27e7c",
-    "last_commit_message": "🎧 On version line — version 4",
+    "last_commit_message": "\ud83c\udfa7 On version line \u2014 version 4",
     "commit_roles": {
       "985c8d1b3f6e925bc6db5a9ebba695ef9ad27e7c": "Main Mix"
     }
@@ -26,7 +26,10 @@
   },
   "metadata": {
     "tags": {
-      "version_marker": "v1.0.2-rolepass"
+      "version_marker": "v1.0.3-testpass"
+    },
+    "qa": {
+      "qa_started": true
     }
   }
 }

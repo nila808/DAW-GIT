@@ -1,5 +1,3 @@
-
-
 ## [v1.0.3-testpass] – 2025-05-21
 **Author:** @niccavendish
 - 📦 v1.0.3-testpass: 📝 updated changelog, 📊 updated project status
@@ -125,3 +123,22 @@ Stable milestone tagged as `v1.0.2-rolepass`
 
 ## [Unreleased]
 - ⏳ Placeholder for next release
+
+## [v1.0.3-testpass] – 2025-05-21
+**Author:** @niccavendish
+
+- ✅ 83/83 tests passing, including full end-to-end
+- 🧪 `timerEvent()` crash bug resolved
+- 🛠 PyQt6 + Git integration hardened for DAW use
+- 📋 Manual QA phase begins
+
+### Manual QA Checklist
+- [ ] Launch without project
+- [ ] Load real DAW project (.als/.logicx)
+- [ ] Save snapshot with commit message
+- [ ] Open latest version in DAW
+- [ ] Switch/create version lines
+- [ ] Return to latest
+- [ ] Delete snapshot
+- [ ] Stash on switch
+- [ ] Tag snapshots and verify
