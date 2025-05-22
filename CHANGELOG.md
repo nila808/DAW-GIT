@@ -1,5 +1,14 @@
 
 
+## [push-it] – 2025-05-22
+**Author:** @niccavendish
+- 🧼 Ignore .DS_Store to prevent test noise and git pollution
+- ✅ Final test fixes + cleanup for v1.0.3 release
+- 📦 v1.0.3: 📝 updated changelog, 📊 updated project status
+- small update to make commit buutons unavailable if no unsaved project data exists
+- ✅ Final fixes for v1.0.4-cleanup: commit safety, HEAD checkout, status label
+
+
 ## [v1.0.3] – 2025-05-22
 **Author:** @niccavendish
 - small update to make commit buutons unavailable if no unsaved project data exists
