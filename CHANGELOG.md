@@ -1,5 +1,14 @@
 
 
+## [v1.0.3] – 2025-05-22
+**Author:** @niccavendish
+- small update to make commit buutons unavailable if no unsaved project data exists
+- ✅ Final fixes for v1.0.4-cleanup: commit safety, HEAD checkout, status label
+- 📦 v1.0.4-cleanup: 📝 updated changelog, 📊 updated project status
+- commit note
+- 🚧 v1.0.5-dev: begin role-tagging refactor + cleanup staging
+
+
 ## [v1.0.4-cleanup] – 2025-05-21
 **Author:** @niccavendish
 - commit note
@@ -162,3 +171,4 @@ Stable milestone tagged as `v1.0.2-rolepass`
 - [ ] Delete snapshot
 - [ ] Stash on switch
 - [ ] Tag snapshots and verify- [2025-05-21 18:30] Tagged v1.0.4-cleanup – test suite green (83/83), fixed commit safety, status label, detached HEAD logic
+- [2025-05-22 17:21] Improved test resilience and fixed all failing tests (checkout safety, status logic, untracked warnings)
