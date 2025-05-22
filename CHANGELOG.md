@@ -1,5 +1,14 @@
 
 
+## [v1.0.3] – 2025-05-22
+**Author:** @niccavendish
+- small update to make commit buutons unavailable if no unsaved project data exists
+- ✅ Final fixes for v1.0.4-cleanup: commit safety, HEAD checkout, status label
+- 📦 v1.0.4-cleanup: 📝 updated changelog, 📊 updated project status
+- commit note
+- 🚧 v1.0.5-dev: begin role-tagging refactor + cleanup staging
+
+
 ## [v1.0.4-cleanup] – 2025-05-21
 **Author:** @niccavendish
 - commit note
