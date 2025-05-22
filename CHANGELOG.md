@@ -1,5 +1,14 @@
 
 
+## [v1.0.4-ui-polish-fix] – 2025-05-22
+**Author:** @niccavendish
+- 📦 v1.0.4-ui-polish: 📝 updated changelog, 📊 updated project status
+- 📦 push-it: 📝 updated changelog, 📊 updated project status
+- 🧼 Ignore .DS_Store to prevent test noise and git pollution
+- ✅ Final test fixes + cleanup for v1.0.3 release
+- 📦 v1.0.3: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.0.4-ui-polish] – 2025-05-22
 **Author:** @niccavendish
 - 📦 push-it: 📝 updated changelog, 📊 updated project status
