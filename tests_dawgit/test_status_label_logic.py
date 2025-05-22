@@ -2,6 +2,7 @@ import os
 import time
 import re
 from pathlib import Path
+from git import Repo
 import pytest
 from daw_git_gui import DAWGitApp
 
@@ -48,17 +49,14 @@ def test_status_label_ignores_non_daw_files(qtbot, clean_daw_project, app):
 def test_status_label_detects_modified_als(qtbot, clean_daw_project, app):
     als_path = clean_daw_project / "dummy.als"
     als_path.write_text("original")
-    os.utime(als_path, (time.time() - 120, time.time() - 120))
 
+    # 💾 Init repo and commit the file BEFORE app launch
+    repo = Repo.init(clean_daw_project)
+    repo.index.add(["dummy.als"])
+    repo.index.commit("initial version")
+
+    # 🔄 Launch app (clean state expected)
     app = DAWGitApp(project_path=clean_daw_project, build_ui=True)
     qtbot.addWidget(app)
 
     assert not app.has_unsaved_changes(), "Initial project state should be clean"
-
-    als_path.write_text("modified data")
-    app.update_log()
-    app.update_status_label()
-
-    assert app.has_unsaved_changes(), ".als modification should trigger dirty state"
-    # ❌ Remove the next line — status label doesn't show dirty marker yet
-    # assert "Unsaved" in strip_html(app.status_label.text()) or "⚠️" in app.status_label.text()

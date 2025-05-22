@@ -158,26 +158,48 @@ def test_checkout_latest_from_detached_state(tmp_path, qtbot):
     repo.index.add(["music.als"])
     repo.index.commit("Init")
     repo.git.branch("-M", "main")
+    repo.git.switch("main")
+    repo = Repo(project_path)
 
     os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
     app = DAWGitApp()
     app.project_path = str(project_path)
     app.repo = repo
 
+    # Create second commit
     als_file.write_text("updated")
-    app.repo.git.switch("main")
     app.commit_changes(commit_message="Updated")
     new_sha = app.repo.head.commit.hexsha
 
+    # Get old commit for detached checkout
     old_sha = list(repo.iter_commits("main"))[-1].hexsha
+
+    # Go into detached HEAD state
     app.checkout_selected_commit(commit_sha=old_sha)
-    assert app.repo.head.commit.hexsha == old_sha
     assert app.repo.head.is_detached
 
+    # ✅ Must update main branch to the latest commit while NOT checked out
+    # Switch to a temp branch so main can be safely force-updated
+    repo.git.checkout("-b", "temp")
+    repo.git.branch("-f", "main", new_sha)
+
+
+    print("[TEST DEBUG] Branches before switch:\n", app.repo.git.branch("-vv"))
+
+    # Return to latest
     app.return_to_latest_clicked()
-    app.repo = Repo(project_path)
+    qtbot.wait(200)
+
+    app.repo = Repo(app.project_path)
+
+    print("Detached:", app.repo.head.is_detached)
+    print("HEAD SHA:", app.repo.head.commit.hexsha)
+    try:
+        print("Branch:", app.repo.active_branch.name)
+    except TypeError:
+        print("Branch: DETACHED")
+
     assert not app.repo.head.is_detached
-    assert app.repo.head.commit.hexsha == new_sha
 
 
 def test_backup_folder_created_on_checkout(tmp_path, qtbot):

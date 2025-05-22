@@ -39,11 +39,15 @@ def test_create_version_line_from_detached_head(app_with_repo):
 def test_safe_switch_branch_creates_if_missing(app_with_repo, qtbot):
     app = app_with_repo
 
+    # Setup: ensure repo has one real commit
     daw_file = Path(app.project_path) / "dummy.als"
-    if not daw_file.exists():
-        daw_file.write_text("Ableton test file")
-        app.repo.index.add([str(daw_file.name)])
-        app.repo.index.commit("Pre-branch commit")
+    daw_file.write_text("Ableton test file")
+    app.repo.git.add(str(daw_file.name))
+    app.repo.git.commit("-m", "Pre-branch commit")
+
+    # Make sure everything is committed so branch logic runs
+    app.repo.git.add(A=True)
+    app.repo.git.commit("-m", "Clean state before switch")
 
     if "fresh_mix" in [b.name for b in app.repo.branches]:
         app.repo.git.branch("-D", "fresh_mix")
@@ -55,8 +59,17 @@ def test_safe_switch_branch_creates_if_missing(app_with_repo, qtbot):
         result = app.safe_switch_branch("fresh_mix")
         print("[TEST DEBUG] Branch switch result:", result)
 
-    assert result["status"] in ("ok", "success", "warning")  # allow fallback warning mode
-    assert "fresh_mix" in [b.name for b in app.repo.branches]
+    branches = [b.name for b in app.repo.branches]
+    print("Branches:", branches)
+    assert "fresh_mix" in branches, "Expected branch 'fresh_mix' to be created"
+
+    app.update_session_branch_display()
+    app.update_version_line_label()
+
+    qtbot.wait(100)
+    assert "fresh_mix" in app.branch_label.text()
+    assert app.version_line_label.text().startswith("🎚️ You’re working on version line:")
+
 
 
 def test_update_session_branch_display_reflects_branch_and_commit(app_with_repo):
@@ -69,7 +82,9 @@ def test_update_session_branch_display_reflects_branch_and_commit(app_with_repo)
     app.update_session_branch_display()
     print("[TEST DEBUG] Branch Label:", app_with_repo.branch_label.text())
     print("[TEST DEBUG] Commit Label:", app.commit_label.text())
-    assert "Branch:" in app_with_repo.branch_label.text()  # stripped emoji for test mode
+    text = app.branch_label.text()
+    assert "Session branch:" in text
+    assert "Current take:" in text
 
 def test_switch_branch_with_unsaved_changes_prompts_backup(app_with_repo):
 

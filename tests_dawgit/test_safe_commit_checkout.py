@@ -6,9 +6,6 @@ from git import Repo
 from daw_git_gui import DAWGitApp
 
 def test_untracked_file_warning_on_checkout(tmp_path):
-    """
-    AT-038 – Should warn if untracked files exist before checkout
-    """
     from daw_git_gui import DAWGitApp
 
     # Step 1: Init repo with valid .als file
@@ -35,4 +32,5 @@ def test_untracked_file_warning_on_checkout(tmp_path):
     result = app.checkout_selected_commit(old_commit_sha)
 
     # Step 5: Check the response
-    assert result["status"] == "warning", "App should warn about untracked file before checkout"
+    assert result["status"] == "blocked"
+    assert "notes.txt" in result["files"]
