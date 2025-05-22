@@ -1,6 +1,6 @@
 {
   "project_name": "TEST 1 Project",
-  "project_version": "push-it",
+  "project_version": "v1.0.4-ui-polish",
   "creator": "Niccavendish",
   "repository_info": {
     "current_branch": "main",
@@ -26,7 +26,7 @@
   },
   "metadata": {
     "tags": {
-      "version_marker": "push-it"
+      "version_marker": "v1.0.4-ui-polish"
     },
     "qa": {
       "qa_started": true
