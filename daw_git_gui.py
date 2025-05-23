@@ -337,20 +337,30 @@ class DAWGitApp(QMainWindow):
 
         # 🌟 Role Tagging Buttons Row
         role_button_layout = QHBoxLayout()
-        self.btn_set_version_main = QPushButton("🌟 Tag as Main Mix")
+       
+        self.btn_set_version_main = QPushButton("🌟 Mark as Final Mix")
+        self.btn_set_version_main.setObjectName("btn_main_mix")
         self.btn_set_version_main.setToolTip("Assign this snapshot as your Main Mix")
         self.btn_set_version_main.clicked.connect(self.tag_main_mix)
         role_button_layout.addWidget(self.btn_set_version_main)
 
-        self.btn_set_experiment = QPushButton("🎨 Creative Take")
-        self.btn_set_experiment.setToolTip("Assign this snapshot as a Creative Take")
-        self.btn_set_experiment.clicked.connect(self.tag_creative_take)
-        role_button_layout.addWidget(self.btn_set_experiment)
+        self.btn_set_version_creative = QPushButton("🎨 Mark as Creative Version")
+        self.btn_set_version_creative.setObjectName("btn_creative")
+        self.btn_set_version_creative.setToolTip("Assign this snapshot as a creative alternative")
+        self.btn_set_version_creative.clicked.connect(self.tag_creative_take)
+        role_button_layout.addWidget(self.btn_set_version_creative)
 
-        self.btn_set_alternate = QPushButton("🎚️ Alt Mixdown")
-        self.btn_set_alternate.setToolTip("Assign this snapshot as an Alternate Mixdown")
-        self.btn_set_alternate.clicked.connect(self.tag_alt_mix)
-        role_button_layout.addWidget(self.btn_set_alternate)
+        self.btn_set_version_alt = QPushButton("🎚️ Mark as Alternate Mix")
+        self.btn_set_version_alt.setObjectName("btn_alt")
+        self.btn_set_version_alt.setToolTip("Assign this snapshot as an alternate mixdown or stem")
+        self.btn_set_version_alt.clicked.connect(self.tag_alt_mix)
+        role_button_layout.addWidget(self.btn_set_version_alt)
+
+        self.btn_custom_tag = QPushButton("✏️ Add Custom Tag")
+        self.btn_custom_tag.setObjectName("btn_custom")
+        self.btn_custom_tag.setToolTip("Add your own label to this snapshot")
+        self.btn_custom_tag.clicked.connect(self.tag_custom_label)
+        role_button_layout.addWidget(self.btn_custom_tag)
 
         commit_layout.addLayout(role_button_layout)
 
@@ -1488,12 +1498,14 @@ class DAWGitApp(QMainWindow):
 
         self.history_table.selectRow(row)
 
-        # Get commit SHA from tooltip in column 1 (set in update_log)
         commit_item = self.history_table.item(row, 1)
-        if not commit_item:
-            return
+        commit_sha = commit_item.toolTip() if commit_item else None
 
-        commit_sha = commit_item.toolTip()
+        if not commit_sha:
+            commit_sha = self.current_commit_id
+
+        if not commit_sha:
+            return  # gracefully bail, no warning needed for context menu
 
         menu = QMenu(self)
         delete_action = QAction("🗑️ Delete This Snapshot", self)
@@ -1850,6 +1862,45 @@ class DAWGitApp(QMainWindow):
             print(f"[DEBUG] No commit role file found at {roles_path}")
             self.commit_roles = {}
 
+    def tag_custom_label(self):
+        """
+        Prompts user for a custom label and assigns it to the selected commit.
+        """
+        self._set_commit_id_from_selected_row()
+        row = self.history_table.currentRow()
+        if row < 0:
+            self._show_warning("Please select a snapshot to tag.")
+            return
+
+        commit_item = self.history_table.item(row, 1)
+        sha = commit_item.toolTip() if commit_item else None
+
+        if not sha:
+            sha = self.current_commit_id
+
+        if not sha:
+            self._show_warning("Commit SHA missing — can't assign role.")
+            return
+
+        label, ok = QInputDialog.getText(
+            self,
+            "Custom Snapshot Label",
+            "Enter your custom label (e.g. 'Master v1', 'Stem Bounce', 'Club Edit'):"
+        )
+
+        if not ok or not label.strip():
+            return  # cancelled or empty
+
+        clean_label = label.strip()
+
+        self.current_commit_id = sha
+        self.assign_commit_role(sha, clean_label)
+        self.save_commit_roles()
+        self.status_message(f"✏️ Commit tagged as '{clean_label}': {sha[:7]}")
+
+        QTimer.singleShot(100, self.load_commit_history)
+
+
 
     def tag_main_mix(self):
         """
@@ -1862,18 +1913,46 @@ class DAWGitApp(QMainWindow):
             return
 
         commit_item = self.history_table.item(row, 1)
-        if not commit_item:
-            self._show_warning("Couldn't retrieve commit info.")
-            return
+        sha = commit_item.toolTip() if commit_item else None
 
-        sha = commit_item.toolTip()
+        if not sha:
+            sha = self.current_commit_id
+
         if not sha:
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
-        self.current_commit_id = sha
-        self.assign_commit_role(sha, "Main Mix")  # ✅ persist and save in one step
+        # 🔍 Find existing Main Mix
+        existing_main = next((k for k, v in self.commit_roles.items() if v == "Main Mix" and k != sha), None)
 
+        # 🧪 In test mode, skip modal
+        if existing_main and os.getenv("DAWGIT_TEST_MODE") != "1":
+            old_msg = self.repo.commit(existing_main).message.strip().split("\n")[0][:40]
+            new_msg = self.repo.commit(sha).message.strip().split("\n")[0][:40]
+
+            confirm = QMessageBox.question(
+                self,
+                "Replace Main Mix?",
+                f"Only one commit can be tagged as 'Main Mix'.\n\n"
+                f"This will remove the tag from:\n"
+                f"🗑 {existing_main[:7]} – {old_msg}\n\n"
+                f"And apply it to:\n"
+                f"🌟 {sha[:7]} – {new_msg}\n\n"
+                f"Continue?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
+            )
+
+            if confirm != QMessageBox.StandardButton.Yes:
+                return
+
+            self.commit_roles.pop(existing_main, None)
+
+        self.current_commit_id = sha
+        self.assign_commit_role(sha, "Main Mix")
+        self.save_commit_roles()
+        self.status_message(f"🌟 Commit tagged as 'Main Mix': {sha[:7]}")
+
+        QTimer.singleShot(100, self.load_commit_history)
 
 
     def tag_creative_take(self):
@@ -1887,19 +1966,23 @@ class DAWGitApp(QMainWindow):
             return
 
         commit_item = self.history_table.item(row, 1)
-        if not commit_item:
-            self._show_warning("Couldn't retrieve commit info.")
-            return
+        sha = commit_item.toolTip() if commit_item else None
 
-        sha = commit_item.toolTip()
+        if not sha:
+            # Fallback to internal commit ID if tooltip is missing
+            sha = self.current_commit_id
+
         if not sha:
             self._show_warning("Commit SHA missing — can't assign role.")
             return
+
 
         self.current_commit_id = sha  # ✅ Critical for test logic
         self.assign_commit_role(sha, "Creative Take")  # ✅ This updates the in-memory dict
         self.save_commit_roles()  # ✅ This persists it for reload
         self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
+
+        QTimer.singleShot(100, self.load_commit_history)
 
 
     def tag_alt_mix(self):
@@ -1913,19 +1996,23 @@ class DAWGitApp(QMainWindow):
             return
 
         commit_item = self.history_table.item(row, 1)
-        if not commit_item:
-            self._show_warning("Couldn't retrieve commit info.")
-            return
+        sha = commit_item.toolTip() if commit_item else None
 
-        sha = commit_item.toolTip()
+        if not sha:
+            # Fallback to internal commit ID if tooltip is missing
+            sha = self.current_commit_id
+
         if not sha:
             self._show_warning("Commit SHA missing — can't assign role.")
             return
+
 
         self.current_commit_id = sha  # ✅ FIX
         self.assign_commit_role(sha, "Alt Mixdown")
         self.save_commit_roles()
         self.status_message(f"🎛️ Commit tagged as 'Alt Mixdown': {sha[:7]}")
+
+        QTimer.singleShot(100, self.load_commit_history)
 
 
     def show_commit_checkout_info(self, commit):
@@ -2515,7 +2602,8 @@ class DAWGitApp(QMainWindow):
             self.init_git()
 
         
-    def load_commit_history(self):
+    def load_commit_history(self, limit=20, offset=0):
+        # 🚩 Check if project path and repo are properly set
         if not self.project_path:
             self.project_path = Path(tempfile.mkdtemp())
             print(f"[INFO] No project path set, using temporary path: {self.project_path}")
@@ -2523,28 +2611,27 @@ class DAWGitApp(QMainWindow):
         if not self.repo:
             print("❌ No Git repo loaded.")
             return
-        
+
         self.load_commit_roles()  # ✅ Load roles before populating history
 
+        # 🚩 Handle case of an empty repo (no commits)
         if not self.repo.head.is_valid():
             print("⚠️ Repo exists but has no commits yet.")
             self.history_table.setRowCount(0)
-            self.history_table.insertRow(0)  # ✅ Insert the row before setting items
-            self.history_table.setItem(0, 0, QTableWidgetItem("–"))  # Role
-            self.history_table.setItem(0, 1, QTableWidgetItem("–"))  # Commit ID
-            self.history_table.setItem(0, 2, QTableWidgetItem("No commits yet"))  # Message
-            self.history_table.setItem(0, 3, QTableWidgetItem("–"))  # Branch
-            # Fill the rest of the columns with placeholders to avoid indexing errors
-            for col in range(4, self.history_table.columnCount()):
-                self.history_table.setItem(0, col, QTableWidgetItem("–"))
+            self.history_table.insertRow(0)
+            placeholders = ["–", "–", "No commits yet", "–", "–", "–", "–", "–", "–"]
+            for col, text in enumerate(placeholders):
+                self.history_table.setItem(0, col, QTableWidgetItem(text))
 
             self.update_status_label()
             self.update_role_buttons()
             return
 
-        self.history_table.setRowCount(0)
-        self.history_table.clearSelection()
-        selected_row = None
+        # 🚩 Initial setup: clear table if it's the first load
+        if offset == 0:
+            self.history_table.setRowCount(0)
+            self.history_table.clearSelection()
+
         head_sha = self.repo.head.commit.hexsha
 
         try:
@@ -2552,25 +2639,36 @@ class DAWGitApp(QMainWindow):
         except TypeError:
             current_branch = "(detached HEAD)"
 
-        commits = list(self.repo.iter_commits("HEAD", max_count=100))  # Keep HEAD first = row 0
-        for row, commit in enumerate(commits):
-            self.history_table.insertRow(row)  # ✅ FIXED
-            
-            row_label = f"#{len(commits) - row}"  # Keep oldest = #1
+        # 🚩 Lazy-load commits in batches
+        commits = list(self.repo.iter_commits("HEAD", max_count=limit, skip=offset))
+        total_commits = self.repo.git.rev_list('--count', 'HEAD')
+        total_commits = int(total_commits.strip())
+
+        for idx, commit in enumerate(commits):
+            row = self.history_table.rowCount()
+            self.history_table.insertRow(row)
+
             sha_short = commit.hexsha[:7]
-            tag = self.get_tag_for_commit(commit.hexsha)
             short_msg = commit.message.strip().split("\n")[0]
             date_str = datetime.fromtimestamp(commit.committed_date).strftime("%b %d, %H:%M")
-            file_count = str(len(commit.stats.files))
-            daw_type = "Ableton" if any(".als" in f for f in commit.stats.files) else "Logic" if any(".logicx" in f for f in commit.stats.files) else "Unknown"
+            # file_count = str(len(commit.stats.files))
+            # daw_type = "Ableton" if any(".als" in f for f in commit.stats.files) else "Logic" if any(".logicx" in f for f in commit.stats.files) else "Unknown"
+            
+            # Optimized and very fast alternative
+            files_in_commit = commit.tree.traverse()
+            file_list = [item.path for item in files_in_commit if item.type == 'blob']
+            file_count = str(len(file_list))
+            daw_type = "Ableton" if any(".als" in f for f in file_list) else "Logic" if any(".logicx" in f for f in file_list) else "Unknown"
+            
+            
+            role = self.commit_roles.get(commit.hexsha, "")
 
-            # Column 0 – Row number
-            row_label = f"#{len(commits) - row}"  # Show oldest = #1, newest = #N
-            self.history_table.setItem(row, 0, QTableWidgetItem(row_label))
-
+            # Column assignments clearly commented:
+            # Column 0 – Commit number (e.g., #20, #19, ...)
+            commit_number = total_commits - (offset + idx)
+            self.history_table.setItem(row, 0, QTableWidgetItem(f"#{commit_number}"))
 
             # Column 1 – Role tag (Main Mix, etc.)
-            role = self.commit_roles.get(commit.hexsha, "")
             self.history_table.setItem(row, 1, QTableWidgetItem(role))
 
             # Column 2 – Commit ID
@@ -2581,7 +2679,7 @@ class DAWGitApp(QMainWindow):
             # Column 3 – Commit message
             self.history_table.setItem(row, 3, QTableWidgetItem(short_msg))
 
-            # Column 4 – Branch name
+            # Column 4 – Branch name (optimized subprocess call)
             try:
                 result = subprocess.run(
                     ["git", "branch", "--contains", commit.hexsha],
@@ -2590,18 +2688,13 @@ class DAWGitApp(QMainWindow):
                     capture_output=True,
                     text=True
                 )
-                branch_list = [
-                    line.strip().lstrip("* ").strip()
-                    for line in result.stdout.strip().splitlines()
-                ]
+                branches = [line.strip().lstrip("* ").strip() for line in result.stdout.strip().splitlines()]
+                if current_branch in branches:
+                    branches = [f"🎯 {b}" if b == current_branch else b for b in branches]
+                branch_str = ", ".join(branches)
             except Exception as e:
                 print(f"[ERROR] Failed to get branches for {sha_short}: {e}")
-                branch_list = []
-
-            if current_branch in branch_list:
-                branch_list = [f"🎯 {b}" if b == current_branch else b for b in branch_list]
-
-            branch_str = ", ".join(branch_list) if branch_list else "–"
+                branch_str = "–"
             self.history_table.setItem(row, 4, QTableWidgetItem(branch_str))
 
             # Column 5 – DAW type (Ableton/Logic/Unknown)
@@ -2611,39 +2704,54 @@ class DAWGitApp(QMainWindow):
             self.history_table.setItem(row, 6, QTableWidgetItem(file_count))
 
             # Column 7 – Tags (if any)
+            tag = self.get_tag_for_commit(commit.hexsha)
             self.history_table.setItem(row, 7, QTableWidgetItem(tag if tag else ""))
 
             # Column 8 – Date
             self.history_table.setItem(row, 8, QTableWidgetItem(date_str))
 
-
-            # ✅ Mark the HEAD commit row
+            # 🚩 Mark the HEAD commit row distinctly
             if commit.hexsha == head_sha:
                 self.history_table.selectRow(row)
-                selected_row = row
-                print(f"[DEBUG] ✅ Matched HEAD SHA: {sha_short} → row {row}")
                 for col in range(self.history_table.columnCount()):
                     item = self.history_table.item(row, col)
                     if item:
                         item.setBackground(Qt.GlobalColor.green)
 
-        # 🧭 Default sort: Newest date first
+        # 🚩 Default sort: Newest commit first
         self.history_table.sortItems(0, Qt.SortOrder.DescendingOrder)
 
+        # 🚩 Ensure current commit ID is set
         self._set_commit_id_from_selected_row()
         if not self.current_commit_id:
-            item = self.history_table.item(selected_row, 2)
+            item = self.history_table.item(self.history_table.currentRow(), 2)
             if item:
                 self.current_commit_id = item.toolTip()
-        print(f"[DEBUG] 🛠️ Fallback set current_commit_id: {self.current_commit_id}")
 
         self.update_status_label()
         self.update_role_buttons()
 
-        # ✅ Final scroll
-        if selected_row is not None:
-            self.history_table.scrollToItem(self.history_table.item(selected_row, 1), QTableWidget.ScrollHint.PositionAtCenter)
-            print(f"[DEBUG] ✅ Final scroll to HEAD row {selected_row}")
+        # 🚩 Scroll to HEAD after loading
+        head_row = self.history_table.currentRow()
+        if head_row >= 0:
+            self.history_table.scrollToItem(
+                self.history_table.item(head_row, 1),
+                QTableWidget.ScrollHint.PositionAtCenter
+            )
+
+        # 🚩 Connect lazy-loading scroll handler (only once)
+        if not hasattr(self, 'commit_history_loaded'):
+            self.commit_history_loaded = offset + limit
+            self.history_table.verticalScrollBar().valueChanged.connect(self.handle_commit_scroll)
+
+    # 🚩 Helper to handle lazy-loading on scroll
+    def handle_commit_scroll(self, value):
+        scrollbar = self.history_table.verticalScrollBar()
+        if value == scrollbar.maximum():
+            print(f"[DEBUG] Scrolled to bottom, loading more commits starting from offset {self.commit_history_loaded}")
+            self.load_commit_history(limit=20, offset=self.commit_history_loaded)
+            self.commit_history_loaded += 20
+
 
 
     def set_commit_id_from_head(self):
@@ -3066,8 +3174,8 @@ class DAWGitApp(QMainWindow):
                 # Disable and hide role buttons
                 for btn in [
                     self.btn_set_version_main,
-                    self.btn_set_experiment,
-                    self.btn_set_alternate
+                    self.btn_set_version_creative,
+                    self.btn_set_version_alt
                 ]:
                     btn.setEnabled(False)
                     btn.setToolTip("Tagging is only available on active version lines.")
@@ -3093,8 +3201,8 @@ class DAWGitApp(QMainWindow):
                 # ✅ Re-enable and show role buttons
                 for btn in [
                     self.btn_set_version_main,
-                    self.btn_set_experiment,
-                    self.btn_set_alternate
+                    self.btn_set_version_creative,
+                    self.btn_set_version_alt
                 ]:
                     btn.setEnabled(True)
                     btn.setToolTip("")
