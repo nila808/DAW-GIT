@@ -1,5 +1,14 @@
 
 
+## [v1.0.5-improve-ux-commit-flow] – 2025-05-23
+**Author:** @niccavendish
+- 🚀 v1.0.5 startup performance fix + dev guide
+- 📦 v1.0.5-optimie start up: 📝 updated changelog, 📊 updated project status
+- 📦 v1.0.4-ui-polish-fix: 📝 updated changelog, 📊 updated project status
+- 📦 v1.0.4-ui-polish: 📝 updated changelog, 📊 updated project status
+- 📦 push-it: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.0.5-optimie start up] – 2025-05-23
 **Author:** @niccavendish
 - 📦 v1.0.4-ui-polish-fix: 📝 updated changelog, 📊 updated project status

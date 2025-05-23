@@ -1,6 +1,6 @@
 {
   "project_name": "TEST 1 Project",
-  "project_version": "v1.0.5-optimie start up",
+  "project_version": "v1.0.5-improve-ux-commit-flow",
   "creator": "Niccavendish",
   "repository_info": {
     "current_branch": "main",
@@ -26,7 +26,7 @@
   },
   "metadata": {
     "tags": {
-      "version_marker": "v1.0.5-optimie start up"
+      "version_marker": "v1.0.5-improve-ux-commit-flow"
     },
     "qa": {
       "qa_started": true
