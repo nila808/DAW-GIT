@@ -1,6 +1,6 @@
 {
   "project_name": "TEST 1 Project",
-  "project_version": "v1.0.5-pages-feature",
+  "project_version": "v1.1.1-dev",
   "creator": "Niccavendish",
   "repository_info": {
     "current_branch": "main",
@@ -26,7 +26,7 @@
   },
   "metadata": {
     "tags": {
-      "version_marker": "v1.0.5-pages-feature"
+      "version_marker": "v1.1.1-dev"
     },
     "qa": {
       "qa_started": true

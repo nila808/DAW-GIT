@@ -1,5 +1,14 @@
 
 
+## [v1.1.1-dev] – 2025-05-25
+**Author:** @niccavendish
+- Update UI commit history table and add branch/snapshot pages components
+- 📦 v1.0.5-pages-feature: 📝 updated changelog, 📊 updated project status
+- 📦 v1.0.5-improve-ux-commit-flow: 📝 updated changelog, 📊 updated project status
+- 🚀 v1.0.5 startup performance fix + dev guide
+- 📦 v1.0.5-optimie start up: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.0.5-pages-feature] – 2025-05-24
 **Author:** @niccavendish
 - 📦 v1.0.5-improve-ux-commit-flow: 📝 updated changelog, 📊 updated project status
