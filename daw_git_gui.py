@@ -3,9 +3,11 @@
 # --- Standard Library ---
 import os
 import sys
+import re
 import fnmatch
 import json
 import signal
+import shlex
 import shutil
 import subprocess
 import time
@@ -16,6 +18,7 @@ import traceback
 # --- App Modules ---
 from gui_layout import build_main_ui
 from daw_git_core import GitProjectManager
+from daw_git_core import sanitize_git_input
 
 # --- Git ---
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
@@ -54,6 +57,18 @@ class DAWGitApp(QMainWindow):
         self.repo = None
         self.current_commit_id = None
         self.settings = QSettings("DAWGitApp", "DAWGit")
+        # 🧪 Test mode: auto-close all modals safely
+        if os.getenv("DAWGIT_TEST_MODE") == "1":
+            from PyQt6.QtWidgets import QMessageBox, QInputDialog
+
+            QMessageBox.question = lambda *a, **kw: QMessageBox.StandardButton.Yes
+            QMessageBox.information = lambda *a, **kw: None
+            QMessageBox.warning = lambda *a, **kw: None
+            QMessageBox.critical = lambda *a, **kw: None
+
+            QInputDialog.getText = lambda *a, **kw: ("test_input", True)
+            QInputDialog.getItem = lambda *a, **kw: ("main", True)
+
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
 
         # ✅ Set project path before loading anything project-specific
@@ -570,26 +585,30 @@ class DAWGitApp(QMainWindow):
             self.repo = None
             self.current_commit_id = None
 
+    @property
+    def branch_dropdown(self):
+        if hasattr(self, "branch_page"):
+            return self.branch_page.branch_dropdown
+        return None
 
 
-    # Have removed the branch dropdown logic as the Load Alt Session button does the same thing
-    # def update_branch_dropdown(self):
-    #     self.branch_dropdown.blockSignals(True)
-    #     self.branch_dropdown.clear()
+    def update_branch_dropdown(self):
+        self.branch_dropdown.blockSignals(True)
+        self.branch_dropdown.clear()
 
-    #     branches = [head.name for head in self.repo.heads]
-    #     self.branch_dropdown.addItems(branches)
+        branches = [head.name for head in self.repo.heads]
+        self.branch_dropdown.addItems(branches)
 
-    #     try:
-    #         active_branch = self.repo.active_branch.name
-    #         if active_branch in branches:
-    #             index = branches.index(active_branch)
-    #             self.branch_dropdown.setCurrentIndex(index)
-    #     except TypeError:
-    #         # Handle detached HEAD
-    #         self.branch_dropdown.setCurrentText("Detached HEAD")
+        try:
+            active_branch = self.repo.active_branch.name
+            if active_branch in branches:
+                index = branches.index(active_branch)
+                self.branch_dropdown.setCurrentIndex(index)
+        except TypeError:
+            # Handle detached HEAD
+            self.branch_dropdown.setCurrentText("Detached HEAD")
 
-    #     self.branch_dropdown.blockSignals(False)
+        self.branch_dropdown.blockSignals(False)
 
 
     def return_to_latest_clicked(self):
@@ -1398,11 +1417,10 @@ class DAWGitApp(QMainWindow):
 
         try:
             if os.getenv("DAWGIT_TEST_MODE") == "1":
-                print(f"[TEST MODE] Would open: {latest_file}")
                 return {"status": "success", "opened_file": str(latest_file)}
 
-            subprocess.Popen(["open", str(latest_file)])
-
+            safe_path = str(latest_file.resolve())
+            subprocess.Popen(["open", safe_path])  # ✅ Safe
         except Exception as e:
             self._show_error(f"Failed to open project file:\n{e}")
 
@@ -1595,9 +1613,22 @@ class DAWGitApp(QMainWindow):
 
         label, ok = QInputDialog.getText(
             self,
-            "Custom Snapshot Label",
-            "Enter your custom label (e.g. 'Master v1', 'Stem Bounce', 'Club Edit'):"
+            "Tag Snapshot",
+            "Enter a label (e.g., 'alt_take', 'pre_master', 'idea_A'):\n\n"
+            "✅ Letters, numbers, dashes, underscores only.\n"
+            "🚫 No spaces or special characters."
         )
+
+        if not ok:
+            return
+
+        # ✅ Sanitize and validate
+        label = label.strip().lower().replace(" ", "_")
+        label = "".join(c for c in label if c.isalnum() or c in ("_", "-"))
+
+        if not label:
+            QMessageBox.warning(self, "Invalid Label", "❌ Please enter a valid label.")
+            return
 
         if not ok or not label.strip():
             return  # cancelled or empty
@@ -1657,7 +1688,7 @@ class DAWGitApp(QMainWindow):
 
     def tag_creative_take(self):
         """
-        Assigns the 'Creative Take' role to the currently selected commit.
+        Assigns the 'creative_take' role to the currently selected commit.
         """
         self._set_commit_id_from_selected_row()
         row = self.snapshot_page.commit_table.currentRow()
@@ -1672,16 +1703,20 @@ class DAWGitApp(QMainWindow):
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
+        # ✅ Normalized internal label
+        safe_label = "creative_take"
+
         self.current_commit_id = sha
-        self.assign_commit_role(sha, "Creative Take")
+        self.assign_commit_role(sha, safe_label)
         self.save_commit_roles()
-        self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
+        self.status_message(f"🎨 Commit tagged as '{safe_label}': {sha[:7]}")
         QTimer.singleShot(100, self.load_commit_history)
+
 
 
     def tag_alt_mix(self):
         """
-        Assigns the 'Alt Mixdown' role to the currently selected commit.
+        Assigns the 'alt_mixdown' role to the currently selected commit.
         """
         self._set_commit_id_from_selected_row()
         row = self.snapshot_page.commit_table.currentRow()
@@ -1696,10 +1731,13 @@ class DAWGitApp(QMainWindow):
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
+        # ✅ Normalized internal label
+        safe_label = "alt_mixdown"
+
         self.current_commit_id = sha
-        self.assign_commit_role(sha, "Alt Mixdown")
+        self.assign_commit_role(sha, safe_label)
         self.save_commit_roles()
-        self.status_message(f"🎛️ Commit tagged as 'Alt Mixdown': {sha[:7]}")
+        self.status_message(f"🎛️ Commit tagged as '{safe_label}': {sha[:7]}")
         QTimer.singleShot(100, self.load_commit_history)
 
 
@@ -2087,7 +2125,7 @@ class DAWGitApp(QMainWindow):
                 ".DS_Store", "._*", "auto_placeholder.als",
                 "PROJECT_MARKER.json", ".dawgit_roles.json",
                 "PROJECT_STATUS.md", ".gitattributes",
-                "Icon\r", '"Icon\r"', "Icon?", "Icon\\r"
+                ".gitignore", ".*", "Icon\r", '"Icon\r"', "Icon?", "Icon\\r"
             ]
 
 
@@ -2141,8 +2179,6 @@ class DAWGitApp(QMainWindow):
         except Exception as e:
             print(f"[DEBUG] has_unsaved_changes() failed: {e}")
             return False
-
-
 
 
     def backup_unsaved_changes(self):
@@ -2525,9 +2561,6 @@ class DAWGitApp(QMainWindow):
                 break
 
 
-
-
-
     def clear_highlight_on_click(self):
         self.current_commit_id = None
 
@@ -2542,11 +2575,11 @@ class DAWGitApp(QMainWindow):
         )
 
         if ok:
-            # ✅ Clean and validate input
+            # ✅ Normalize
             branch_name = raw_input.strip().lower().replace(" ", "_")
-            branch_name = "".join(c for c in branch_name if c.isalnum() or c in ("_", "-"))
 
-            if not branch_name:
+            # ✅ Sanitize using strict regex
+            if not re.match(r"^[a-z0-9_-]+$", branch_name):
                 QMessageBox.warning(
                     self,
                     "Invalid Name",
@@ -2586,10 +2619,9 @@ class DAWGitApp(QMainWindow):
                 self.update_status_label()
                 self.update_role_buttons()
 
-                # Trigger branch dropdown refresh after a short delay so Git updates internally
                 if hasattr(self, "branch_page"):
                     QTimer.singleShot(300, self.branch_page.populate_branches)
-                    
+
                 QMessageBox.information(
                     self,
                     "Version Line Created",
@@ -2602,6 +2634,7 @@ class DAWGitApp(QMainWindow):
                     "Error Creating Version",
                     f"❌ Could not create version line:\n\n{e}"
                 )
+
 
 
     def safe_single_shot(self, delay_ms, callback, parent=None):    

@@ -1,3 +1,4 @@
+import os
 import shutil
 from pathlib import Path
 from daw_git_gui import DAWGitApp
@@ -12,8 +13,20 @@ def test_commit_and_return_to_latest(tmp_path, qtbot):
 
     # Init Git repo manually
     repo = Repo.init(project_path)
-    repo.index.add(["dummy.als"])
-    repo.index.commit("Initial commit")
+
+    # Safely handle working directory
+    try:
+        cwd = os.getcwd()
+    except FileNotFoundError:
+        cwd = "/tmp"
+
+    os.chdir(project_path)  # switch into valid Git repo before GitPython operations
+    try:
+        repo.index.add(["dummy.als"])
+        repo.index.commit("Initial dummy")
+    finally:
+        os.chdir(cwd)
+
     repo.git.branch("-M", "main")  # Rename to main
 
     # Launch app

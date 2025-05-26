@@ -26,7 +26,19 @@ def test_daw_git_end_to_end( qtbot):
         gitattributes = project_path / ".gitattributes"
         gitattributes.write_text("*.logicx/** filter=lfs diff=lfs merge=lfs -text")
 
-        repo.index.add([str(gitattributes.relative_to(project_path)), "MyTrack.logicx/ProjectData"])
+        try:
+            cwd = os.getcwd()
+        except FileNotFoundError:
+            cwd = "/tmp"
+
+        os.chdir(project_path)
+        try:
+            repo.index.add([str(gitattributes.relative_to(project_path)), "MyTrack.logicx/ProjectData"])
+            repo.index.commit("Initial commit")
+        finally:
+            os.chdir(cwd)
+
+
         repo.index.commit("Initial commit: tracking MyTrack.logicx")
 
         assert repo.active_branch.name == "main"

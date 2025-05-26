@@ -1,13 +1,17 @@
-import sys
+# conftest.py or top of test file
 import os
 from pathlib import Path
+import sys
 
-# Automatically add the DAWGitApp root to sys.path
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# ✅ Ensure DAWGitApp root is in Python path (use only once)
+project_root = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(project_root))
 
-# ✅ Activate test mode globally
+# ✅ Set test mode environment variable (globally for all tests)
 os.environ["DAWGIT_TEST_MODE"] = "1"
+
+# ✅ Optional: force a known project path for UI logic (if needed)
+# os.environ["DAWGIT_FORCE_TEST_PATH"] = "/tmp/test_daw_project"
 
 import pytest
 from PyQt6.QtWidgets import QMessageBox, QFileDialog, QApplication
@@ -16,6 +20,10 @@ import shutil
 from git import Repo
 import subprocess
 from daw_git_gui import DAWGitApp
+
+
+def pytest_configure():
+    os.environ["DAWGIT_TEST_MODE"] = "1"
 
 
 @pytest.fixture(scope="session")

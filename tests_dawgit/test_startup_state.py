@@ -1,3 +1,7 @@
+import os
+os.environ["DAWGIT_TEST_MODE"] = "1"
+import daw_git_testing  # patches modals at import
+
 from pathlib import Path
 from git import Repo
 from daw_git_gui import DAWGitApp
@@ -77,25 +81,29 @@ def test_checked_out_commit_highlighted_on_startup(tmp_path, qtbot):
 
 
 
-    def test_branch_dropdown_shows_active_branch(tmp_path, qtbot):
-        # Create repo with a branch
-        repo = Repo.init(tmp_path)
-        (tmp_path / "track.als").write_text("Ableton session")
-        repo.index.add(["track.als"])
-        repo.index.commit("Initial")
+def test_branch_dropdown_shows_active_branch(tmp_path, qtbot):
+    from git import Repo  # ✅ Make sure Repo is imported here too
 
-        # App with full UI
-        app = DAWGitApp(project_path=tmp_path, build_ui=True)
-        qtbot.addWidget(app)
+    # Create repo with a branch
+    repo = Repo.init(tmp_path)
+    (tmp_path / "track.als").write_text("Ableton session")
+    repo.index.add(["track.als"])
+    repo.index.commit("Initial")
 
-        app.init_git()
-        app.update_branch_dropdown()
+    # App with full UI
+    app = DAWGitApp(project_path=tmp_path, build_ui=True)
+    qtbot.addWidget(app)
 
-        active_branch = repo.active_branch.name
-        dropdown_text = app.branch_dropdown.currentText()
+    app.init_git()
+    app.update_branch_dropdown()
 
-        assert dropdown_text == active_branch
+    # ✅ Fail-proof: Check if dropdown exists first
+    assert hasattr(app, "branch_dropdown"), "branch_dropdown not found on DAWGitApp"
 
+    active_branch = repo.active_branch.name
+    dropdown_text = app.branch_dropdown.currentText()
+
+    assert dropdown_text == active_branch
 
 
 def test_startup_in_detached_head_warns_user(tmp_path, qtbot):

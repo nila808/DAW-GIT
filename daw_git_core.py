@@ -2,8 +2,19 @@ from pathlib import Path
 import subprocess
 import os
 import json
+import re
 from datetime import datetime
 from git import Repo, GitCommandError
+
+
+def sanitize_git_input(user_input: str, allow_spaces=False):
+    """Remove dangerous characters and enforce safe Git naming."""
+    user_input = user_input.strip()
+    if not allow_spaces:
+        user_input = user_input.replace(" ", "-")
+    # Only allow safe characters (alphanum, dash, underscore, dot)
+    sanitized = re.sub(r"[^a-zA-Z0-9\-_\.]", "", user_input)
+    return sanitized
 
 
 class GitProjectManager:
@@ -86,6 +97,9 @@ class GitProjectManager:
             return {"status": "error", "message": str(e)}
 
         return {"status": "ok"}
+    
+
+
 
 
     def commit_changes(self, message):
@@ -193,3 +207,18 @@ class GitProjectManager:
                     return {"status": "switched", "branch": target_branch}
             except GitCommandError as e:
                 return {"status": "error", "message": str(e)}
+            
+
+    def is_valid_git_tag(tag: str) -> bool:
+        """
+        Git tag rules:
+        - No spaces
+        - No control chars
+        - Cannot start with "-"
+        - Cannot contain "~ ^ : ? * [ \\"
+        """
+        return (
+            bool(tag) and
+            not tag.startswith("-") and
+            re.match(r"^[A-Za-z0-9._/-]+$", tag)
+        )

@@ -1,4 +1,6 @@
 import os
+os.environ["DAWGIT_TEST_MODE"] = "1"
+import daw_git_testing  # patches modals at import
 import time
 import re
 from pathlib import Path

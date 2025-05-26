@@ -32,7 +32,7 @@ pytest tests_dawgit/
 
 
 // If you only want to run the single full workflow test:
-pytest tests_dawgit/test_full_workflow.py
+pytest tests_dawgit/test_full_user_session_flow.py
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -123,6 +123,15 @@ os.system("git add PROJECT_STATUS.md CHANGELOG.md PROJECT_MARKER.json ROADMAP.md
 
 📚 Logs the version to release.log
 
+
+
+To run only the last failed tests in your terminal using pytest, use:
+
+pytest --last-failed --tb=short
+
+
+You can also add -q for even more compact output:
+pytest --last-failed --tb=short -q
 
 
 

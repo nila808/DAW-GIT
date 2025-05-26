@@ -1,6 +1,9 @@
+import os
+os.environ["DAWGIT_TEST_MODE"] = "1"
+import daw_git_testing  # patches modals at import
+
 from PyQt6.QtWidgets import QTableWidgetItem, QInputDialog
 import sys
-import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pytest
