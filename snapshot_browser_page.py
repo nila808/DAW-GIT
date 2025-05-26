@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QPushButton, QTableWidget,
-    QLineEdit, QHBoxLayout, QTableWidgetItem, QSpacerItem, QSizePolicy
+    QLineEdit, QHBoxLayout, QTableWidgetItem, QSpacerItem, QSizePolicy,
+    QTextEdit
 )
 from PyQt6.QtCore import Qt
 
@@ -22,8 +23,9 @@ class SnapshotBrowserPage(QWidget):
         ])
 
         # Commit message input
-        self.commit_message_input = QLineEdit()
-        self.commit_message_input.setPlaceholderText("Enter snapshot message...")
+        self.commit_message_input = QTextEdit()
+        self.commit_message_input.setPlaceholderText("Describe what changed in this snapshot")
+        self.commit_message_input.setFixedHeight(80)  # Optional: adjust height
         layout.addWidget(self.commit_message_input)
 
         # Status label

@@ -17,6 +17,7 @@ import datetime as dt  # ✅ Safety net for bundled runtimes or shadowed imports
 from pathlib import Path
 from unittest import mock
 from branch_manager_page import BranchManagerPage
+from daw_git_core import GitProjectManager 
 
 # --- Third-Party ---
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
@@ -273,20 +274,20 @@ class DAWGitApp(QMainWindow):
         controls_layout.addWidget(self.restore_backup_btn)
         main_layout.addLayout(controls_layout)
 
-        self.commit_message = QTextEdit()
-        self.commit_message.setPlaceholderText("Describe what changed in this snapshot")
-        self.commit_message.setFixedHeight(60)
+        # self.commit_message = QTextEdit()
+        # self.commit_message.setPlaceholderText("Describe what changed in this snapshot")
+        # self.commit_message.setFixedHeight(60)
 
         commit_layout = QVBoxLayout()
         commit_layout.addWidget(QLabel("Snapshot Notes:"))
-        commit_layout.addWidget(self.commit_message)
+        # commit_layout.addWidget(self.commit_message)
 
         snapshot_buttons_layout = QHBoxLayout()
         self.commit_btn = QPushButton("💾 Save Snapshot")
         self.commit_btn.setMinimumHeight(36)
         self.commit_btn.setToolTip("Save the current version of your DAW project")
         self.commit_btn.clicked.connect(lambda: self.commit_changes(
-            self.commit_message.toPlainText().strip() or None
+            self.snapshot_page.commit_message_input.toPlainText().strip() or None
         ))
         snapshot_buttons_layout.addWidget(self.commit_btn)
 
@@ -731,128 +732,39 @@ class DAWGitApp(QMainWindow):
 
 
     def init_git(self):
-        print("[DEBUG] Initializing Git...")  # Debug entry point
+        print("[DEBUG] Calling GitProjectManager.init_repo()")
 
-        app_root = Path(__file__).resolve().parent
-        if self.project_path and self.project_path.resolve() == app_root:
-            print("⚠️ Refusing to track DAWGitApp root folder — not a valid project.")
-            self.project_path = None
-            return {"status": "invalid", "message": "Cannot track app root folder."}
+        self.git = GitProjectManager(self.project_path)
+        result = self.git.init_repo()
 
-        if not self.project_path or not self.project_path.exists():
-            print("❌ Invalid or missing project path. Aborting Git setup.")
-            self.project_path = None
-            return {"status": "invalid", "message": "Missing or invalid project path."}
-
-        daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
-        print(f"[DEBUG] Found DAW files: {daw_files}")
-
-        is_test_mode = os.getenv("DAWGIT_TEST_MODE") == "1"
-        if not daw_files and not is_test_mode:
-            print("⚠️ No .als or .logicx file found in selected folder. Aborting Git setup.")
-            self.project_path = None
-            return {"status": "invalid", "message": "No DAW files found."}
-        elif not daw_files:
-            print("🧪 [Test Mode] No DAW files found — continuing with empty project.")
-
-        try:
-            if (self.project_path / ".git").exists():
-                try:
-                    print(f"[DEBUG] Found existing Git repo at {self.project_path}")
-                    self.repo = Repo(self.project_path)
-
-                    if self.repo.head.is_detached:
-                        print("🎯 Repo is in detached HEAD state — skipping bind_repo() to preserve HEAD.")
-                        
-                        if hasattr(self, "status_label"):
-                            self.snapshot_page.status_label.setText("🔍 Detached snapshot • Not on a version line")
-                        if hasattr(self, "detached_warning_label"):
-                            self.detached_warning_label.setText(
-                                "🧭 You’re viewing a snapshot — to save changes, return to latest or start a new version line."
-                            )
-                            self.detached_warning_label.show()
-
-                        return {"status": "detached", "message": "Detached HEAD state detected."}
-                    else:
-                        self.bind_repo()
-                        if hasattr(self, "update_status_label"):
-                            self.update_status_label()
-
-                        # ✅ Always save path — new or existing repo
-                        self.save_last_project_path()
-
-                    print("ℹ️ Existing Git repo found — checking status...")
-
-                    if not self.repo.head.is_valid():
-                        print("🧪 No commits found — auto-committing initial DAW files...")
-                        self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
-                        self.repo.index.commit("Initial commit")
-
-                except InvalidGitRepositoryError:
-                    print("❌ Invalid Git repository. Re-initializing repository...")
-                    self.repo = None
-                    return {"status": "invalid", "message": "Invalid Git repository."}
-
-            else:
-                print(f"[DEBUG] No existing repo found. Initializing new repo at {self.project_path}")
-                self.repo = Repo.init(self.project_path)
-                # --- Ensure standard .gitignore exists and has noise files excluded ---
-                default_ignores = {
-                    ".DS_Store",
-                    "PROJECT_MARKER.json",
-                    ".dawgit_roles.json",
-                    "*.asd",
-                    "*.bak",
-                    "*.tmp",
-                    "*.swp",
-                    "Ableton Project Info/*"
-                }
-
-                gitignore_path = self.project_path / ".gitignore"
-
-                existing_lines = set()
-                if gitignore_path.exists():
-                    existing_lines = set(gitignore_path.read_text().splitlines())
-
-                new_lines = sorted(default_ignores - existing_lines)
-                if new_lines:
-                    with gitignore_path.open("a") as f:
-                        for line in new_lines:
-                            f.write(f"{line}\n")
-                    print("[DEBUG] Appended default ignores to .gitignore")
-
-
-                print("✅ New Git repo initialized.")
-                self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
-                self.repo.index.commit("Initial commit")
-                
-                if hasattr(self, "project_label"):
-                    QMessageBox.information(
-                        self,
-                        "Repo Initialized",
-                        "✅ Git repository initialized for this DAW project."
-                    )
+        if result["status"] == "ok":
+            self.repo = self.git.repo
+            self.save_last_project_path()
+            self.load_commit_roles()
 
             if hasattr(self, "update_status_label"):
                 self.update_status_label()
 
-            try:
-                if self.repo and self.repo.head.is_valid():
-                    if hasattr(self, "history_table"):
-                        self.current_commit_id = self.repo.head.commit.hexsha
-                        print(f"[DEBUG] self.current_commit_id before update_log: {self.current_commit_id}")
-                        self.load_commit_history()
-                    else:
-                        print("⚠️ Skipping update_log(): history_table not initialized yet.")
-            except Exception as log_err:
-                print(f"[DEBUG] Skipping log update — repo not ready: {log_err}")
+            if hasattr(self, "history_table") and self.repo.head.is_valid():
+                self.current_commit_id = self.repo.head.commit.hexsha
+                self.load_commit_history()
 
-        except Exception as e:
-            print(f"❌ Failed to initialize Git repo: {e}")
+        elif result["status"] == "detached":
+            self.repo = self.git.repo  # still bind the repo to self
+            if hasattr(self, "status_label"):
+                self.snapshot_page.status_label.setText("🔍 Detached snapshot • Not on a version line")
+            if hasattr(self, "detached_warning_label"):
+                self.detached_warning_label.setText(
+                    "🧭 You’re viewing a snapshot — to save changes, return to latest or start a new version line."
+                )
+                self.detached_warning_label.show()
+
+        else:
             self.repo = None
-            return {"status": "error", "message": str(e)}
+            print(f"[ERROR] init_git(): {result['message']}")
 
-        return {"status": "ok"}
+        return result
+
 
 
 
@@ -1509,7 +1421,7 @@ class DAWGitApp(QMainWindow):
 
         self.snapshot_page.commit_table.selectRow(row)
 
-        commit_item = self.snapshot_page.commit_table.item(row, 1)
+        commit_item = self.snapshot_page.commit_table.item(row, 2)
         commit_sha = commit_item.toolTip() if commit_item else None
 
         if not commit_sha:
@@ -1908,11 +1820,8 @@ class DAWGitApp(QMainWindow):
             self._show_warning("Please select a snapshot to tag.")
             return
 
-        commit_item = self.snapshot_page.commit_table.item(row, 1)
-        sha = commit_item.toolTip() if commit_item else None
-
-        if not sha:
-            sha = self.current_commit_id
+        commit_item = self.snapshot_page.commit_table.item(row, 2)
+        sha = commit_item.toolTip() if commit_item else self.current_commit_id
 
         if not sha:
             self._show_warning("Commit SHA missing — can't assign role.")
@@ -1928,40 +1837,33 @@ class DAWGitApp(QMainWindow):
             return  # cancelled or empty
 
         clean_label = label.strip()
-
         self.current_commit_id = sha
         self.assign_commit_role(sha, clean_label)
         self.save_commit_roles()
         self.status_message(f"✏️ Commit tagged as '{clean_label}': {sha[:7]}")
-
         QTimer.singleShot(100, self.load_commit_history)
-
 
 
     def tag_main_mix(self):
         """
-        Assigns the 'Main Mix' role to the currently selected commit row.
+        Assigns the 'Main Mix' role to the currently selected commit.
+        Ensures only one commit can hold the 'Main Mix' tag at a time.
         """
-        self._set_commit_id_from_selected_row()  # ✅ Force SHA update first
+        self._set_commit_id_from_selected_row()
         row = self.snapshot_page.commit_table.currentRow()
         if row < 0:
             self._show_warning("Please select a snapshot to tag as 'Main Mix'.")
             return
 
-        commit_item = self.snapshot_page.commit_table.item(row, 1)
-        sha = commit_item.toolTip() if commit_item else None
-
-        if not sha:
-            sha = self.current_commit_id
+        commit_item = self.snapshot_page.commit_table.item(row, 2)
+        sha = commit_item.toolTip() if commit_item else self.current_commit_id
 
         if not sha:
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
-        # 🔍 Find existing Main Mix
+        # Remove existing 'Main Mix' tag from another commit, if needed
         existing_main = next((k for k, v in self.commit_roles.items() if v == "Main Mix" and k != sha), None)
-
-        # 🧪 In test mode, skip modal
         if existing_main and os.getenv("DAWGIT_TEST_MODE") != "1":
             old_msg = self.repo.commit(existing_main).message.strip().split("\n")[0][:40]
             new_msg = self.repo.commit(sha).message.strip().split("\n")[0][:40]
@@ -1970,11 +1872,8 @@ class DAWGitApp(QMainWindow):
                 self,
                 "Replace Main Mix?",
                 f"Only one commit can be tagged as 'Main Mix'.\n\n"
-                f"This will remove the tag from:\n"
-                f"🗑 {existing_main[:7]} – {old_msg}\n\n"
-                f"And apply it to:\n"
-                f"🌟 {sha[:7]} – {new_msg}\n\n"
-                f"Continue?",
+                f"This will remove the tag from:\n🗑 {existing_main[:7]} – {old_msg}\n\n"
+                f"And apply it to:\n🌟 {sha[:7]} – {new_msg}\n\nContinue?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
             )
 
@@ -1987,67 +1886,54 @@ class DAWGitApp(QMainWindow):
         self.assign_commit_role(sha, "Main Mix")
         self.save_commit_roles()
         self.status_message(f"🌟 Commit tagged as 'Main Mix': {sha[:7]}")
-
         QTimer.singleShot(100, self.load_commit_history)
 
 
     def tag_creative_take(self):
         """
-        Assigns the 'Creative Take' role to the currently selected commit row.
+        Assigns the 'Creative Take' role to the currently selected commit.
         """
-        self._set_commit_id_from_selected_row()  # ✅ Force SHA update first
+        self._set_commit_id_from_selected_row()
         row = self.snapshot_page.commit_table.currentRow()
         if row < 0:
             self._show_warning("Please select a snapshot to tag as 'Creative Take'.")
             return
 
-        commit_item = self.snapshot_page.commit_table.item(row, 1)
-        sha = commit_item.toolTip() if commit_item else None
-
-        if not sha:
-            # Fallback to internal commit ID if tooltip is missing
-            sha = self.current_commit_id
+        commit_item = self.snapshot_page.commit_table.item(row, 2)
+        sha = commit_item.toolTip() if commit_item else self.current_commit_id
 
         if not sha:
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
-
-        self.current_commit_id = sha  # ✅ Critical for test logic
-        self.assign_commit_role(sha, "Creative Take")  # ✅ This updates the in-memory dict
-        self.save_commit_roles()  # ✅ This persists it for reload
+        self.current_commit_id = sha
+        self.assign_commit_role(sha, "Creative Take")
+        self.save_commit_roles()
         self.status_message(f"🎨 Commit tagged as 'Creative Take': {sha[:7]}")
-
         QTimer.singleShot(100, self.load_commit_history)
 
 
     def tag_alt_mix(self):
         """
-        Assigns the 'Alt Mixdown' role to the currently selected commit row.
+        Assigns the 'Alt Mixdown' role to the currently selected commit.
         """
-        self._set_commit_id_from_selected_row()  # ✅ Force SHA update first
+        self._set_commit_id_from_selected_row()
         row = self.snapshot_page.commit_table.currentRow()
         if row < 0:
             self._show_warning("Please select a snapshot to tag as 'Alt Mixdown'.")
             return
 
-        commit_item = self.snapshot_page.commit_table.item(row, 1)
-        sha = commit_item.toolTip() if commit_item else None
-
-        if not sha:
-            # Fallback to internal commit ID if tooltip is missing
-            sha = self.current_commit_id
+        commit_item = self.snapshot_page.commit_table.item(row, 2)
+        sha = commit_item.toolTip() if commit_item else self.current_commit_id
 
         if not sha:
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
-
-        self.current_commit_id = sha  # ✅ FIX
+        self.current_commit_id = sha
         self.assign_commit_role(sha, "Alt Mixdown")
         self.save_commit_roles()
         self.status_message(f"🎛️ Commit tagged as 'Alt Mixdown': {sha[:7]}")
-
         QTimer.singleShot(100, self.load_commit_history)
 
 

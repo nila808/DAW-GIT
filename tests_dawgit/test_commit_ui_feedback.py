@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QMessageBox
 
 def test_empty_commit_message_blocked(qtbot, app, monkeypatch):
     """Should show a warning and block commit if message is empty."""
-    app.commit_message.setPlainText("")  # Simulate empty input
+    app.snapshot_page.commit_message_input.setPlainText("") # Simulate empty input
 
     triggered = {"warning": False}
 
@@ -19,7 +19,7 @@ def test_empty_commit_message_blocked(qtbot, app, monkeypatch):
 
 def test_commit_modal_message_includes_branch_and_sha(qtbot, app, monkeypatch):
     """Commit modal should include branch name and short SHA."""
-    app.commit_message.setPlainText("Snapshot test")
+    app.snapshot_page.commit_message_input.setPlainText("Snapshot test")
 
     # ✅ Ensure there's something to commit
     test_file = app.project_path / "dummy.als"
@@ -42,7 +42,7 @@ def test_commit_modal_message_includes_branch_and_sha(qtbot, app, monkeypatch):
 
 def test_commit_updates_branch_and_commit_labels(qtbot, app):
     """Branch and commit labels should update after commit."""
-    app.commit_message.setPlainText("Test label update")
+    app.snapshot_page.commit_message_input.setPlainText("Test label update")
 
     # ✅ Ensure there's something to commit
     test_file = app.project_path / "dummy.als"
@@ -57,7 +57,7 @@ def test_commit_updates_branch_and_commit_labels(qtbot, app):
 
 def test_status_label_reflects_commit_after_snapshot(qtbot, app):
     """Status label should include branch and version number after commit."""
-    app.commit_message.setPlainText("Version update")
+    app.snapshot_page.commit_message_input.setPlainText("Version update")
 
     # ✅ Ensure there's something to commit
     test_file = app.project_path / "dummy.als"
