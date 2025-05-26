@@ -3,7 +3,8 @@ from PyQt6.QtWidgets import QMessageBox
 
 def test_empty_commit_message_blocked(qtbot, app, monkeypatch):
     """Should show a warning and block commit if message is empty."""
-    app.snapshot_page.commit_message_input.setPlainText("") # Simulate empty input
+    app.commit_page.commit_message.setPlainText("") # Simulate empty input
+    app.pages.switch_to("commit")  # optional but good UX simulation
 
     triggered = {"warning": False}
 
@@ -19,7 +20,8 @@ def test_empty_commit_message_blocked(qtbot, app, monkeypatch):
 
 def test_commit_modal_message_includes_branch_and_sha(qtbot, app, monkeypatch):
     """Commit modal should include branch name and short SHA."""
-    app.snapshot_page.commit_message_input.setPlainText("Snapshot test")
+    app.commit_page.commit_message.setPlainText("Snapshot test")
+    app.pages.switch_to("commit")  # optional but good UX simulation
 
     # ✅ Ensure there's something to commit
     test_file = app.project_path / "dummy.als"
@@ -42,7 +44,8 @@ def test_commit_modal_message_includes_branch_and_sha(qtbot, app, monkeypatch):
 
 def test_commit_updates_branch_and_commit_labels(qtbot, app):
     """Branch and commit labels should update after commit."""
-    app.snapshot_page.commit_message_input.setPlainText("Test label update")
+    app.commit_page.commit_message.setPlainText("Test label update")
+    app.pages.switch_to("commit")  # optional but good UX simulation
 
     # ✅ Ensure there's something to commit
     test_file = app.project_path / "dummy.als"
@@ -57,7 +60,8 @@ def test_commit_updates_branch_and_commit_labels(qtbot, app):
 
 def test_status_label_reflects_commit_after_snapshot(qtbot, app):
     """Status label should include branch and version number after commit."""
-    app.snapshot_page.commit_message_input.setPlainText("Version update")
+    app.commit_page.commit_message.setPlainText("Version update")
+    app.pages.switch_to("commit")  # optional but good UX simulation
 
     # ✅ Ensure there's something to commit
     test_file = app.project_path / "dummy.als"

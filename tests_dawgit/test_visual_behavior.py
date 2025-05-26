@@ -30,7 +30,9 @@ def test_full_snapshot_flow(app, qtbot):
     als_path.write_text("updated snapshot content")  # ✅ trigger change
 
     # Create a commit
-    app.snapshot_page.commit_message_input.setPlainText("Initial snapshot")
+    app.pages.switch_to("commit")
+    app.commit_page.commit_message.setPlainText("Initial snapshot")
+
     result = app.commit_changes("Initial snapshot")
     assert result["status"] == "success"
 

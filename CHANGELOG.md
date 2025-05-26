@@ -325,3 +325,10 @@ Stable milestone tagged as `v1.0.2-rolepass`
 - [ ] Stash on switch
 - [ ] Tag snapshots and verify- [2025-05-21 18:30] Tagged v1.0.4-cleanup – test suite green (83/83), fixed commit safety, status label, detached HEAD logic
 - [2025-05-22 17:21] Improved test resilience and fixed all failing tests (checkout safety, status logic, untracked warnings)
+- v1.0.2-ui-refactor (2025-05-27): ✅ Full test suite passed (92/92) after modular UI refactor and test patching
+
+- Patched all commit_message_input test references to new commit_page.commit_message
+- Restored project_label and path_label in ProjectSetupPage to fix label-related tests
+- Fixed branch switching and path clear tests by updating update_project_label() logic
+- Added page switching to commit tests to reflect real UI state
+- Final patch: test_full_snapshot_flow routed through CommitPage

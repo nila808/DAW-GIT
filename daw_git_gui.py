@@ -20,6 +20,7 @@ from gui_layout import build_main_ui
 from daw_git_core import GitProjectManager
 from daw_git_core import sanitize_git_input
 
+
 # --- Git ---
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 from git.exc import GitCommandError
@@ -1019,6 +1020,10 @@ class DAWGitApp(QMainWindow):
         else:
             self.commit_label.setText("Commit: unknown")
 
+    def quick_commit(self):
+        default_message = "Quick snapshot"
+        self.commit_changes(commit_message=default_message)
+
 
     def commit_changes(self, commit_message=None):
         if not self.project_path or not self.git or not self.git.repo:
@@ -1048,8 +1053,16 @@ class DAWGitApp(QMainWindow):
                 return {"status": "error", "message": "Empty or cancelled commit message."}
 
         result = self.git.commit_changes(commit_message)
+
         if result["status"] != "success":
-            self._show_error(f"Commit failed: {result['message']}")
+            if "nothing to commit" in result.get("message", ""):
+                self._show_warning(
+                    "🎧 No changes to commit.\n\n"
+                    "It looks like your DAW project hasn’t changed since your last snapshot.\n"
+                    "Make a small edit and save your session before trying again."
+                )
+            else:
+                self._show_error(f"Commit failed: {result['message']}")
             return result
 
         short_sha = result["sha"][:7]
@@ -2746,6 +2759,8 @@ class DAWGitApp(QMainWindow):
         if self.settings_path.exists():
             try:
                 self.settings_path.unlink()
+                self.project_path = None  # ✅ clear in memory
+                self.update_project_label()  # ✅ update the UI and test state
                 QMessageBox.information(
                     self,
                     "Project Path Cleared",
@@ -2767,9 +2782,16 @@ class DAWGitApp(QMainWindow):
 
 
     def update_project_label(self):
-        self.project_label.setText(f"Tracking: {self.project_path}")
-        self.path_label.setText(str(self.project_path))  # keeps tests passing
+        if self.project_path:
+            display = f"Tracking: {self.project_path}"
+        else:
+            display = "🔍 No project loaded"
 
+        if hasattr(self, "project_label"):
+            self.project_label.setText(display)
+
+        if hasattr(self, "path_label"):
+            self.path_label.setText(str(self.project_path) if self.project_path else "")
 
 
     def status_message(self, message):
@@ -2799,6 +2821,7 @@ class DAWGitApp(QMainWindow):
     def timerEvent(self, event):
         has_changes = self.repo and self.has_unsaved_changes()
 
+        # 🔁 Flash the unsaved indicator if changes exist
         if has_changes:
             self.unsaved_flash = not self.unsaved_flash
             self.unsaved_indicator.setProperty("alert", self.unsaved_flash)
@@ -2806,10 +2829,10 @@ class DAWGitApp(QMainWindow):
             self.unsaved_flash = False
             self.unsaved_indicator.setProperty("alert", False)
 
-        # ✅ Normalize state to boolean to avoid NoneType issues
-        has_changes = bool(self.repo and self.has_unsaved_changes())
+        # ✅ Normalize to True/False
+        has_changes = bool(has_changes)
 
-        # ✅ Save Snapshot button logic
+        # 💾 Old "Save Snapshot" button (legacy UI)
         if hasattr(self, "commit_btn") and self.commit_btn:
             self.commit_btn.setEnabled(has_changes)
             self.commit_btn.setToolTip(
@@ -2817,16 +2840,16 @@ class DAWGitApp(QMainWindow):
                 "No changes detected — nothing new to snapshot."
             )
 
-        # ✅ Auto-snapshot button logic
+        # 🧠 Auto-snapshot checkbox
         if hasattr(self, "auto_save_toggle") and self.auto_save_toggle:
-            self.auto_save_toggle.setEnabled(False)
+            self.auto_save_toggle.setEnabled(False)  # temporary pause
             self.auto_save_toggle.setEnabled(has_changes)
             self.auto_save_toggle.setToolTip(
                 "Auto-snapshot ready — changes detected." if has_changes else
                 "✅ Snapshot saved. Auto-commit disabled until further changes."
             )
 
-        # ✅ Manual commit button logic
+        # ✅ New CommitPage "💾 Commit Now" button
         if hasattr(self, "commit_button") and self.commit_button:
             self.commit_button.setEnabled(has_changes)
             self.commit_button.setToolTip(
@@ -2834,12 +2857,12 @@ class DAWGitApp(QMainWindow):
                 "No changes detected to commit."
             )
 
-        # 🔁 Refresh visual styles
+        # 🔁 Refresh styles
         self.unsaved_indicator.style().unpolish(self.unsaved_indicator)
         self.unsaved_indicator.style().polish(self.unsaved_indicator)
 
-        # ✅ Visibility control
-        self.unsaved_indicator.setVisible(bool(has_changes))
+        # 👁 Show or hide indicator
+        self.unsaved_indicator.setVisible(has_changes)
 
 
 
@@ -2908,14 +2931,25 @@ class DAWGitApp(QMainWindow):
                 print(f"[DEBUG] status label set: {label_text}")
 
                 # ✅ Re-enable and show role buttons
-                for btn in [
-                    self.btn_set_version_main,
-                    self.btn_set_version_creative,
-                    self.btn_set_version_alt
-                ]:
-                    btn.setEnabled(True)
-                    btn.setToolTip("")
-                    btn.show()
+                if hasattr(self, "commit_page"):
+                    for attr in [
+                        "tag_main_btn",
+                        "tag_creative_btn",
+                        "tag_alt_btn",
+                        "tag_custom_btn"
+                    ]:
+                        btn = getattr(self.commit_page, attr, None)
+                        if btn:
+                            btn.setEnabled(not self.repo.head.is_detached)
+                            btn.setToolTip(
+                                "❌ Tagging is only available on active version lines."
+                                if self.repo.head.is_detached
+                                else ""
+                            )
+                            if self.repo.head.is_detached:
+                                btn.hide()
+                            else:
+                                btn.show()
 
         except Exception as e:
             self.snapshot_page.status_label.setText(f"⚠️ Git status error: {e}")

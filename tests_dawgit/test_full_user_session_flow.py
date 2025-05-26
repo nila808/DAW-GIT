@@ -39,6 +39,8 @@ def test_full_user_session_flow(monkeypatch, qtbot):
     qtbot.addWidget(app)
     qtbot.wait(200)
 
+    app.pages.switch_to("commit")  # 👈 ensures UI logic expects the right page
+
     # Ensure clean state before branch checkout
     try:
         app.repo.git.restore("--staged", "--worktree", ".")
