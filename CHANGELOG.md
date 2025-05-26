@@ -1,5 +1,14 @@
 
 
+## [refactor-phase-2.1] – 2025-05-26
+**Author:** @niccavendish
+- 📦 refactor-phase-1: 📝 updated changelog, 📊 updated project status
+- 📦 v1.1.1-dev: 📝 updated changelog, 📊 updated project status
+- Update UI commit history table and add branch/snapshot pages components
+- 📦 v1.0.5-pages-feature: 📝 updated changelog, 📊 updated project status
+- 📦 v1.0.5-improve-ux-commit-flow: 📝 updated changelog, 📊 updated project status
+
+
 ## [refactor-phase-1] – 2025-05-26
 **Author:** @niccavendish
 - 📦 v1.1.1-dev: 📝 updated changelog, 📊 updated project status
