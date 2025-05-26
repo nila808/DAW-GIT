@@ -17,7 +17,7 @@ def test_commit_and_return_to_latest(tmp_path, qtbot):
     repo.git.branch("-M", "main")  # Rename to main
 
     # Launch app
-    app = DAWGitApp(project_path=project_path, build_ui=False)
+    app = DAWGitApp(project_path=project_path, build_ui=True)
     app.custom_env = lambda: {}  # no-op for testing
     app.repo = repo
 

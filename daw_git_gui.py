@@ -1231,7 +1231,7 @@ class DAWGitApp(QMainWindow):
 
 
     def commit_changes(self, commit_message=None):
-        if not self.project_path or not self.repo:
+        if not self.project_path or not self.git or not self.git.repo:
             print("[DEBUG] Skipping commit — no project or Git repo loaded")
             return {
                 "status": "error",
@@ -1257,45 +1257,37 @@ class DAWGitApp(QMainWindow):
                     self._show_warning("Commit cancelled. Please enter a valid commit message.")
                 return {"status": "error", "message": "Empty or cancelled commit message."}
 
-        # Enforce DAW file presence
-        daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
-        if not daw_files:
-            return {"status": "error", "message": "No DAW file to commit."}
+        result = self.git.commit_changes(commit_message)
+        if result["status"] != "success":
+            self._show_error(f"Commit failed: {result['message']}")
+            return result
+
+        short_sha = result["sha"][:7]
+        self.current_commit_id = result["sha"]
+
+        if hasattr(self, "commit_message"):
+            self.commit_message.setPlainText("")
+
+        # Update UI state
+        self.update_log()
+        self.update_branch_label()
+        self.update_commit_label()
+        self.update_status_label()
 
         try:
-            self.repo.git.add(A=True)
-            self.repo.git.commit("-m", commit_message)
-            if hasattr(self, "commit_message"):
-                self.commit_message.setPlainText("")
+            branch = self.repo.active_branch.name
+        except TypeError:
+            branch = str(self.repo.head.ref) if self.repo.head.ref else "detached"
 
-            # Update UI state
-            self.update_log()
-            self.update_branch_label()
-            self.update_commit_label()
-            self.update_status_label()
-            print(f"[DEBUG] status label set: {self.status_label.text()}")
+        QMessageBox.information(self, "Commit Successful", f"Branch: {branch}\nCommit: {short_sha}")
 
-            short_sha = self.repo.head.commit.hexsha[:7]
-            try:
-                branch = self.repo.active_branch.name
-            except TypeError:
-                branch = str(self.repo.head.ref) if self.repo.head.ref else "detached"
+        if hasattr(self, "project_marker") and self.repo.head.is_valid():
+            msg = self.repo.head.commit.message.strip()
+            self.project_marker.setdefault("repository_info", {})["last_commit_sha"] = result["sha"]
+            self.project_marker["repository_info"]["last_commit_message"] = msg
+            self.save_project_marker()
 
-            QMessageBox.information(self, "Commit Successful", f"Branch: {branch}\nCommit: {short_sha}")
-
-            if hasattr(self, "project_marker") and self.repo.head.is_valid():
-                sha = self.repo.head.commit.hexsha
-                msg = self.repo.head.commit.message.strip()
-                self.project_marker.setdefault("repository_info", {})["last_commit_sha"] = sha
-                self.project_marker["repository_info"]["last_commit_message"] = msg
-                self.save_project_marker()
-
-            return {"status": "success", "sha": short_sha, "branch": branch}
-        
-        except Exception as e:
-            traceback.print_exc()
-            self._show_error(f"Commit failed: {e}")
-            return {"status": "error", "message": str(e)}
+        return {"status": "success", "sha": short_sha, "branch": branch}
 
 
     def update_role_buttons(self):

@@ -2,6 +2,15 @@
 
 ## [refactor-phase-2.2] – 2025-05-26
 **Author:** @niccavendish
+- 📦 refactor-phase-2.2: 📝 updated changelog, 📊 updated project status
+- refactor-phase-2.1: extract init_git logic into GitProjectManager and fix test repo init
+- 📦 refactor-phase-2.1: 📝 updated changelog, 📊 updated project status
+- 📦 refactor-phase-1: 📝 updated changelog, 📊 updated project status
+- 📦 v1.1.1-dev: 📝 updated changelog, 📊 updated project status
+
+
+## [refactor-phase-2.2] – 2025-05-26
+**Author:** @niccavendish
 - refactor-phase-2.1: extract init_git logic into GitProjectManager and fix test repo init
 - 📦 refactor-phase-2.1: 📝 updated changelog, 📊 updated project status
 - 📦 refactor-phase-1: 📝 updated changelog, 📊 updated project status

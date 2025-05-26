@@ -88,20 +88,24 @@ class GitProjectManager:
 
 
     def commit_changes(self, message):
+        if not self.repo:
+            return {"status": "error", "message": "No Git repo available."}
+
         if not message or not message.strip():
-            raise ValueError("Commit message cannot be empty.")
+            return {"status": "error", "message": "Commit message cannot be empty."}
 
         daw_files = list(self.project_path.glob("*.als")) + list(self.project_path.glob("*.logicx"))
         if not daw_files:
-            raise FileNotFoundError("No DAW file to commit.")
+            return {"status": "error", "message": "No DAW file to commit."}
 
         try:
             self.repo.git.add(A=True)
-            self.repo.git.commit("-m", message)
+            self.repo.git.commit("-m", message.strip())
             sha = self.repo.head.commit.hexsha
             return {"status": "success", "sha": sha}
         except GitCommandError as e:
             return {"status": "error", "message": str(e)}
+        
 
     def is_dirty(self):
         return self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
