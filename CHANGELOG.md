@@ -1,5 +1,14 @@
 
 
+## [refactor-phase-2.3] – 2025-05-26
+**Author:** @niccavendish
+- added improved push-it script
+- 📦 refactor-phase-2.2: 📝 updated changelog, 📊 updated project status
+- 📦 refactor-phase-2.2: 📝 updated changelog, 📊 updated project status
+- refactor-phase-2.1: extract init_git logic into GitProjectManager and fix test repo init
+- 📦 refactor-phase-2.1: 📝 updated changelog, 📊 updated project status
+
+
 ## [refactor-phase-2.2] – 2025-05-26
 **Author:** @niccavendish
 - 📦 refactor-phase-2.2: 📝 updated changelog, 📊 updated project status

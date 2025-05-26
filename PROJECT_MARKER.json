@@ -1,6 +1,6 @@
 {
   "project_name": "TEST 1 Project",
-  "project_version": "refactor-phase-2.2",
+  "project_version": "refactor-phase-2.3",
   "creator": "Niccavendish",
   "repository_info": {
     "current_branch": "main",
@@ -26,7 +26,7 @@
   },
   "metadata": {
     "tags": {
-      "version_marker": "refactor-phase-2.2"
+      "version_marker": "refactor-phase-2.3"
     },
     "qa": {
       "qa_started": true
