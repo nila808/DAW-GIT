@@ -696,15 +696,13 @@ class DAWGitApp(QMainWindow):
 
 
     def stash_uncommitted_changes(self, message="DAWGit auto-stash"):
-        """
-        Stash any uncommitted changes with a given message.
-        """
-        try:
-            if self.repo.is_dirty(untracked_files=True):
-                self.repo.git.stash("save", "--include-untracked", message)
-                print(f"[DEBUG] Stashed changes: {message}")
-        except Exception as e:
-            print(f"[WARN] Failed to stash changes: {e}")
+        result = self.git.stash_uncommitted_changes(message)
+        if result["status"] == "stashed":
+            print(f"[DEBUG] Changes stashed: {message}")
+        elif result["status"] == "clean":
+            print("[DEBUG] No changes to stash.")
+        else:
+            print(f"[WARN] Failed to stash changes: {result.get('message')}")
 
 
     def get_tag_for_commit(self, commit_sha):

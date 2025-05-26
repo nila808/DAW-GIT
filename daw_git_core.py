@@ -150,3 +150,16 @@ class GitProjectManager:
         env = os.environ.copy()
         env["PATH"] = self.env_path
         return env
+
+    def stash_uncommitted_changes(self, message="DAWGit auto-stash"):
+        if not self.repo:
+            return {"status": "error", "message": "No Git repo available."}
+
+        try:
+            if self.repo.is_dirty(untracked_files=True):
+                self.repo.git.stash("save", "--include-untracked", message)
+                return {"status": "stashed", "message": message}
+            else:
+                return {"status": "clean", "message": "No changes to stash."}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
