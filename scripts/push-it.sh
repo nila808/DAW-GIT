@@ -25,6 +25,7 @@ fi
 echo "🧪 Running test suite..."
 pytest -q > /dev/null || {
   echo "❌ Tests failed — aborting release."
+  echo "💡 Fix the issue, rerun tests, and retry with: push-it <tag> \"message\""
   exit 1
 }
 echo "✅ All tests passed."
