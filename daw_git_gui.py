@@ -1,42 +1,36 @@
 #!/usr/bin/env python3
 
 # --- Standard Library ---
-import tempfile
 import os
 import sys
 import fnmatch
-import unicodedata
 import json
-import time
-import shutil
 import signal
+import shutil
 import subprocess
-import traceback
-from datetime import datetime, timedelta
-import datetime as dt  # ✅ Safety net for bundled runtimes or shadowed imports
+import time
 from pathlib import Path
-from unittest import mock
-from branch_manager_page import BranchManagerPage
-from daw_git_core import GitProjectManager 
+from datetime import datetime
+import traceback
 
-# --- Third-Party ---
+# --- App Modules ---
+from gui_layout import build_main_ui
+from daw_git_core import GitProjectManager
+
+# --- Git ---
 from git import Repo, InvalidGitRepositoryError, NoSuchPathError
 from git.exc import GitCommandError
 
 # --- PyQt6 ---
 from PyQt6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
-    QPushButton, QTextEdit, QLabel, QFileDialog, QMessageBox,
-    QTableWidget, QTableWidgetItem, QCheckBox, QComboBox, QInputDialog,
-    QHeaderView, QScrollArea, QSplitter, QSizePolicy, QStyle, QMenu,
-    QAbstractItemView, QMainWindow
+    QApplication, QMainWindow, QFileDialog, QMessageBox, 
+    QTableWidgetItem, QInputDialog, QAbstractItemView, 
+    QTableWidget
 )
-
-from PyQt6.QtGui import QIcon, QPixmap, QAction
 from PyQt6.QtCore import Qt, QSettings, QTimer
 
-# Optional compatibility import (namespace style, legacy fallback)
-from PyQt6 import QtCore, QtGui, QtWidgets
+
+# from PyQt6.QtWidgets import 
 
 # --- App Bootstrap ---
 if QApplication.instance() is None:
@@ -190,228 +184,7 @@ class DAWGitApp(QMainWindow):
 
 
     def setup_ui(self):
-        main_widget = QWidget()
-        main_layout = QVBoxLayout(main_widget)
-
-        from pages_controller import PagesController
-        from snapshot_browser_page import SnapshotBrowserPage
-        from branch_manager_page import BranchManagerPage
-
-        # Create snapshot page and assign commit_table
-        self.pages = PagesController()
-        self.snapshot_page = SnapshotBrowserPage()
-        self.pages.add_page("snapshots", self.snapshot_page)
-        self.load_commit_history()
-
-        self.history_table = self.snapshot_page.commit_table
-        self.status_label = self.snapshot_page.status_label  # Ensure same label reference
-        self.status_label.setText("Ready")
-        self.status_label.setObjectName("status_label")
-        main_layout.addWidget(self.status_label)
-
-        self.branch_page = BranchManagerPage(self)
-        self.pages.add_page("branches", self.branch_page)
-
-        self.pages.switch_to("snapshots")
-        main_layout.addWidget(self.pages)
-        self.setCentralWidget(main_widget)
-
-        self.unsaved_indicator = QLabel("● Uncommitted Changes")
-        self.unsaved_indicator.setObjectName("unsaved_indicator")
-        self.unsaved_indicator.setVisible(False)
-        self.unsaved_flash = False
-        self.unsaved_timer = self.startTimer(800)
-        main_layout.addWidget(self.unsaved_indicator)
-
-        self.project_label = QLabel()
-        self.project_label.setObjectName("project_label")
-        self.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
-        self.project_label.setOpenExternalLinks(True)
-        self.project_label.setToolTip("Click to open in Finder")
-        self.project_label.setWordWrap(True)
-        main_layout.addWidget(self.project_label)
-
-        self.path_label = QLabel(str(self.project_path))
-        self.path_label.setVisible(False)
-        main_layout.addWidget(self.path_label)
-
-        self.update_project_label()
-
-        self.setup_label = QLabel("🎚️ Step 1: Choose your Ableton or Logic project folder")
-        self.setup_label.setObjectName("setup_label")
-        main_layout.addWidget(self.setup_label)
-
-        self.setup_btn = QPushButton("Start Tracking")
-        self.setup_btn.setToolTip("This will start tracking the folder where your current Ableton or Logic project is saved.")
-        self.setup_btn.clicked.connect(self.run_setup)
-        main_layout.addWidget(self.setup_btn)
-
-        self.load_branch_btn = QPushButton("🎹 Load Alternate Session")
-        self.load_branch_btn.setToolTip("Switch to a different creative version of this track")
-        self.load_branch_btn.clicked.connect(self.show_branch_selector)
-        main_layout.addWidget(self.load_branch_btn)
-
-        controls_layout = QHBoxLayout()
-        self.change_folder_btn = QPushButton("Change Project Folder")
-        self.change_folder_btn.clicked.connect(self.change_project_folder)
-
-        self.clear_project_btn = QPushButton("Clear Saved Project")
-        self.clear_project_btn.clicked.connect(self.clear_saved_project)
-
-        self.export_btn = QPushButton("Export Snapshot")
-        self.export_btn.clicked.connect(self.export_snapshot)
-
-        self.import_btn = QPushButton("Import Snapshot")
-        self.import_btn.clicked.connect(self.import_snapshot)
-
-        self.restore_backup_btn = QPushButton("Restore Last Backup")
-        self.restore_backup_btn.clicked.connect(self.restore_last_backup)
-
-        controls_layout.addWidget(self.change_folder_btn)
-        controls_layout.addWidget(self.clear_project_btn)
-        controls_layout.addWidget(self.export_btn)
-        controls_layout.addWidget(self.import_btn)
-        controls_layout.addWidget(self.restore_backup_btn)
-        main_layout.addLayout(controls_layout)
-
-        # self.commit_message = QTextEdit()
-        # self.commit_message.setPlaceholderText("Describe what changed in this snapshot")
-        # self.commit_message.setFixedHeight(60)
-
-        commit_layout = QVBoxLayout()
-        commit_layout.addWidget(QLabel("Snapshot Notes:"))
-        # commit_layout.addWidget(self.commit_message)
-
-        snapshot_buttons_layout = QHBoxLayout()
-        self.commit_btn = QPushButton("💾 Save Snapshot")
-        self.commit_btn.setMinimumHeight(36)
-        self.commit_btn.setToolTip("Save the current version of your DAW project")
-        self.commit_btn.clicked.connect(lambda: self.commit_changes(
-            self.snapshot_page.commit_message_input.toPlainText().strip() or None
-        ))
-        snapshot_buttons_layout.addWidget(self.commit_btn)
-
-        self.auto_save_toggle = QCheckBox("🎹 Auto-Save Snapshots")
-        self.auto_save_toggle.setToolTip("Enable to auto-commit when changes are detected")
-        self.auto_save_toggle.stateChanged.connect(self.handle_auto_save_toggle)
-        snapshot_buttons_layout.addWidget(self.auto_save_toggle)
-        commit_layout.addLayout(snapshot_buttons_layout)
-
-        version_control_layout = QHBoxLayout()
-        self.new_branch_btn = QPushButton("🎼 Start New Version Line")
-        self.new_branch_btn.setToolTip("Start a new creative branch from here")
-        self.new_branch_btn.clicked.connect(self.start_new_version_line)
-        version_control_layout.addWidget(self.new_branch_btn)
-
-        self.return_to_latest_btn = QPushButton("🎯 Return to Latest")
-        self.return_to_latest_btn.setToolTip("Return to the most recent version")
-        self.return_to_latest_btn.clicked.connect(self.return_to_latest_clicked)
-        version_control_layout.addWidget(self.return_to_latest_btn)
-        commit_layout.addLayout(version_control_layout)
-
-        role_button_layout = QHBoxLayout()
-        self.btn_set_version_main = QPushButton("🌟 Mark as Final Mix")
-        self.btn_set_version_main.setToolTip("Assign this snapshot as your Main Mix")
-        self.btn_set_version_main.clicked.connect(self.tag_main_mix)
-        role_button_layout.addWidget(self.btn_set_version_main)
-
-        self.btn_set_version_creative = QPushButton("🎨 Mark as Creative Version")
-        self.btn_set_version_creative.setToolTip("Assign this snapshot as a creative alternative")
-        self.btn_set_version_creative.clicked.connect(self.tag_creative_take)
-        role_button_layout.addWidget(self.btn_set_version_creative)
-
-        self.btn_set_version_alt = QPushButton("🎚️ Mark as Alternate Mix")
-        self.btn_set_version_alt.setToolTip("Assign this snapshot as an alternate mixdown or stem")
-        self.btn_set_version_alt.clicked.connect(self.tag_alt_mix)
-        role_button_layout.addWidget(self.btn_set_version_alt)
-
-        self.btn_custom_tag = QPushButton("✏️ Add Custom Tag")
-        self.btn_custom_tag.setToolTip("Add your own label to this snapshot")
-        self.btn_custom_tag.clicked.connect(self.tag_custom_label)
-        role_button_layout.addWidget(self.btn_custom_tag)
-
-        commit_layout.addLayout(role_button_layout)
-        snapshot_group = QGroupBox("Snapshot Controls")
-        snapshot_group.setProperty("debug", True)
-        snapshot_group.setLayout(commit_layout)
-        main_layout.addWidget(snapshot_group)
-
-        checkout_layout = QHBoxLayout()
-        self.load_snapshot_btn = QPushButton("🎧 Load This Snapshot")
-        self.load_snapshot_btn.setToolTip("Load this version of your project safely")
-        self.load_snapshot_btn.clicked.connect(self.load_snapshot_clicked)
-
-        self.where_am_i_btn = QPushButton("📍 Where Am I?")
-        self.where_am_i_btn.setToolTip("Show current snapshot version")
-        self.where_am_i_btn.clicked.connect(self.show_current_commit)
-
-        self.switch_branch_btn = QPushButton("🔀 Switch Version Line")
-        self.switch_branch_btn.setToolTip("Switch to another creative path or saved version")
-        self.switch_branch_btn.clicked.connect(self.switch_branch)
-
-        checkout_layout.addWidget(self.load_snapshot_btn)
-        checkout_layout.addWidget(self.where_am_i_btn)
-        checkout_layout.addWidget(self.switch_branch_btn)
-        main_layout.addLayout(checkout_layout)
-
-        self.detached_warning_label = QLabel("")
-        self.detached_warning_label.setWordWrap(True)
-        self.detached_warning_label.hide()
-
-        self.version_line_label = QLabel("🎚️ No active version line")
-        self.branch_label = QLabel("Session branch: unknown • Current take: unknown")
-        self.commit_label = QLabel("🎶 Commit: unknown")
-
-        self.lower_commit_info_widget = QWidget()
-        lower_commit_layout = QVBoxLayout()
-        lower_commit_layout.addWidget(self.detached_warning_label)
-        lower_commit_layout.addWidget(self.version_line_label)
-        lower_commit_layout.addWidget(self.branch_label)
-        lower_commit_layout.addWidget(self.commit_label)
-        self.lower_commit_info_widget.setLayout(lower_commit_layout)
-        main_layout.addWidget(self.lower_commit_info_widget)
-
-        self.remote_checkbox = QCheckBox("Push to remote after snapshot")
-        main_layout.addWidget(self.remote_checkbox)
-
-        self.connect_remote_btn = QPushButton("🔗 Connect to Remote Repo")
-        self.connect_remote_btn.setToolTip("Set up a remote Git URL (e.g. GitHub)")
-        self.connect_remote_btn.clicked.connect(self.connect_to_remote_repo)
-        main_layout.addWidget(self.connect_remote_btn)
-
-        self.open_in_daw_btn = QPushButton("🎧 Open This Version in DAW")
-        self.open_in_daw_btn.setVisible(False)
-        self.open_in_daw_btn.clicked.connect(self.open_latest_daw_project)
-        main_layout.addWidget(self.open_in_daw_btn)
-
-        self.show_tooltips_checkbox = QCheckBox("Show Tooltips")
-        self.show_tooltips_checkbox.setChecked(True)
-        self.show_tooltips_checkbox.stateChanged.connect(self.toggle_tooltips)
-        main_layout.addWidget(self.show_tooltips_checkbox)
-
-        container = QWidget()
-        container.setLayout(main_layout)
-        self.setCentralWidget(container)
-
-        # ✅ Now that Git is initialized, update branch list
-        QTimer.singleShot(500, lambda: self.branch_page.populate_branches())
-
-        self.update_role_buttons()
-        self.safe_single_shot(250, self.load_commit_history, parent=self)
-
-        nav_layout = QHBoxLayout()
-        self.goto_branch_btn = QPushButton("🔀 Branch Manager")
-        self.goto_snapshots_btn = QPushButton("🎧 Snapshot Browser")
-        self.goto_branch_btn.clicked.connect(lambda: self.pages.switch_to("branches"))
-        self.goto_snapshots_btn.clicked.connect(lambda: self.pages.switch_to("snapshots"))
-        nav_layout.addWidget(self.goto_branch_btn)
-        nav_layout.addWidget(self.goto_snapshots_btn)
-        main_layout.addLayout(nav_layout)
-
-        # ✅ Sync top-level status_label to snapshot_page’s instance
-        self.status_label = self.snapshot_page.status_label
-
-
+        build_main_ui(self)
 
 
     def maybe_show_welcome_modal(self):

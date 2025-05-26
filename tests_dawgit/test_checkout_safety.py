@@ -1,3 +1,4 @@
+from PyQt6.QtWidgets import QTableWidgetItem, QInputDialog
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -7,6 +8,7 @@ from pathlib import Path
 from unittest import mock
 from daw_git_gui import DAWGitApp
 from git import Repo
+
 
 # ---------------------- FIXTURES ----------------------
 
@@ -26,6 +28,30 @@ def app(test_repo):
     return app
 
 # ---------------------- TEST CASES ----------------------
+
+def test_backup_folder_created_on_unsaved_changes(tmp_path):
+    # Create fake project folder
+    project_path = tmp_path / "TestProject"
+    project_path.mkdir()
+
+    # Create a dummy DAW file so Git init works
+    daw_file = project_path / "song.als"
+    daw_file.write_text("test content")
+
+    app = DAWGitApp(str(project_path))
+    app.init_git()
+
+    # Force project_path onto the app (if not already set)
+    app.project_path = project_path
+
+    # ✅ Mock repo as dirty to force backup trigger
+    with mock.patch.object(app.repo, "is_dirty", return_value=True):
+        backup_dir = app.backup_unsaved_changes()
+
+    # ✅ Now assert the backup folder was created
+    assert backup_dir is not None, "Expected backup folder path"
+    assert backup_dir.exists(), "Backup folder does not exist"
+    assert any(backup_dir.iterdir()), "Backup folder is empty"
 
 @pytest.mark.parametrize("temp_repo_factory", [True], indirect=True)
 def test_checkout_commit_from_other_branch(temp_repo_factory, qtbot):
@@ -268,32 +294,35 @@ def test_switch_branch_with_uncommitted_changes_warns_or_stashes(temp_repo_facto
     repo_path = temp_repo_factory()
     repo = Repo(repo_path)
 
-    # Create initial commit with project.als
+    # Set up commits
     als_file = Path(repo_path) / "track.als"
     als_file.write_text("Initial version")
     repo.git.add(all=True)
-    repo.git.commit(m="First commit on main")
+    repo.git.commit(m="Initial commit")
 
-    # Create second branch
     repo.git.checkout("-b", "alt_branch")
-    (Path(repo_path) / "track.als").write_text("Modified on alt branch")
+    als_file.write_text("Alt edit")
     repo.git.add(all=True)
-    repo.git.commit(m="Alt branch change")
+    repo.git.commit(m="Alt branch commit")
 
-    # Switch back to main and dirty working state
     repo.git.checkout("main")
-    (Path(repo_path) / "track.als").write_text("⚠️ unsaved mod")
+    als_file.write_text("unsaved")
 
     os.environ["DAWGIT_FORCE_TEST_PATH"] = str(repo_path)
+    repo_path = Path(repo_path)  # ✅ Add this line here only
+
     app = DAWGitApp(repo_path)
     qtbot.addWidget(app)
 
-    result = app.switch_branch("alt_branch")
+    with mock.patch.object(app, "has_unsaved_changes", return_value=True), \
+         mock.patch.object(app, "backup_unsaved_changes", wraps=app.backup_unsaved_changes) as mock_backup:
+
+        result = app.switch_branch("alt_branch")
 
     assert result["status"] == "success"
     assert app.repo.active_branch.name == "alt_branch"
+    mock_backup.assert_called_once()
 
-    # ✅ Check if backup folder was created
-    backup_root = Path("/var/folders")
-    matching_backups = list(backup_root.rglob(f"Backup_{Path(repo_path).name}_*"))
+    backup_root = repo_path.parent
+    matching_backups = list(backup_root.glob(f"Backup_{repo_path.name}_*"))
     assert matching_backups, "Expected backup folder not found for unsaved changes"

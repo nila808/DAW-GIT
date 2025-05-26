@@ -112,13 +112,6 @@ class GitProjectManager:
         return self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
 
 
-    def stash_uncommitted_changes(self, message="DAWGit auto-stash"):
-        if self.repo.is_dirty(untracked_files=True):
-            self.repo.git.stash("save", "--include-untracked", message)
-            return True
-        return False
-
-
     def get_latest_commit_sha(self):
         return self.repo.head.commit.hexsha if self.repo.head.is_valid() else None
 

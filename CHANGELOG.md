@@ -1,5 +1,14 @@
 
 
+## [refactor-phase-2.5.1] – 2025-05-26
+**Author:** @niccavendish
+- 📦 refactor-phase-2.4: 📝 updated changelog, 📊 updated project status
+- added files to last commit
+- 📦 refactor-phase-2.3: 📝 updated changelog, 📊 updated project status
+- added improved push-it script
+- 📦 refactor-phase-2.2: 📝 updated changelog, 📊 updated project status
+
+
 ## [refactor-phase-2.4] – 2025-05-26
 **Author:** @niccavendish
 - added files to last commit
