@@ -1386,9 +1386,12 @@ class DAWGitApp(QMainWindow):
         latest_file = daw_files[0]
 
         if (
-            latest_file.name.startswith("test_")
-            or "placeholder" in latest_file.name.lower()
-            or "pytest-of-" in str(latest_file)
+            os.getenv("DAWGIT_TEST_MODE") != "1"
+            and (
+                latest_file.name.startswith("test_")
+                or "placeholder" in latest_file.name.lower()
+                or "pytest-of-" in str(latest_file)
+            )
         ):
             print(f"[DEBUG] Skipping test/placeholder file: {latest_file}")
             return
