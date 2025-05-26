@@ -2854,6 +2854,10 @@ class DAWGitApp(QMainWindow):
 
         try:
             branches = [head.name for head in self.repo.heads]
+
+            if self.has_unsaved_changes():
+                self.backup_unsaved_changes()
+
             if not branches:
                 QMessageBox.information(
                     self,
@@ -2886,48 +2890,28 @@ class DAWGitApp(QMainWindow):
             else:
                 selected_branch = branch_name
 
-            # ✅ NEW: Return early if already on the selected branch
-            if not self.repo.head.is_detached and selected_branch == self.repo.active_branch.name:
-                print("[DEBUG] Already on selected branch — no switch needed.")
-                return {"status": "success", "message": "Already on this branch"}
+            # Perform the actual switch
+            result = self.git.switch_branch(selected_branch)
 
-            if self.has_unsaved_changes():
-                choice = QMessageBox.question(
-                    self,
-                    "Unsaved Work Detected",
-                    "🎵 You’ve made changes that haven’t been saved yet.\n\nWould you like to back them up before switching?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
-                if choice == QMessageBox.StandardButton.Yes:
-                    self.backup_unsaved_changes()
-                elif os.getenv("DAWGIT_TEST_MODE") == "1":
-                    self.backup_unsaved_changes()
+            if result["status"] == "error":
+                QMessageBox.critical(self, "Couldn’t Switch", f"❌ Git error:\n\n{result['message']}")
+                return result
 
-                subprocess.run(
-                    ["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
+            if result["status"] == "detached":
+                QMessageBox.warning(self, "Detached HEAD", "⚠️ Cannot switch branches from a snapshot view.")
+                return result
 
-            # Inside checkout_branch or switch_branch before actual checkout:
-            self.clean_blocking_files()
-
-
-            subprocess.run(
-                ["git", "checkout", selected_branch],
-                cwd=self.project_path,
-                env=self.custom_env(),
-                check=True
-            )
-
+            if result["status"] == "noop":
+                QMessageBox.information(self, "Already on Branch", f"🎚️ Already on version line:\n\n{selected_branch}")
+                return {"status": "success", "message": result["message"]}
+            
+            # Refresh UI state
+            self.repo = self.git.repo  # rebind
             self.init_git()
-
             if hasattr(self, "load_commit_history"):
                 self.load_commit_history()
             if hasattr(self, "update_session_branch_display"):
                 self.update_session_branch_display()
-
             if hasattr(self, "update_version_line_label"):
                 self.update_version_line_label()
 
@@ -2938,20 +2922,8 @@ class DAWGitApp(QMainWindow):
             )
             return {"status": "success", "message": f"Switched to branch {selected_branch}"}
 
-        except subprocess.CalledProcessError as e:
-            QMessageBox.critical(
-                self,
-                "Couldn’t Switch",
-                f"❌ Something went wrong switching versions:\n\n{e}"
-            )
-            return {"status": "error", "message": str(e)}
-
         except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Unexpected Issue",
-                f"⚠️ Something unexpected happened:\n\n{e}"
-            )
+            QMessageBox.critical(self, "Unexpected Issue", f"⚠️ Something unexpected happened:\n\n{e}")
             return {"status": "error", "message": str(e)}
 
 

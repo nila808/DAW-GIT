@@ -12,6 +12,7 @@ class GitProjectManager:
         self.repo = None
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
 
+
     def init_repo(self):
         print("[DEBUG] Initializing Git...")
 
@@ -110,20 +111,24 @@ class GitProjectManager:
     def is_dirty(self):
         return self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
 
+
     def stash_uncommitted_changes(self, message="DAWGit auto-stash"):
         if self.repo.is_dirty(untracked_files=True):
             self.repo.git.stash("save", "--include-untracked", message)
             return True
         return False
 
+
     def get_latest_commit_sha(self):
         return self.repo.head.commit.hexsha if self.repo.head.is_valid() else None
+
 
     def get_branch_name(self):
         try:
             return self.repo.active_branch.name
         except TypeError:
             return "(detached)"
+
 
     def assign_commit_role(self, sha, role):
         meta_file = self.project_path / ".dawgit_roles.json"
@@ -137,6 +142,7 @@ class GitProjectManager:
         meta_file.write_text(json.dumps(roles, indent=2))
         return True
 
+
     def get_commit_roles(self):
         meta_file = self.project_path / ".dawgit_roles.json"
         if meta_file.exists():
@@ -146,10 +152,12 @@ class GitProjectManager:
                 return {}
         return {}
 
+
     def custom_env(self):
         env = os.environ.copy()
         env["PATH"] = self.env_path
         return env
+
 
     def stash_uncommitted_changes(self, message="DAWGit auto-stash"):
         if not self.repo:
@@ -163,3 +171,32 @@ class GitProjectManager:
                 return {"status": "clean", "message": "No changes to stash."}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+
+    def switch_branch(self, target_branch, stash_if_dirty=True):
+            if not self.repo:
+                return {"status": "error", "message": "No Git repo available."}
+
+            current_branch = None
+            try:
+                current_branch = self.repo.active_branch.name
+            except TypeError:
+                return {"status": "detached", "message": "Detached HEAD state."}
+
+            if current_branch == target_branch:
+                return {"status": "noop", "message": "Already on target branch."}
+
+            if stash_if_dirty:
+                stash_result = self.stash_uncommitted_changes()
+                if stash_result["status"] == "error":
+                    return {"status": "error", "message": stash_result["message"]}
+
+            try:
+                if target_branch not in self.repo.heads:
+                    self.repo.git.checkout("-b", target_branch)
+                    return {"status": "created", "branch": target_branch}
+                else:
+                    self.repo.git.checkout(target_branch)
+                    return {"status": "switched", "branch": target_branch}
+            except GitCommandError as e:
+                return {"status": "error", "message": str(e)}
