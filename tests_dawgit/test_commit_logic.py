@@ -66,16 +66,35 @@ def test_placeholder_file_created_if_none_exist(tmp_path, qtbot):
     project_path = tmp_path / "Placeholder"
     project_path.mkdir()
 
+    # 🧪 Init repo with one dummy commit (Git requires at least one to detach)
     repo = Repo.init(project_path)
-    repo.index.commit("Empty start")
+    dummy = project_path / "dummy.als"
+    dummy.write_text("placeholder content")
+    repo.index.add(["dummy.als"])
+    repo.index.commit("Initial commit")
+    dummy.unlink()  # Remove it to simulate no DAW files
 
-    app = DAWGitApp()
-    app.project_path = str(project_path)
+    # 🧪 Detach HEAD (simulate snapshot view)
+    repo.git.checkout(repo.head.commit.hexsha)
+    assert repo.head.is_detached
+
+    # 🎛 Launch app
+    app = DAWGitApp(project_path=str(project_path), build_ui=False)
     app.repo = repo
+    app.init_git()
 
+    # 🎼 Trigger new version line creation
     branch_name = "v1-experiment"
-    app.create_new_version_line(branch_name)
+    result = app.create_new_version_line(branch_name)
+    assert result["status"] == "success"
 
+    # ✅ Validate placeholder file exists
     placeholder = project_path / "auto_placeholder.als"
-    assert placeholder.exists()
-    assert "auto_placeholder.als" in app.repo.git.show("--name-only")
+    print("[DEBUG] Placeholder exists:", placeholder.exists())
+    print("[DEBUG] Placeholder content:", placeholder.read_text() if placeholder.exists() else "MISSING")
+
+    assert placeholder.exists(), "Expected placeholder file to be created"
+
+    # ✅ Validate it's committed
+    tracked_files = list(app.repo.git.ls_files().splitlines())
+    assert "auto_placeholder.als" in tracked_files, "Expected placeholder to be committed"

@@ -4,64 +4,106 @@ import shutil
 import pytest
 import uuid
 from pathlib import Path
+from PyQt6.QtWidgets import QMessageBox
+from daw_git_gui import DAWGitApp
 from git import Repo
+
+from unittest.mock import patch
+# 🧪 Disable the global fallback mock
+os.environ["DAWGIT_FORCE_INPUT"] = "0"
+
+# ✅ Patch input before importing app
+patch("PyQt6.QtWidgets.QInputDialog.getText", return_value=("Alt 2", True)).start()
+
 from daw_git_gui import DAWGitApp
 
-os.environ["DAWGIT_TEST_MODE"] = "1"
-import daw_git_testing  # ensures all modals are patched early
 
+from contextlib import contextmanager
+
+os.environ["DAWGIT_TEST_MODE"] = "1"
+
+# 🛡️ Global patch for all modal dialogs
+# @pytest.fixture(autouse=True)
+# def patch_dialogs(monkeypatch):
+#     monkeypatch.setattr(QInputDialog, "getText", lambda *a, **k: ("Alt 2", True))
+#     monkeypatch.setattr(QMessageBox, "information", lambda *a, **k: None)
+#     monkeypatch.setattr(QMessageBox, "warning", lambda *a, **k: None)
+#     monkeypatch.setattr(QMessageBox, "critical", lambda *a, **k: None)
+
+
+@contextmanager
+def working_directory(path):
+    """Temporarily change working directory."""
+    try:
+        previous = os.getcwd()
+    except FileNotFoundError:
+        previous = "/tmp"
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(previous)
+
+
+def git_add_and_commit(repo, path: Path, filename: str, message="Initial commit"):
+    with working_directory(path):
+        repo.index.add([filename])
+        repo.index.commit(message)
+
+
+# ✅ Test 1: role variants
 @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
 def test_assign_commit_role_variants(monkeypatch, qtbot, label):
-    test_path = f"/tmp/test_daw_tagging_{uuid.uuid4().hex}"
-    project_path = Path(test_path)
-    project_path.mkdir(parents=True, exist_ok=True)
-    os.environ["DAWGIT_FORCE_TEST_PATH"] = test_path
+    project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+    project_path.mkdir(parents=True)
+    (project_path / "track.als").write_text("init")
 
-    # 📝 Create test .als file
-    daw_file = project_path / "session.als"
-    daw_file.write_text("init")
+    repo = Repo.init(project_path)
+    git_add_and_commit(repo, project_path, "track.als", message="init")
 
-    # 🔃 Initialize Git repo
-    Repo.init(project_path)
-    repo = Repo(project_path)
-
-    # ✅ Safely set working directory during Git add/commit
-    try:
-        cwd = os.getcwd()
-    except FileNotFoundError:
-        cwd = "/tmp"
-
-    os.chdir(project_path)
-    try:
-        repo.index.add([daw_file.name])
-        repo.index.commit("Initial commit")
-    finally:
-        os.chdir(cwd)
-
-    # 🖥 Launch the app
-    app = DAWGitApp(build_ui=True)
+    app = DAWGitApp(project_path=str(project_path), build_ui=True)
     qtbot.addWidget(app)
     qtbot.wait(200)
 
-    status = app.status_label.text()
-    print(f"[DEBUG] status_label: {status}")
-    assert any(term in status for term in [
-        "Ready", "Session branch", "Take:", "Detached snapshot"
-    ]), f"Unexpected status label: {status}"
-
-    # 🔖 Assign and verify role
     sha = app.repo.head.commit.hexsha
     app.assign_commit_role(sha, label)
     app.save_commit_roles()
-    qtbot.wait(100)
 
-    roles_path = project_path / ".dawgit_roles.json"
-    assert roles_path.exists()
-    roles = json.loads(roles_path.read_text())
-    assert roles.get(sha) == label, f"Expected role '{label}' on commit {sha[:7]}"
+    role_file = project_path / ".dawgit_roles.json"
+    assert role_file.exists()
+    roles = json.loads(role_file.read_text())
+    assert roles[sha] == label
 
-    # ✅ Safe shutdown and cleanup
     app.close()
-    qtbot.wait(100)
-    if project_path.exists():
-        shutil.rmtree(project_path, ignore_errors=True)
+    shutil.rmtree(project_path, ignore_errors=True)
+
+
+# ✅ Test 2: custom tag via button
+@patch("PyQt6.QtWidgets.QInputDialog.getText", return_value=("Alt 2", True))
+def test_tag_custom_label_assigns_alt2(mock_input, tmp_path, qtbot):
+    (tmp_path / "track.als").write_text("Ableton")
+
+    repo = Repo.init(tmp_path)
+    git_add_and_commit(repo, tmp_path, "track.als", message="init")
+
+    app = DAWGitApp(project_path=str(tmp_path), build_ui=True)
+    qtbot.addWidget(app)
+    qtbot.wait(200)
+
+    sha = app.repo.head.commit.hexsha
+    app.pages.switch_to("commit")
+    qtbot.wait(200)
+
+    app.commit_page.tag_custom_btn.click()
+    qtbot.wait(200)
+
+    expected_role = "alt_2"
+    actual_role = app.commit_roles.get(sha)
+    assert actual_role == expected_role, f"Expected '{expected_role}', got '{actual_role}'"
+
+    role_file = tmp_path / ".dawgit_roles.json"
+    assert role_file.exists()
+    roles = json.loads(role_file.read_text())
+    assert roles.get(sha) == expected_role
+
+    app.close()

@@ -68,7 +68,8 @@ class DAWGitApp(QMainWindow):
             QMessageBox.warning = lambda *a, **kw: None
             QMessageBox.critical = lambda *a, **kw: None
 
-            QInputDialog.getText = lambda *a, **kw: ("test_input", True)
+            if os.getenv("DAWGIT_FORCE_INPUT") == "1":
+                QInputDialog.getText = lambda *a, **k: ("test_input", True)
             QInputDialog.getItem = lambda *a, **kw: ("main", True)
 
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
@@ -1080,8 +1081,29 @@ class DAWGitApp(QMainWindow):
         short_sha = result["sha"][:7]
         self.current_commit_id = result["sha"]
 
+        # ✅ Push to remote if enabled
+        if hasattr(self.setup_page, "remote_checkbox") and self.setup_page.remote_checkbox.isChecked():
+            try:
+                print("[DEBUG] Attempting to push to remote...")
+                subprocess.run(
+                    # ["git", "push", "origin", self.get_current_branch()],
+                    ["git", "push", "origin", self.get_default_branch()],
+
+                    cwd=self.project_path,
+                    env=self.custom_env(),
+                    check=True
+                )
+            except subprocess.CalledProcessError as e:
+                print(f"[DEBUG] Remote push failed: {e}")
+                QMessageBox.critical(
+                    self,
+                    "Push Failed",
+                    f"Couldn’t push to remote:\n\n{e}"
+                )
+
         if hasattr(self, "commit_message"):
             self.commit_message.setPlainText("")
+
 
         # Update UI state
         self.update_log()
@@ -1167,33 +1189,66 @@ class DAWGitApp(QMainWindow):
             if self.repo is None:
                 self.repo = Repo(self.project_path)
 
-            # Safety: if not detached, detach to start new version line from commit
+            # 🎯 Detach HEAD to snapshot commit
             if not self.repo.head.is_detached:
                 self.repo.git.checkout(self.repo.head.commit.hexsha)
 
-            # ✅ Step 1: Create and checkout the new branch
+            # ✅ Step 1: Create .version_marker file
+            marker_path = Path(self.project_path) / ".version_marker"
+            marker_path.write_text("🎼 Auto-created marker")
+            files_to_commit = [marker_path.relative_to(self.project_path).as_posix()]
+
+            # ✅ Step 2: Create placeholder .als if needed (before branch checkout)
+            daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
+            if not daw_files:
+                if self.repo.head.is_detached:
+                    print("[DEBUG] No DAW files found — creating placeholder .als for detached HEAD branching")
+                    placeholder_path = Path(self.project_path) / "auto_placeholder.als"
+                    placeholder_path.write_text("Temporary placeholder for version line start")
+                    files_to_commit.append(placeholder_path.relative_to(self.project_path).as_posix())
+                else:
+                    return {
+                        "status": "error",
+                        "message": "No DAW files found for new version line, and not in detached state"
+                    }
+
+            # ✅ Step 3: Create and checkout the new branch
             new_branch = self.repo.create_head(branch_name)
             new_branch.checkout()
 
-            # ✅ Step 2: Create .version_marker file
-            marker_path = Path(self.project_path) / ".version_marker"
-            marker_path.write_text("🎼 Auto-created marker")
+            # ✅ Step 4: Commit all new files
+            try:
+                print(f"[DEBUG] Committing files: {files_to_commit}")
+                self.repo.index.add(files_to_commit)
+                commit_message = f"🎼 Start New Version Line: {branch_name}"
+                self.repo.index.commit(commit_message)
+            except Exception as e:
+                print(f"[ERROR] Failed to commit new version line: {e}")
+                return {"status": "error", "message": f"Commit failed: {e}"}
 
-            files_to_commit = [".version_marker"]
+            # ✅ Step 5: Optional push
+            if (
+                hasattr(self, "setup_page") and
+                hasattr(self.setup_page, "remote_checkbox") and
+                self.setup_page.remote_checkbox.isChecked()
+            ):
+                try:
+                    print("[DEBUG] Attempting to push to remote...")
+                    subprocess.run(
+                        ["git", "push", "origin", branch_name],
+                        cwd=self.project_path,
+                        env=self.custom_env(),
+                        check=True
+                    )
+                except subprocess.CalledProcessError as e:
+                    print(f"[DEBUG] Remote push failed: {e}")
+                    QMessageBox.critical(
+                        self,
+                        "Push Failed",
+                        f"Couldn’t push to remote:\n\n{e}"
+                    )
 
-            # ✅ Step 3: Create a placeholder .als if none are found
-            daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
-            if not daw_files:
-                placeholder = Path(self.project_path) / "auto_placeholder.als"
-                placeholder.write_text("This is a placeholder Ableton file")
-                files_to_commit.append(str(placeholder.name))
-
-            # ✅ Step 4: Commit all new files together
-            self.repo.index.add(files_to_commit)
-            commit_message = f"🎼 Start New Version Line: {branch_name}"
-            self.repo.index.commit(commit_message)
-
-            # ✅ Step 5: Refresh app state (safe for test mode)
+            # ✅ Step 6: Refresh state (safe for test mode)
             if hasattr(self, "update_log"):
                 self.update_log()
             if hasattr(self, "update_status_label"):
@@ -1210,6 +1265,7 @@ class DAWGitApp(QMainWindow):
         except Exception as e:
             print(f"[ERROR] create_new_version_line: {e}")
             return {"status": "error", "message": str(e)}
+
 
 
     def show_commit_context_menu(self, position):
@@ -1686,7 +1742,7 @@ class DAWGitApp(QMainWindow):
             confirm = QMessageBox.question(
                 self,
                 "Replace Main Mix?",
-                f"Only one commit can be tagged as 'Main Mix'.\n\n"
+                f"Only one Snaphot can be tagged as 'Main Mix'.\n\n"
                 f"This will remove the tag from:\n🗑 {existing_main[:7]} – {old_msg}\n\n"
                 f"And apply it to:\n🌟 {sha[:7]} – {new_msg}\n\nContinue?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel

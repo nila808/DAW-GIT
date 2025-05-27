@@ -1,6 +1,6 @@
 {
   "project_name": "TEST 1 Project",
-  "project_version": "test-phase-2.5.3",
+  "project_version": "v1.1.0",
   "creator": "Niccavendish",
   "repository_info": {
     "current_branch": "main",
@@ -26,7 +26,7 @@
   },
   "metadata": {
     "tags": {
-      "version_marker": "test-phase-2.5.3"
+      "version_marker": "v1.1.0"
     },
     "qa": {
       "qa_started": true

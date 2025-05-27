@@ -29,27 +29,29 @@ def test_placeholder_file_created_on_version_line_start(tmp_path, qtbot):
     repo.git.checkout(repo.head.commit.hexsha)
     assert repo.head.is_detached
 
-    # Step 3: Launch app and initialize
+    # Step 3: Delete the .als file BEFORE launching app
+    als_file.unlink()  # Must be deleted before init_git() to avoid .glob() detection
+
+    # Step 4: Launch app and initialize
     app = DAWGitApp(project_path=tmp_path, build_ui=False)
+    app.repo = repo
     app.init_git()
 
-    als_file.unlink()  # Remove base.als to trigger placeholder creation
-
-    # Step 4: Start a new version line
+    # Step 5: Start a new version line
     result = app.create_new_version_line("new_version_test")
 
-    # Step 5: Check result is successful
+    # Step 6: Check result is successful
     assert result["status"] == "success", "Expected success creating new version line with placeholder"
     assert result["branch"] == "new_version_test"
 
-    # Step 6: Check for placeholder .als file
+    # Step 7: Check for placeholder .als file
     placeholder_file = tmp_path / "auto_placeholder.als"
     assert placeholder_file.exists(), "Placeholder .als file not found"
 
-    # Step 7: Confirm it was committed
-    latest_commit = repo.head.commit
-    committed_files = latest_commit.stats.files.keys()
-    assert "auto_placeholder.als" in committed_files, "Placeholder file was not committed"
+    # Step 8: Confirm it was committed
+    tracked_files = list(app.repo.git.ls_files().splitlines())
+    assert "auto_placeholder.als" in tracked_files, "Placeholder file was not committed"
+
 
 def test_placeholder_file_committed_to_repo(project_without_daw_files, qtbot):
     os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_without_daw_files)

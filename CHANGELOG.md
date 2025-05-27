@@ -1,5 +1,14 @@
 
 
+## [v1.1.0] – 2025-05-27
+**Author:** @niccavendish
+- ✅ UX: Clear commit box after error, improve error messaging
+- 🧩 Refactor: CommitPage role buttons + detached state safety
+- updated push-it script to show test logs as it runs
+- ✅ Full test suite passed (92/92) after modular UI refactor and test patching
+- 📦 test-phase-2.5.3: 📝 updated changelog, 📊 updated project status
+
+
 ## [test-phase-2.5.3] – 2025-05-26
 **Author:** @niccavendish
 - 📦 refactor-phase-2.5.2: 📝 updated changelog, 📊 updated project status
