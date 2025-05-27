@@ -1,5 +1,14 @@
 
 
+## [v1.1.2] – 2025-05-27
+**Author:** @niccavendish
+- 🐛 Fix: Normalize project_path to Path object to prevent .exists() crash in timerEvent
+- 📦 v1.1.1: 📝 updated changelog, 📊 updated project status
+- added script fix file missed in last commit - push-it env
+- 📦 v1.1.2-scriptfix: 📝 updated changelog, 📊 updated project status
+- 📦 v1.1.0: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.1.1] – 2025-05-27
 **Author:** @niccavendish
 - added script fix file missed in last commit - push-it env
