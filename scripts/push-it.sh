@@ -24,6 +24,9 @@ fi
 
 # 🧪 Run test suite with full output
 echo "🧪 Running test suite..."
+# 🧪 Enable test mode
+export DAWGIT_TEST_MODE=1
+export DAWGIT_FORCE_INPUT=1
 pytest -v || {
   echo ""
   echo "❌ Tests failed — aborting release."
