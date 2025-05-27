@@ -17,11 +17,24 @@ class SnapshotBrowserPage(QWidget):
 
         # 📜 Commit History Table
         self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+
         layout.addWidget(self.commit_table)
         self.commit_table.setColumnCount(9)
         self.commit_table.setHorizontalHeaderLabels([
             "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
         ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
 
         # 📦 Status
         self.status_label = QLabel("📦 Ready")

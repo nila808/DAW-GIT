@@ -22,14 +22,17 @@ if [[ -z "$MESSAGE" ]]; then
   MESSAGE="📦 $VERSION: 🔖 automated release commit"
 fi
 
+# 🧪 Run test suite with full output
 echo "🧪 Running test suite..."
-pytest -q > /dev/null || {
+pytest -v || {
+  echo ""
   echo "❌ Tests failed — aborting release."
   echo "💡 Fix the issue, rerun tests, and retry with: push-it <tag> \"message\""
   exit 1
 }
 echo "✅ All tests passed."
 
+# 🧾 Project Status
 echo "🔧 Updating PROJECT_STATUS.md..."
 if [[ -f PROJECT_STATUS.md ]]; then
   sed -i '' "s/^Current Version:.*/Current Version: $VERSION/" PROJECT_STATUS.md
@@ -37,9 +40,11 @@ else
   echo "Current Version: $VERSION" > PROJECT_STATUS.md
 fi
 
+# 📖 Changelog
 echo "📝 Updating CHANGELOG.md..."
 echo "- $VERSION ($(date +%Y-%m-%d)): $MESSAGE" >> CHANGELOG.md
 
+# 🧩 Project Marker
 echo "📁 Updating PROJECT_MARKER.json..."
 if [[ -f PROJECT_MARKER.json ]]; then
   jq --arg ver "$VERSION" '.version = $ver' PROJECT_MARKER.json > tmp_marker && mv tmp_marker PROJECT_MARKER.json
@@ -47,6 +52,7 @@ else
   echo "{ \"version\": \"$VERSION\" }" > PROJECT_MARKER.json
 fi
 
+# 📦 Git
 echo "📦 Staging all changes..."
 git add -A
 

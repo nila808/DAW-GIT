@@ -202,6 +202,14 @@ class DAWGitApp(QMainWindow):
     def setup_ui(self):
         build_main_ui(self)
 
+    def pretty_role(self, role_key):
+        return {
+            "main_mix": "Main Mix",
+            "creative_take": "Creative Mix",
+            "alt_mixdown": "Alt Mix",
+            "test_custom_tag": "Custom"
+        }.get(role_key, role_key.replace("_", " ").title() if role_key else "")
+    
 
     def maybe_show_welcome_modal(self):
         print("[DEBUG] Entering maybe_show_welcome_modal()")  # Debug entry point
@@ -1103,7 +1111,7 @@ class DAWGitApp(QMainWindow):
 
         in_detached = self.repo.head.is_detached
 
-        # Guard and safely update btn_set_version_main
+        # 🧩 Legacy buttons (if they still exist)
         if hasattr(self, "btn_set_version_main"):
             self.btn_set_version_main.setEnabled(not in_detached)
             self.btn_set_version_main.setToolTip(
@@ -1124,6 +1132,17 @@ class DAWGitApp(QMainWindow):
                 "❌ Tagging disabled. You're viewing a snapshot."
                 if in_detached else "Assign this snapshot as an Alternate Mixdown"
             )
+
+        # ✅ Modular CommitPage buttons
+        if hasattr(self, "commit_page"):
+            for attr in ["tag_main_btn", "tag_creative_btn", "tag_alt_btn", "tag_custom_btn"]:
+                btn = getattr(self.commit_page, attr, None)
+                if btn:
+                    btn.setEnabled(not in_detached)
+                    btn.setToolTip(
+                        "❌ Tagging is only available on active version lines."
+                        if in_detached else ""
+                    )
 
 
 
@@ -1606,6 +1625,7 @@ class DAWGitApp(QMainWindow):
         else:
             print(f"[DEBUG] No commit role file found at {roles_path}")
             self.commit_roles = {}
+
 
     def tag_custom_label(self):
         """
@@ -2400,7 +2420,7 @@ class DAWGitApp(QMainWindow):
             commit_table.setItem(row, 0, item0)
 
             # Role — read-only
-            item1 = QTableWidgetItem(role)
+            item1 = QTableWidgetItem(self.pretty_role(role))
             item1.setFlags(item1.flags() & ~Qt.ItemFlag.ItemIsEditable)
             commit_table.setItem(row, 1, item1)
 

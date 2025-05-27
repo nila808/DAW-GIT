@@ -332,3 +332,4 @@ Stable milestone tagged as `v1.0.2-rolepass`
 - Fixed branch switching and path clear tests by updating update_project_label() logic
 - Added page switching to commit tests to reflect real UI state
 - Final patch: test_full_snapshot_flow routed through CommitPage
+- v1.0.2-role-buttons (2025-05-27): updated push-it script to show test logs as it runs
