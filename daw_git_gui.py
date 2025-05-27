@@ -2249,11 +2249,20 @@ class DAWGitApp(QMainWindow):
             for ext in ("*.als", "*.logicx"):
                 for daw_file in self.project_path.glob(ext):
                     rel_path = daw_file.relative_to(self.project_path)
-                    git_status_lines = [line for line in status_output if str(rel_path) in line]
-                    if git_status_lines:
-                        print(f"[DEBUG] Unsaved DAW file detected: {rel_path}")
-                        self._last_dirty_state = True
-                        return True
+
+                    if daw_file.suffix == ".logicx" and daw_file.is_dir():
+                        # 🔍 Look for dirty files inside the .logicx bundle
+                        for subfile in daw_file.rglob("*"):
+                            sub_rel = subfile.relative_to(self.project_path)
+                            if any(sub_rel.as_posix() in line for line in status_output):
+                                print(f"[DEBUG] Unsaved LogicX change: {sub_rel}")
+                                self._last_dirty_state = True
+                                return True
+                    else:
+                        if any(str(rel_path) in line for line in status_output):
+                            print(f"[DEBUG] Unsaved DAW file detected: {rel_path}")
+                            self._last_dirty_state = True
+                            return True
 
             # ✅ Only log once when status goes clean
             if getattr(self, "_last_dirty_state", None) is not False:
@@ -2895,51 +2904,63 @@ class DAWGitApp(QMainWindow):
 
 
     def timerEvent(self, event):
-        has_changes = self.repo and self.has_unsaved_changes()
+        if isinstance(self.project_path, str):
+            self.project_path = Path(self.project_path)
+        if not self.repo or not self.project_path or not self.project_path.exists():
+            return  # 🛑 prevent crash if repo or folder is missing (e.g. during tests)
 
-        # 🔁 Flash the unsaved indicator if changes exist
+        try:
+            has_changes = self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
+        except Exception as e:
+            print(f"[WARNING] Skipping is_dirty check — repo error: {e}")
+            return
+
+        # 🎚️ Flash toggle flag
+        self.unsaved_flash = getattr(self, "unsaved_flash", False)
+
         if has_changes:
             self.unsaved_flash = not self.unsaved_flash
-            self.unsaved_indicator.setProperty("alert", self.unsaved_flash)
         else:
             self.unsaved_flash = False
-            self.unsaved_indicator.setProperty("alert", False)
 
-        # ✅ Normalize to True/False
-        has_changes = bool(has_changes)
 
-        # 💾 Old "Save Snapshot" button (legacy UI)
+        # ✅ Update alert property and force visual refresh
+        if hasattr(self, "unsaved_indicator") and self.unsaved_indicator:
+            new_alert = self.unsaved_flash
+            self.unsaved_indicator.setProperty("alert", new_alert)
+
+            # Force full restyle
+            self.unsaved_indicator.style().unpolish(self.unsaved_indicator)
+            self.unsaved_indicator.style().polish(self.unsaved_indicator)
+            self.unsaved_indicator.update()
+
+            # Ensure visibility toggles with flash
+            self.unsaved_indicator.setVisible(has_changes or self.unsaved_flash)
+
+        # 💾 Legacy "Save Snapshot" button
         if hasattr(self, "commit_btn") and self.commit_btn:
             self.commit_btn.setEnabled(has_changes)
             self.commit_btn.setToolTip(
-                "Save a snapshot of your DAW session." if has_changes else
-                "No changes detected — nothing new to snapshot."
+                "Save a snapshot of your current track state." if has_changes else
+                "No new changes — nothing to snapshot yet."
             )
 
-        # 🧠 Auto-snapshot checkbox
+        # 🧠 Auto-snapshot toggle
         if hasattr(self, "auto_save_toggle") and self.auto_save_toggle:
-            self.auto_save_toggle.setEnabled(False)  # temporary pause
+            self.auto_save_toggle.setEnabled(False)
             self.auto_save_toggle.setEnabled(has_changes)
             self.auto_save_toggle.setToolTip(
-                "Auto-snapshot ready — changes detected." if has_changes else
-                "✅ Snapshot saved. Auto-commit disabled until further changes."
+                "Auto-snapshot is ready — changes detected in your session." if has_changes else
+                "✅ All changes saved. Auto-snapshot will resume on next tweak."
             )
 
-        # ✅ New CommitPage "💾 Commit Now" button
+        # 🧱 New Commit button
         if hasattr(self, "commit_button") and self.commit_button:
             self.commit_button.setEnabled(has_changes)
             self.commit_button.setToolTip(
-                "Commit changes to your DAW version history." if has_changes else
-                "No changes detected to commit."
+                "Lock in this version of your project — save it to your version history." if has_changes else
+                "🎵 No tweaks yet — this version matches the last saved snapshot."
             )
-
-        # 🔁 Refresh styles
-        self.unsaved_indicator.style().unpolish(self.unsaved_indicator)
-        self.unsaved_indicator.style().polish(self.unsaved_indicator)
-
-        # 👁 Show or hide indicator
-        self.unsaved_indicator.setVisible(has_changes)
-
 
 
     def update_unsaved_indicator(self):
@@ -3060,6 +3081,26 @@ class DAWGitApp(QMainWindow):
             print(f"⚠️ Failed to save project path: {e}")
 
 
+    def get_active_daw_file(self):
+        """
+        Return the path to the active DAW file (.als or .logicx) if one exists in the project.
+        """
+        if not self.project_path or not self.project_path.exists():
+            return None
+
+        # Check for .als first (Ableton)
+        als_files = list(self.project_path.glob("*.als"))
+        if als_files:
+            return als_files[0]
+
+        # Then check for Logic Pro
+        logicx_files = list(self.project_path.glob("*.logicx"))
+        if logicx_files:
+            return logicx_files[0]
+
+        return None
+
+
     def load_project_folder(self, folder_path):
         print(f"[DEBUG] Loading project folder: {folder_path}")
         self.project_path = Path(folder_path)
@@ -3068,9 +3109,19 @@ class DAWGitApp(QMainWindow):
         self.save_last_project_path()
         self.load_commit_history()
 
-        # ✅ FIX: Add this to sync lower labels after auto-restore
+        # ✅ Sync UI labels
         self.update_session_branch_display()
         self.update_version_line_label()
+
+        # ✅ Ensure "Open in DAW" button is available if file exists
+        if self.get_active_daw_file():
+            self.open_in_daw_btn.setVisible(True)
+            self.open_in_daw_btn.setEnabled(True)
+            print("[DEBUG] 🎧 Open DAW button enabled on project load")
+        else:
+            self.open_in_daw_btn.setVisible(False)
+            self.open_in_daw_btn.setEnabled(False)
+            print("[DEBUG] ❌ No .als or .logicx file found — button disabled")
 
 
     def try_restore_last_project(self):

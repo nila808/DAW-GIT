@@ -81,12 +81,12 @@ def build_main_ui(app):
 def build_project_controls(app):
     layout = QVBoxLayout()
 
-    app.unsaved_indicator = QLabel("● Uncommitted Changes")
-    app.unsaved_indicator.setObjectName("unsaved_indicator")
-    app.unsaved_indicator.setVisible(False)
-    app.unsaved_flash = False
-    app.unsaved_timer = app.startTimer(800)
-    layout.addWidget(app.unsaved_indicator)
+    # app.unsaved_indicator = QLabel("● Uncommitted Changes")
+    # app.unsaved_indicator.setObjectName("unsaved_indicator")
+    # app.unsaved_indicator.setVisible(False)
+    # app.unsaved_flash = False
+    # app.unsaved_timer = app.startTimer(800)
+    # layout.addWidget(app.unsaved_indicator)
 
     # app.project_label = QLabel()
     # app.project_label.setObjectName("project_label")
@@ -143,53 +143,12 @@ def build_commit_controls(app):
     layout.addWidget(QLabel("Snapshot Notes:"))
 
     buttons = QHBoxLayout()
-    # app.commit_btn = QPushButton("💾 Save Snapshot")
-    # app.commit_btn.setMinimumHeight(36)
-    # app.commit_btn.setToolTip("Save the current version of your DAW project")
-    # app.commit_btn.clicked.connect(lambda: app.commit_changes(
-    #     app.snapshot_page.commit_message_input.toPlainText().strip() or None
-    # ))
-    # buttons.addWidget(app.commit_btn)
 
     app.auto_save_toggle = QCheckBox("🎹 Auto-Save Snapshots")
     app.auto_save_toggle.setToolTip("Enable to auto-commit when changes are detected")
     app.auto_save_toggle.stateChanged.connect(app.handle_auto_save_toggle)
     buttons.addWidget(app.auto_save_toggle)
     layout.addLayout(buttons)
-
-    # vc_layout = QHBoxLayout()
-    # app.new_branch_btn = QPushButton("🎼 Start New Version Line")
-    # app.new_branch_btn.setToolTip("Start a new creative branch from here")
-    # app.new_branch_btn.clicked.connect(app.start_new_version_line)
-    # vc_layout.addWidget(app.new_branch_btn)
-
-    # app.return_to_latest_btn = QPushButton("🎯 Return to Latest")
-    # app.return_to_latest_btn.setToolTip("Return to the most recent version")
-    # app.return_to_latest_btn.clicked.connect(app.return_to_latest_clicked)
-    # vc_layout.addWidget(app.return_to_latest_btn)
-    # layout.addLayout(vc_layout)
-
-    # role_layout = QHBoxLayout()
-    # app.btn_set_version_main = QPushButton("🌟 Mark as Final Mix")
-    # app.btn_set_version_main.setToolTip("Assign this snapshot as your Main Mix")
-    # app.btn_set_version_main.clicked.connect(app.tag_main_mix)
-    # role_layout.addWidget(app.btn_set_version_main)
-
-    # app.btn_set_version_creative = QPushButton("🎨 Mark as Creative Version")
-    # app.btn_set_version_creative.setToolTip("Assign this snapshot as a creative alternative")
-    # app.btn_set_version_creative.clicked.connect(app.tag_creative_take)
-    # role_layout.addWidget(app.btn_set_version_creative)
-
-    # app.btn_set_version_alt = QPushButton("🎚️ Mark as Alternate Mix")
-    # app.btn_set_version_alt.setToolTip("Assign this snapshot as an alternate mixdown or stem")
-    # app.btn_set_version_alt.clicked.connect(app.tag_alt_mix)
-    # role_layout.addWidget(app.btn_set_version_alt)
-
-    # app.btn_custom_tag = QPushButton("✏️ Add Custom Tag")
-    # app.btn_custom_tag.setToolTip("Add your own label to this snapshot")
-    # app.btn_custom_tag.clicked.connect(app.tag_custom_label)
-    # role_layout.addWidget(app.btn_custom_tag)
-    # layout.addLayout(role_layout)
 
     group = QGroupBox("Snapshot Controls")
     group.setLayout(layout)
@@ -233,6 +192,13 @@ def build_commit_info_display(app):
 
 def build_bottom_controls(app):
     layout = QVBoxLayout()
+
+    app.unsaved_indicator = QLabel("● Uncommitted Changes")
+    app.unsaved_indicator.setObjectName("unsaved_indicator")
+    app.unsaved_indicator.setVisible(False)
+    app.unsaved_flash = False
+    app.unsaved_timer = app.startTimer(800)
+    layout.addWidget(app.unsaved_indicator)
 
     app.open_in_daw_btn = QPushButton("🎧 Open This Version in DAW")
     app.open_in_daw_btn.setVisible(False)
