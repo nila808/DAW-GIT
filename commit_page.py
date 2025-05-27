@@ -85,7 +85,10 @@ class CommitPage(QWidget):
             self.status_label.setText(f"✅ Committed: {result['sha'][:7]}")
             self.commit_message.clear()
         else:
-            self.status_label.setText(f"❌ Commit failed: {result.get('message')}")
+            error_msg = result.get("message", "Unknown error.")
+            self.status_label.setText(f"❌ Couldn’t save snapshot:\n{error_msg}")
+            self.commit_message.clear()  # ✅ Always clear after failure
 
     def toggle_auto_commit(self, state):
-        self.app.handle_auto_save_toggle(state)
+        if hasattr(self.app, "handle_auto_save_toggle"):
+            self.app.handle_auto_save_toggle(state)

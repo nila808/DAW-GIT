@@ -99,9 +99,6 @@ class GitProjectManager:
         return {"status": "ok"}
     
 
-
-
-
     def commit_changes(self, message):
         if not self.repo:
             return {"status": "error", "message": "No Git repo available."}
@@ -119,7 +116,10 @@ class GitProjectManager:
             sha = self.repo.head.commit.hexsha
             return {"status": "success", "sha": sha}
         except GitCommandError as e:
-            return {"status": "error", "message": str(e)}
+            msg = str(e)
+            if "nothing to commit" in msg:
+                return {"status": "error", "message": "Nothing new to commit — your project hasn't changed."}
+            return {"status": "error", "message": msg}
         
 
     def is_dirty(self):

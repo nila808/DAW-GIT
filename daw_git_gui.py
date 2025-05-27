@@ -19,6 +19,7 @@ import traceback
 from gui_layout import build_main_ui
 from daw_git_core import GitProjectManager
 from daw_git_core import sanitize_git_input
+from ui_strings import *
 
 
 # --- Git ---
@@ -410,7 +411,8 @@ class DAWGitApp(QMainWindow):
 
     def show_branch_selector(self):
         if not self.repo:
-            QMessageBox.warning(self, "No Repo", "No Git repository initialized.")
+            from ui_strings import NO_REPO_TITLE, NO_REPO_MSG
+            QMessageBox.warning(self, NO_REPO_TITLE, NO_REPO_MSG)
             return
 
         branches = [head.name for head in self.repo.heads]
@@ -757,7 +759,8 @@ class DAWGitApp(QMainWindow):
                     ))
                     print(f"[DEBUG] ✅ Delayed scroll and select to HEAD row {selected_row}")
 
-                QMessageBox.information(self, "Returned to Latest", "🎯 You’re now back on the latest version line: 'main'")
+                from ui_strings import RETURN_TO_LATEST_TITLE, RETURN_TO_LATEST_MSG
+                QMessageBox.information(self, RETURN_TO_LATEST_TITLE, RETURN_TO_LATEST_MSG.format(branch="main"))
 
             else:
                 # Already on a named branch (not detached)
@@ -886,7 +889,8 @@ class DAWGitApp(QMainWindow):
 
     def connect_to_remote_repo(self):
         if not self.repo:
-            QMessageBox.warning(self, "No Repo", "No Git repository initialized.")
+            from ui_strings import NO_REPO_TITLE, NO_REPO_MSG
+            QMessageBox.warning(self, NO_REPO_TITLE, NO_REPO_MSG)
             return
 
         url, ok = QInputDialog.getText(
@@ -1090,7 +1094,9 @@ class DAWGitApp(QMainWindow):
         except TypeError:
             branch = str(self.repo.head.ref) if self.repo.head.ref else "detached"
 
-        QMessageBox.information(self, "Commit Successful", f"Branch: {branch}\nCommit: {short_sha}")
+        from ui_strings import COMMIT_SUCCESS_TITLE, COMMIT_SUCCESS_MSG
+        QMessageBox.information(self, COMMIT_SUCCESS_TITLE, COMMIT_SUCCESS_MSG.format(branch=branch, sha=short_sha))
+
 
         if hasattr(self, "project_marker") and self.repo.head.is_valid():
             msg = self.repo.head.commit.message.strip()
@@ -1149,7 +1155,8 @@ class DAWGitApp(QMainWindow):
         timestamp = current.committed_datetime.strftime("%d %b %Y, %H:%M")
 
         body = f"{label}\n\n" + ("-" * 40) + f"\n\nCommitted: {timestamp}"
-        QMessageBox.information(self, "Current Commit", body)
+        from ui_strings import CURRENT_COMMIT_TITLE
+        QMessageBox.information(self, CURRENT_COMMIT_TITLE, body)
 
     
     def create_new_version_line(self, branch_name: str):
@@ -1637,7 +1644,8 @@ class DAWGitApp(QMainWindow):
         label = "".join(c for c in label if c.isalnum() or c in ("_", "-"))
 
         if not label:
-            QMessageBox.warning(self, "Invalid Label", "❌ Please enter a valid label.")
+            from ui_strings import INVALID_LABEL_TITLE, INVALID_LABEL_MSG
+            QMessageBox.warning(self, INVALID_LABEL_TITLE, INVALID_LABEL_MSG)
             return
 
         if not ok or not label.strip():
@@ -1784,11 +1792,7 @@ class DAWGitApp(QMainWindow):
 
     def auto_commit(self, message: str, tag: str = ""):
         if not self.repo:
-            QMessageBox.warning(
-                self,
-                "No Repo",
-                "🎛️ Please initialize version control before saving your project."
-            )
+            QMessageBox.warning(self, NO_REPO_TITLE, NO_REPO_SAVE_MSG)
             return
 
         # ✅ Immediately disable UI to prevent double clicks
@@ -2663,12 +2667,9 @@ class DAWGitApp(QMainWindow):
 
 
     def switch_branch(self, branch_name=None):
+        from ui_strings import NO_REPO_TITLE, NO_REPO_MSG
         if not self.repo:
-            QMessageBox.warning(
-                self,
-                "Project Not Set Up",
-                "🎛️ Please load or set up a project folder first."
-            )
+            QMessageBox.warning(self, NO_REPO_TITLE, NO_REPO_MSG)
             return {"status": "error", "message": "No repo loaded."}
 
         try:
@@ -2717,11 +2718,14 @@ class DAWGitApp(QMainWindow):
                 return result
 
             if result["status"] == "detached":
-                QMessageBox.warning(self, "Detached HEAD", "⚠️ Cannot switch branches from a snapshot view.")
+                from ui_strings import DETACHED_HEAD_TITLE, DETACHED_HEAD_MSG
+                QMessageBox.warning(self, DETACHED_HEAD_TITLE, DETACHED_HEAD_MSG)
                 return result
 
             if result["status"] == "noop":
-                QMessageBox.information(self, "Already on Branch", f"🎚️ Already on version line:\n\n{selected_branch}")
+                from ui_strings import ALREADY_ON_BRANCH_TITLE, ALREADY_ON_BRANCH_MSG
+                QMessageBox.information(self, ALREADY_ON_BRANCH_TITLE, ALREADY_ON_BRANCH_MSG.format(branch=selected_branch))
+
                 return {"status": "success", "message": result["message"]}
             
             # Refresh UI state

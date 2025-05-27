@@ -334,3 +334,4 @@ Stable milestone tagged as `v1.0.2-rolepass`
 - Final patch: test_full_snapshot_flow routed through CommitPage
 - v1.0.2-role-buttons (2025-05-27): updated push-it script to show test logs as it runs
 - v1.0.3-role-ui (2025-05-27): 🧩 Refactor: CommitPage role buttons + detached state safety
+- v1.0.2-commit-feedback (2025-05-27): ✅ UX: Clear commit box after error, improve error messaging
