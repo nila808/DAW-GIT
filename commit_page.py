@@ -32,10 +32,18 @@ class CommitPage(QWidget):
         layout.addWidget(self.auto_save_toggle)
         self.auto_save_toggle.stateChanged.connect(self.toggle_auto_commit)
 
+        # 🎯 Return to Latest button
+        self.return_to_latest_btn = QPushButton("🎯 Return to Latest")
+        self.return_to_latest_btn.setToolTip("Return to the most recent snapshot on your version line")
+        if parent and hasattr(parent, "return_to_latest_clicked"):
+            self.return_to_latest_btn.clicked.connect(parent.return_to_latest_clicked)
+        layout.addWidget(self.return_to_latest_btn)
+
         # 💾 Commit button
         self.commit_button = QPushButton("💾 Commit Now")
         layout.addWidget(self.commit_button)
         self.commit_button.clicked.connect(self.commit_snapshot)
+
 
         # 🏷️ Tagging Buttons
         tag_layout = QHBoxLayout()

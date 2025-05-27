@@ -1111,29 +1111,7 @@ class DAWGitApp(QMainWindow):
 
         in_detached = self.repo.head.is_detached
 
-        # 🧩 Legacy buttons (if they still exist)
-        if hasattr(self, "btn_set_version_main"):
-            self.btn_set_version_main.setEnabled(not in_detached)
-            self.btn_set_version_main.setToolTip(
-                "❌ You’re not on a version line. Use 'Start New Version Line' to enable tagging."
-                if in_detached else "Assign this snapshot as your Main Mix"
-            )
-
-        if hasattr(self, "btn_set_experiment"):
-            self.btn_set_experiment.setEnabled(not in_detached)
-            self.btn_set_experiment.setToolTip(
-                "❌ Tagging disabled. You're viewing a snapshot."
-                if in_detached else "Assign this snapshot as a Creative Take"
-            )
-
-        if hasattr(self, "btn_set_alternate"):
-            self.btn_set_alternate.setEnabled(not in_detached)
-            self.btn_set_alternate.setToolTip(
-                "❌ Tagging disabled. You're viewing a snapshot."
-                if in_detached else "Assign this snapshot as an Alternate Mixdown"
-            )
-
-        # ✅ Modular CommitPage buttons
+        # ✅ Modular CommitPage buttons — handle all current tag buttons cleanly
         if hasattr(self, "commit_page"):
             for attr in ["tag_main_btn", "tag_creative_btn", "tag_alt_btn", "tag_custom_btn"]:
                 btn = getattr(self.commit_page, attr, None)
@@ -1143,7 +1121,6 @@ class DAWGitApp(QMainWindow):
                         "❌ Tagging is only available on active version lines."
                         if in_detached else ""
                     )
-
 
 
 
