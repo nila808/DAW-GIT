@@ -1,5 +1,35 @@
 
 
+## [v1.1.2-scriptfix] – 2025-05-27
+**Author:** @niccavendish
+- 📦 v1.1.0: 📝 updated changelog, 📊 updated project status
+- ✅ UX: Clear commit box after error, improve error messaging
+- 🧩 Refactor: CommitPage role buttons + detached state safety
+- updated push-it script to show test logs as it runs
+- ✅ Full test suite passed (92/92) after modular UI refactor and test patching
+## [v1.1.0] — 2025-05-27
+🎉 First full milestone release of StudioGit
+
+### Highlights
+- ✅ Full PyQt6 GUI across 4 pages: Project Setup, Branch Manager, Snapshot Browser, Commit Page
+- ✅ Commit Role Tagging (Main Mix, Creative Take, Alt Mixdown)
+- ✅ Git-safe branching, versioning, detached HEAD protection
+- ✅ Return to Latest flow with repo/UI sync
+- ✅ Placeholder + backup safety system
+- ✅ 95/95 automated tests passing
+
+### Visual Milestone
+- 📸 Milestone SHA: `d52f397` (Creative Take on `main`)
+- 🎧 Session: version 7
+- 🔍 See: *Snapshot Browser* row 1, *Commit Page* state, and full session load flow
+
+### Fixes
+- [FIX] Persistent role metadata on restart
+- [FIX] Commit selection scroll issues (partially resolved)
+- [FIX] Placeholder safety logic for missing `.als` files
+
+
+
 ## [v1.1.0] – 2025-05-27
 **Author:** @niccavendish
 - ✅ UX: Clear commit box after error, improve error messaging

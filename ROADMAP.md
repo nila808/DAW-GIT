@@ -1,6 +1,14 @@
 # 🛣️ DAW Git – Roadmap
 _Tracking future features, optimizations, and polish milestones_
 
+### 🎯 Milestone: v1.1.0 (2025-05-27)
+- Tag: `v1.1.0`
+- Commit SHA: `d52f397`
+- Status: ✅ All tests passing
+- Session: Creative Take, version 7
+- Project: `p1 Project`
+- Feature lock: Snapshot browser, commit tagging, branch navigation, project setup, role buttons
+
 ---
 
 ## 🚀 Core UX & Stability
