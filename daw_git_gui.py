@@ -34,7 +34,16 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QSettings, QTimer
 
+class NumericItem(QTableWidgetItem):
+    def __init__(self, number, text=None):
+        super().__init__(f"#{number}" if text is None else text)
+        self.number = number
 
+    def __lt__(self, other):
+        if isinstance(other, NumericItem):
+            return self.number < other.number
+        return super().__lt__(other)
+    
 # from PyQt6.QtWidgets import 
 
 # --- App Bootstrap ---
@@ -723,17 +732,26 @@ class DAWGitApp(QMainWindow):
                     print("[ERROR] git switch failed:", e)
                     print("STDOUT:", e.stdout)
                     print("STDERR:", e.stderr)
-                    raise
+                    self._show_error("❌ Git switch to 'main' failed. Please check your branches.")
+                    return  # ❌ Important: exit if the switch fails
 
-                # Refresh repo object
+                # ✅ Only runs if switch succeeded
                 self.repo = Repo(self.project_path)
-
                 print("[DEBUG] Switched to main")
                 subprocess.run(["git", "lfs", "checkout"], cwd=self.project_path, env=self.custom_env(), check=True)
 
                 # 🔄 Rebind and update UI
                 self.bind_repo()
-                self.current_commit_id = self.repo.head.commit.hexsha
+
+                # ✅ Safely get HEAD SHA
+                try:
+                    head_commit = self.repo.head.commit
+                    self.current_commit_id = head_commit.hexsha
+                except Exception as e:
+                    print(f"[ERROR] Failed to get HEAD commit after switch: {e}")
+                    self._show_error("❌ Failed to return to the latest commit.\n\nCould not identify latest commit.")
+                    return
+
                 print(f"[DEBUG] Repo rebound: HEAD = {self.current_commit_id[:7]}")
                 self.load_commit_history()
                 self.update_status_label()
@@ -744,7 +762,7 @@ class DAWGitApp(QMainWindow):
                 self.detached_warning_label.hide()
                 self.open_in_daw_btn.setVisible(True)
 
-                # 🎯 Scroll to HEAD row
+                # 🎯 Scroll to HEAD row ...
                 head_sha = self.repo.head.commit.hexsha[:7]
                 selected_row = None
                 for row in range(self.snapshot_page.commit_table.rowCount()):
@@ -779,9 +797,7 @@ class DAWGitApp(QMainWindow):
         except Exception as e:
             self._show_error(f"❌ Failed to return to the latest commit:\n\n{e}")
 
-
-
-    
+   
     def run_setup(self):
         confirm = QMessageBox.question(
             self,
@@ -2452,7 +2468,8 @@ class DAWGitApp(QMainWindow):
             role = self.commit_roles.get(commit.hexsha, "")
 
             # Commit number — read-only
-            item0 = QTableWidgetItem(f"#{total_commits - (offset + idx)}")
+            index_num = total_commits - (offset + idx)
+            item0 = NumericItem(index_num)
             item0.setFlags(item0.flags() & ~Qt.ItemFlag.ItemIsEditable)
             commit_table.setItem(row, 0, item0)
 
@@ -2513,6 +2530,8 @@ class DAWGitApp(QMainWindow):
             item8.setFlags(item8.flags() & ~Qt.ItemFlag.ItemIsEditable)
             commit_table.setItem(row, 8, item8)
 
+        commit_table.setSortingEnabled(True)
+
         # Move highlight outside the loop for performance
         self.snapshot_page.highlight_row_by_sha(head_sha)
 
@@ -2541,7 +2560,7 @@ class DAWGitApp(QMainWindow):
         if not hasattr(self, 'commit_history_loaded'):
             self.commit_history_loaded = offset + limit
             commit_table.verticalScrollBar().valueChanged.connect(self.handle_commit_scroll)
-
+        
         
     # Lazy-load scroll handler helper
     def handle_commit_scroll(self):

@@ -1,5 +1,14 @@
 
 
+## [v1.1.1] – 2025-05-27
+**Author:** @niccavendish
+- added script fix file missed in last commit - push-it env
+- 📦 v1.1.2-scriptfix: 📝 updated changelog, 📊 updated project status
+- 📦 v1.1.0: 📝 updated changelog, 📊 updated project status
+- ✅ UX: Clear commit box after error, improve error messaging
+- 🧩 Refactor: CommitPage role buttons + detached state safety
+
+
 ## [v1.1.2-scriptfix] – 2025-05-27
 **Author:** @niccavendish
 - 📦 v1.1.0: 📝 updated changelog, 📊 updated project status
