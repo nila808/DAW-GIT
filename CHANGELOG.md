@@ -1,5 +1,10 @@
 
 
+## [v1.1.4-ref-cleaner] – 2025-05-28
+**Author:** @niccavendish
+- Initial commit after HEAD reset to main
+
+
 ## [v1.1.3-checkout-ux] – 2025-05-28
 **Author:** @niccavendish
 - 📦 v1.1.3: 📝 updated changelog, 📊 updated project status
