@@ -1450,14 +1450,18 @@ class DAWGitApp(QMainWindow):
 
 
     def open_latest_daw_project(self):
-        # ✅ Delay warning until user actually tries to open in DAW
-        if self.als_recently_modified() and os.getenv("DAWGIT_TEST_MODE") != "1":
+        # ⛔️ Skip redundant warning if using safe editable copy
+        if (
+            not hasattr(self, "editable_daw_path")
+            and self.als_recently_modified()
+            and os.getenv("DAWGIT_TEST_MODE") != "1"
+        ):
             confirm = QMessageBox.question(
                 self,
-                "Ableton Might Be Open",
-                "🎛️ This project was modified just now.\n\n"
-                "Ableton may ask to 'Save As' or overwrite your changes.\n\n"
-                "Open this version anyway?",
+                "Project Was Recently Modified",
+                "🎛️ This project was updated just moments ago.\n\n"
+                "Make sure Ableton is not already running this file before opening again.\n\n"
+                "Open anyway?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
             )
             if confirm != QMessageBox.StandardButton.Yes:
@@ -1470,13 +1474,14 @@ class DAWGitApp(QMainWindow):
             else:
                 confirm = QMessageBox.question(
                     self,
-                    "🎧 Launching Snapshot",
-                    "You're viewing a snapshot from your project history.\n\n"
-                    "Ableton may prompt you to 'Save As' when this version opens.\n\n"
-                    "💡 To continue editing safely, consider clicking '🎼 Start New Version Line' first.\n\n"
-                    "Would you like to continue launching this version?",
+                    "🎧 Open Snapshot Version",
+                    "You're previewing an earlier version of your project.\n\n"
+                    "This version will open in a safe, editable copy — so you’re free to explore, tweak, or start something new.\n\n"
+                    "💡 When you're ready to keep this version, click '🎼 Make This a New Version'.\n\n"
+                    "Continue?",
                     QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel
                 )
+
                 if confirm != QMessageBox.StandardButton.Ok:
                     print(f"[DEBUG] Early exit at snapshot confirmation")
                     return
@@ -2115,6 +2120,25 @@ class DAWGitApp(QMainWindow):
             self.bind_repo()
             self.init_git()
             self.load_commit_history()
+
+            # 🎛️ Create editable copy for DAW
+            try:
+                head_commit = self.repo.head.commit.hexsha
+                editable_path = Path(self.project_path) / ".dawgit_checkout_work" / head_commit
+                editable_path.mkdir(parents=True, exist_ok=True)
+
+                for daw_file in Path(self.project_path).glob("*.als"):
+                    shutil.copy2(daw_file, editable_path / daw_file.name)
+                for daw_file in Path(self.project_path).glob("*.logicx"):
+                    shutil.copy2(daw_file, editable_path / daw_file.name)
+
+                print(f"[DEBUG] Created editable copy at: {editable_path}")
+
+                self.editable_daw_path = editable_path  # 🔗 Used in DAW launcher
+            except Exception as e:
+                print(f"[ERROR] Failed to create editable copy: {e}")
+
+
             self.update_role_buttons()
 
             self.current_commit_id = self.repo.head.commit.hexsha
@@ -2309,6 +2333,15 @@ class DAWGitApp(QMainWindow):
                     shutil.copy(file, backup_dir / file.name)
 
             print(f"🔒 Unsaved changes backed up to: {backup_dir}")
+
+            # 🧠 NEW: Confirmation modal
+            if os.getenv("DAWGIT_TEST_MODE") != "1":
+                QMessageBox.information(
+                    self,
+                    "Backup Created",
+                    f"🛡️ Your changes were safely backed up to:\n\n{backup_dir}"
+                )
+
             return backup_dir
         except Exception as e:
             print(f"[ERROR] Failed to back up unsaved changes: {e}")
@@ -3022,7 +3055,7 @@ class DAWGitApp(QMainWindow):
 
                 # Disable and hide role buttons
                 for btn in [
-                    self.btn_set_version_main,
+                    self.tag_main_mix_btn,
                     self.btn_set_version_creative,
                     self.btn_set_version_alt
                 ]:

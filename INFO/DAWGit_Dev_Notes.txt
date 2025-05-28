@@ -150,21 +150,30 @@ pytest --last-failed --tb=short -q
 
 
 ------------------------------------------------------------------------------------------------------------------------
-✅ Copy & Paste This into a New Chat:
+✅ Copy & Paste This into a New Chat:        push-ctx 
 ------------------------------------------------------------------------------------------------------------------------
 
-Hi ChatGPT, please load the full context of my previous project called **DAW Git App**. It includes:
+Hi ChatGPT, please load the full context of my previous project called **DAW Git App** (aka StudioGit). It includes:
 
-- A PyQt6-based GUI for version control of DAW projects (Ableton, Logic Pro)
-- Git and Git LFS integration with commit, branch, and checkout logic
-- Safety features like:
-  - warnings for detached HEAD
-  - protection against commits without .als/.logicx files
-  - stash/backup handling on checkout
-- Full UI logic with commit logs, branch dropdowns, status labels
-- A working test suite (Pytest) for safety, UI, Git behavior
-- Cleanup for temp branches, tags, stashes, .dawgit_backups, and placeholders like auto_placeholder.als
-- Final app logic includes: 🎼 Start New Version Line, 🎧 Open This Version in Ableton, commit/branch checkout safety, and user-friendly DAW-themed messaging
-- Current goal: wrap up all failing tests and improve responsiveness + UX
+- A PyQt6-based GUI for version control of DAW projects (Ableton Live, Logic Pro)
+- Git and Git LFS integration with snapshot/branch/commit logic
+- Full UI with:
+  - commit log viewer
+  - branch dropdown
+  - status label showing session state
+  - role tagging system (Main Mix, Creative Take, etc.)
+- Key safety features:
+  - warnings for detached HEAD states
+  - protection against commits with no .als or .logicx
+  - stash + backup handling on checkout and switching
+  - persistent snapshot folder protection for audio/MIDI
+- Cleaned temp artifacts: `.dawgit_backups`, placeholder files, stashes, and test folders
+- 🎼 Final app logic includes: 
+  - 'Start New Version Line', 
+  - 'Open in Ableton', 
+  - safe snapshot switching,
+  - user-friendly music-producer language
+- 🧪 Pytest test suite covering UI, safety, edge cases, branching, commits, snapshots
+- 🧹 Latest version (v1.1.2) includes real DAW test assets for regression tests (audio, MIDI, Logic & ALS files)
 
-Please continue development, fix bugs, or add features based on this. I'm resuming from where the last thread left off.
+✅ Please continue development, fix bugs, or add features based on this. I'm resuming from where the last thread left off, starting on `feature/pages-ui-navigation`.

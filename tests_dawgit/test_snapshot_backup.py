@@ -4,9 +4,10 @@ os.environ["DAWGIT_TEST_MODE"] = "1"
 import shutil
 from pathlib import Path
 from git import Repo
-from daw_git_gui import DAWGitApp
 from unittest.mock import patch
 from PyQt6.QtWidgets import QMessageBox
+from daw_git_gui import DAWGitApp
+from daw_git_core import backup_latest_commit_state
 
 def test_snapshot_backup_created_on_checkout(tmp_path, qtbot):
     # Set up fake project and repo
@@ -91,3 +92,30 @@ def test_backup_skipped_if_exists(tmp_path):
 
     # Confirm marker file still exists — untouched
     assert marker.read_text() == "DO NOT OVERWRITE"
+
+
+def test_audio_files_backed_up_on_switch(tmp_path, qtbot):
+    # Setup: Create fake project
+    project_path = tmp_path / "BackupTest"
+    project_path.mkdir()
+    als_file = project_path / "mytrack.als"
+    als_file.write_text("test content")
+
+    # Init repo
+    repo = Repo.init(project_path)
+    repo.index.add(["mytrack.als"])
+    repo.index.commit("Initial commit")
+    repo.git.branch("-M", "main")
+    initial_sha = repo.head.commit.hexsha
+
+    # App setup
+    app = DAWGitApp(project_path=str(project_path), build_ui=False)
+    app.repo = repo
+    app.git.repo = repo
+
+    # Trigger backup manually
+    backup_latest_commit_state(app.repo, project_path, commit_sha=initial_sha)
+
+    # Assert file exists in backup location
+    backup_file = project_path / ".dawgit_cache" / "latest_snapshot" / initial_sha / "mytrack.als"
+    assert backup_file.exists(), "Expected .als file not found in snapshot backup."

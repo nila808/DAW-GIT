@@ -1,5 +1,14 @@
 
 
+## [v1.1.3] – 2025-05-28
+**Author:** @niccavendish
+- 🔀 Merge: Add snapshot backup and audio file protection (v1.1.2)
+- 🛠️ Fix: Add missing files to v1.1.2 release commit
+- 📦 v1.1.2: 📝 updated changelog, 📊 updated project status
+- 🐛 Fix: Normalize project_path to Path object to prevent .exists() crash in timerEvent
+- 📦 v1.1.1: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.1.2] – 2025-05-28
 **Author:** @niccavendish
 - 📦 v1.1.2: 📝 updated changelog, 📊 updated project status

@@ -124,7 +124,19 @@ class GitProjectManager:
         
 
     def is_dirty(self):
-        return self.repo.is_dirty(index=True, working_tree=True, untracked_files=True)
+        status = self.repo.git.status('--porcelain').splitlines()
+
+        # Filter out safe noise from untracked folders
+        safe_untracked = [
+            line for line in status
+            if not (
+                ".dawgit_checkout_work/" in line
+                or ".dawgit_cache/" in line
+                or line.strip().startswith("?? .DS_Store")
+            )
+        ]
+
+        return bool(safe_untracked)
 
 
     def get_latest_commit_sha(self):
