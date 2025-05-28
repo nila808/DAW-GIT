@@ -1,5 +1,14 @@
 
 
+## [v1.1.2] – 2025-05-28
+**Author:** @niccavendish
+- 📦 v1.1.2: 📝 updated changelog, 📊 updated project status
+- 🐛 Fix: Normalize project_path to Path object to prevent .exists() crash in timerEvent
+- 📦 v1.1.1: 📝 updated changelog, 📊 updated project status
+- added script fix file missed in last commit - push-it env
+- 📦 v1.1.2-scriptfix: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.1.2] – 2025-05-27
 **Author:** @niccavendish
 - 🐛 Fix: Normalize project_path to Path object to prevent .exists() crash in timerEvent
@@ -392,3 +401,4 @@ Stable milestone tagged as `v1.0.2-rolepass`
 - v1.0.2-role-buttons (2025-05-27): updated push-it script to show test logs as it runs
 - v1.0.3-role-ui (2025-05-27): 🧩 Refactor: CommitPage role buttons + detached state safety
 - v1.0.2-commit-feedback (2025-05-27): ✅ UX: Clear commit box after error, improve error messaging
+- [2025-05-28 17:02] ## [v1.0.3] - 2025-05-28

@@ -4,7 +4,7 @@ import shutil
 import pytest
 import uuid
 from pathlib import Path
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox, QApplication
 from daw_git_gui import DAWGitApp
 from git import Repo
 
@@ -89,6 +89,10 @@ def test_tag_custom_label_assigns_alt2(mock_input, tmp_path, qtbot):
     app = DAWGitApp(project_path=str(tmp_path), build_ui=True)
     qtbot.addWidget(app)
     qtbot.wait(200)
+    
+    # 🔧 Optional: Skip QTimer logic in test mode
+    if os.getenv("DAWGIT_TEST_MODE") == "1":
+        app._handle_main_mix_tag = lambda: None
 
     sha = app.repo.head.commit.hexsha
     app.pages.switch_to("commit")
@@ -106,4 +110,18 @@ def test_tag_custom_label_assigns_alt2(mock_input, tmp_path, qtbot):
     roles = json.loads(role_file.read_text())
     assert roles.get(sha) == expected_role
 
+    # ✅ Force Qt event loop to flush and let all pending updates complete
+    qtbot.wait(200)
+
+    # ✅ Explicitly close the app window to release resources
     app.close()
+
+
+@pytest.fixture(autouse=True)
+def ensure_qapp_cleanup(qtbot):
+    yield
+    # ⛔ Force close all top-level widgets
+    for w in QApplication.topLevelWidgets():
+        if w.isVisible():
+            w.close()
+    qtbot.wait(100)
