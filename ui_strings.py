@@ -20,6 +20,14 @@ AUTO_SAVE_TITLE = "Auto Save Complete"
 RETURN_TO_LATEST_TITLE = "🎯 Return to Latest"
 RETURN_TO_LATEST_MSG = "You're now back on the latest version line: '{branch}'"
 
+# Toast Feedback – Return to Latest
+RETURN_TO_LATEST_SUCCESS = "🎼 Back on the MAIN version line."
+RETURN_TO_LATEST_FAIL = (
+    "🎧 Couldn't return to your MAIN version. "
+    "Try a different version line or select a saved session from the snapshot list."
+)
+ALREADY_ON_MAIN = "Already on version line 'MAIN'. No action needed."
+
 # Snapshot Viewing
 SNAPSHOT_ALREADY_VIEWING_TITLE = "Already Viewing Snapshot"
 SNAPSHOT_ALREADY_VIEWING_MSG = "🎧 You're already previewing this version.\n\nCommit ID: {sha}"

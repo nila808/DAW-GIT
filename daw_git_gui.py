@@ -56,6 +56,7 @@ from ui_strings import (
     NO_REPO_COMMIT_MSG,
     NO_REPO_STATUS_LABEL,
     NO_REPO_SAVE_MSG, 
+    RETURN_TO_LATEST_SUCCESS,
     SNAPSHOT_CONFIRMATION_TITLE,
     SNAPSHOT_CONFIRMATION_MSG
 )
@@ -794,7 +795,7 @@ class DAWGitApp(QMainWindow):
                     print("[ERROR] git switch failed:", e)
                     print("STDOUT:", e.stdout)
                     print("STDERR:", e.stderr)
-                    self._show_error("❌ Git switch to 'main' failed. Please check your branches.")
+                    self.show_status_message(RETURN_TO_LATEST_FAIL, success=False)
                     return  # ❌ Important: exit if the switch fails
 
                 # ✅ Only runs if switch succeeded
@@ -841,7 +842,10 @@ class DAWGitApp(QMainWindow):
                     print(f"[DEBUG] ✅ Delayed scroll and select to HEAD row {selected_row}")
 
                 from ui_strings import RETURN_TO_LATEST_TITLE, RETURN_TO_LATEST_MSG
-                QMessageBox.information(self, RETURN_TO_LATEST_TITLE, RETURN_TO_LATEST_MSG.format(branch="main"))
+                self.show_status_message(
+                    RETURN_TO_LATEST_MSG.format(branch="main"),
+                    success=True
+                )
 
             else:
                 # Already on a named branch (not detached)
@@ -3347,11 +3351,16 @@ class DAWGitApp(QMainWindow):
                 print(f"❌ Failed to open DAW project file: {e}")
 
 
-    def show_status_message(self, message, timeout=3000):
-        self.statusBar().showMessage(message, timeout)
+    def show_status_message(self, message, success=True, timeout=3000):
         """🎵 Display a status message to the user in the status label."""
-        if hasattr(self, 'status_label'):
-            self.snapshot_page.status_label.setText(f"Status: {message}")
+        self.statusBar().showMessage(message, timeout)
+
+        color = "green" if success else "red"
+        if hasattr(self, "snapshot_page") and hasattr(self.snapshot_page, "status_label"):
+            self.snapshot_page.status_label.setText(message)
+            self.snapshot_page.status_label.setStyleSheet(
+                f"color: {color}; font-weight: bold; padding: 4px;"
+            )
         else:
             print(f"[STATUS] {message}")
             
