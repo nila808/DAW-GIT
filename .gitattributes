@@ -1,0 +1,2 @@
+*.als filter=lfs diff=lfs merge=lfs -text
+*.logicx/** filter=lfs diff=lfs merge=lfs -text

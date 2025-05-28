@@ -1,0 +1,35 @@
+{
+  "project_name": "TEST 1 Project",
+  "project_version": "v1.1.3-checkout-ux",
+  "creator": "Niccavendish",
+  "repository_info": {
+    "current_branch": "main",
+    "last_commit_sha": "985c8d1b3f6e925bc6db5a9ebba695ef9ad27e7c",
+    "last_commit_message": "\ud83c\udfa7 On version line \u2014 version 4",
+    "commit_roles": {
+      "985c8d1b3f6e925bc6db5a9ebba695ef9ad27e7c": "Main Mix"
+    }
+  },
+  "project_settings": {
+    "auto_commit": true,
+    "tracked_files": [
+      "*.als",
+      "*.logicx"
+    ]
+  },
+  "backup_info": {
+    "last_backup_time": "2025-05-18T19:36:22",
+    "backup_files": [
+      ".dawgit_roles.json",
+      "Backup/TEST 1 [2025-05-18 193622].als"
+    ]
+  },
+  "metadata": {
+    "tags": {
+      "version_marker": "v1.1.3-checkout-ux"
+    },
+    "qa": {
+      "qa_started": true
+    }
+  }
+}

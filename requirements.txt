@@ -1,0 +1,10 @@
+iniconfig==2.1.0
+packaging==25.0
+pluggy==1.5.0
+PyQt6==6.9.0
+PyQt6-Qt6==6.9.0
+PyQt6_sip==13.10.0
+pytest==8.3.5
+setuptools==80.3.1
+wheel==0.45.1
+pytest-timeout==2.3.1

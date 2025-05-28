@@ -1,0 +1,110 @@
+[
+  {
+    "id": "MT-01",
+    "title": "App Launches Correctly",
+    "description": "DAW Git App starts without error and loads previous project path.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-02",
+    "title": "Project Path Saved/Loaded",
+    "description": "Reopen app and it remembers last loaded project path.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-03",
+    "title": "Commit Snapshot",
+    "description": "Make a new commit and check that it appears in the commit table.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-04",
+    "title": "Switch Commit",
+    "description": "Select an earlier commit and ensure DAW project loads that version.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-05",
+    "title": "Switch Branch",
+    "description": "Switch to a different branch from dropdown and ensure correct version loads.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-06",
+    "title": "Start New Version Line",
+    "description": "Use \ud83c\udfbc button to create a new branch from current commit. Confirm new branch exists.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-07",
+    "title": "Role Tagging (Main Mix)",
+    "description": "Click 'Main Mix' and confirm commit gets role tag saved and shown in UI.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-08",
+    "title": "Role Tagging (Creative Take)",
+    "description": "Click 'Creative Take' and verify tag shows.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-09",
+    "title": "Role Tagging (Alt Mixdown)",
+    "description": "Click 'Alt Mixdown' and verify tag shows.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-10",
+    "title": "Commit Role Persists Across Restart",
+    "description": "Close and reopen app \u2014 role tag still visible for commit.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-11",
+    "title": "Detached HEAD Warning",
+    "description": "Checkout an old commit. Confirm app warns you're not on latest.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-12",
+    "title": "Untracked Files Warning",
+    "description": "Add a non-committed file and switch commits. Confirm warning shown.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-13",
+    "title": "Unsaved Changes Warning",
+    "description": "Modify .als/.logicx file and try to switch commits. Confirm backup warning.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-14",
+    "title": "Open in Ableton",
+    "description": "Click \ud83c\udfa7 to open checked out .als file in Ableton. Confirm correct version opens.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-15",
+    "title": "Delete Commit",
+    "description": "Select a commit and delete. Confirm it\u2019s removed from Git and UI.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-16",
+    "title": "Start From Placeholder",
+    "description": "New version line adds placeholder .als and it can be committed.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-17",
+    "title": "Status Label Updates",
+    "description": "Status label updates between clean, dirty, detached states.",
+    "status": "Not Checked"
+  },
+  {
+    "id": "MT-18",
+    "title": "Pages View Navigation",
+    "description": "Open Pages view and switch snapshots using cards.",
+    "status": "Not Checked"
+  }
+]

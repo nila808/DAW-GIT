@@ -1,0 +1,72 @@
+/* styles/dawgit_styles.qss */
+
+/* === Labels === */
+
+QLabel#branchLabel,
+#branchLabel {
+    color: #00BFD8; /* Aqua blue */
+    font-weight: bold;
+    font-size: 14px;
+    background-color: transparent;
+}
+
+QLabel#status_label {
+    color: #00BCD4;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 6px 10px;
+}
+
+QLabel#setup_label {
+    font-weight: bold;
+}
+
+QLabel#detached_warning_label {
+    color: orange;
+    font-style: italic;
+    padding: 4px;
+}
+
+/* === Unsaved Changes Indicator === */
+
+QLabel#unsaved_indicator {
+    font-weight: bold;
+    padding-left: 6px;
+}
+
+QLabel#unsaved_indicator[alert="true"] {
+    color: orange;
+}
+
+QLabel#unsaved_indicator[alert="false"] {
+    color: transparent;
+}
+
+/* === Buttons === */
+
+QPushButton#setVersionBtn,
+QPushButton#setExperimentBtn,
+QPushButton#setAltMixBtn {
+    background-color: #00BFD8;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* === Debug Mode GroupBoxes === */
+
+QGroupBox[debug="true"] {
+    border: 1px dashed red;
+    border-radius: 4px;
+    margin-top: 8px;
+    padding: 6px;
+    font-weight: bold;
+    color: #a22;
+}
+
+QGroupBox[debug="true"]::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 4px;
+}
