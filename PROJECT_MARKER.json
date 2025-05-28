@@ -1,6 +1,6 @@
 {
   "project_name": "TEST 1 Project",
-  "project_version": "v1.1.3",
+  "project_version": "v1.1.3-checkout-ux",
   "creator": "Niccavendish",
   "repository_info": {
     "current_branch": "main",
@@ -26,7 +26,7 @@
   },
   "metadata": {
     "tags": {
-      "version_marker": "v1.1.3"
+      "version_marker": "v1.1.3-checkout-ux"
     },
     "qa": {
       "qa_started": true

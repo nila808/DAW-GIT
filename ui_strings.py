@@ -1,5 +1,12 @@
 # ui_strings.py
 
+# Snapshot Role Labels
+TAG_LABELS = {
+    "main": "🎼 Save Snapshot as New Version",
+    "alt": "🎭 Alt Mixdown",
+    "creative": "🧪 Creative Take"
+}
+
 # Commit & Snapshot
 COMMIT_SUCCESS_TITLE = "✅ Snapshot Saved"
 COMMIT_SUCCESS_MSG = "Branch: {branch}\nCommit: {sha}"
@@ -46,8 +53,26 @@ INVALID_LABEL_MSG = "❌ Please enter a valid label."
 COMMIT_NOT_FOUND_TITLE = "Commit Not Found"
 COMMIT_NOT_FOUND_MSG = "❌ Could not find a valid commit at this row."
 
-DETACHED_HEAD_TITLE = "Detached HEAD"
-DETACHED_HEAD_MSG = "⚠️ You’re previewing a snapshot. Return to a version line to switch."
+# Detached Head/Snapshot
+DETACHED_HEAD_TITLE = "📸 Exploring Snapshot"
+DETACHED_HEAD_MSG = (
+    "📦 You’re browsing a snapshot — this version is read-only.\n\n"
+    "To continue working from here, click:\n"
+    "🎼 Save Snapshot as New Version"
+)
+DETACHED_HEAD_OPTIONS = [
+    "🎼 Save Snapshot as New Version",
+    "🔁 Return to Latest",
+    "Cancel"
+]
+
+SNAPSHOT_CONFIRMATION_TITLE = "📸 You're Exploring a Snapshot"
+SNAPSHOT_CONFIRMATION_MSG = (
+    "📸 You're exploring an earlier version.\n"
+    "This will open in an editable copy so you can try ideas safely.\n\n"
+    "💡 To save changes, use ‘🎼 Save Snapshot as New Version’.\n\n"
+    "Continue?"
+)
 
 # Generic
 HEADS_UP_TITLE = "Heads Up"

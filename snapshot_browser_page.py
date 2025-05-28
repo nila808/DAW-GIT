@@ -61,8 +61,8 @@ class SnapshotBrowserPage(QWidget):
         if self.app and hasattr(self.app, "quick_commit"):
             self.quick_commit_btn.clicked.connect(self.app.quick_commit)
 
-        self.quick_tag_main_btn = QPushButton("🌟 Main Mix")
-        self.quick_tag_main_btn.setToolTip("Tag the selected snapshot as your Main Mix")
+        self.quick_tag_main_btn = QPushButton("🎼 Save Snapshot as New Version")
+        self.quick_tag_main_btn.setToolTip("Create a new version line from this snapshot.")
         if self.app and hasattr(self.app, "tag_main_mix"):
             self.quick_tag_main_btn.clicked.connect(self.app.tag_main_mix)
 
@@ -81,19 +81,22 @@ class SnapshotBrowserPage(QWidget):
         if self.app and hasattr(self.app, "pages"):
             self.open_commit_page_btn.clicked.connect(lambda: self.app.pages.switch_to("commit"))
 
+        # 🧼 Only add buttons that exist
         for btn in [
             self.quick_commit_btn,
-            self.quick_tag_main_btn,
-            self.quick_tag_creative_btn,
-            self.quick_tag_alt_btn,
+            self.quick_tag_main_btn if hasattr(self, "quick_tag_main_btn") else None,
+            self.quick_tag_creative_btn if hasattr(self, "quick_tag_creative_btn") else None,
+            self.quick_tag_alt_btn if hasattr(self, "quick_tag_alt_btn") else None,
             self.open_commit_page_btn
         ]:
-            action_row.addWidget(btn)
+            if btn:  # skip None safely
+                action_row.addWidget(btn)
 
         layout.addLayout(action_row)
 
         # Spacer
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+
 
 
     

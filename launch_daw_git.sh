@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# ⛔ Disable test mode for manual use
+unset DAWGIT_TEST_MODE
+
 echo "🧹 Cleaning up Python cache and test artifacts..."
 find . -name "__pycache__" -exec rm -rf {} +
 find . -name "*.pyc" -exec rm -f {} +
