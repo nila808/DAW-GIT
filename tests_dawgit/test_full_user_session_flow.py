@@ -98,9 +98,25 @@ def test_full_user_session_flow(monkeypatch, qtbot):
     qtbot.wait(200)
     assert "Session branch: main" in app.status_label.text()
 
-    # Checkout earlier snapshot
-    old_sha = list(repo.iter_commits("main", max_count=2))[-1].hexsha
-    app.checkout_selected_commit(commit_sha=old_sha)
+    # ✅ Checkout an earlier snapshot to ensure detached HEAD
+    commits = list(repo.iter_commits("main", max_count=5))
+    if len(commits) < 2:
+        raise Exception("Not enough commits to test detached HEAD.")
+    old_sha = commits[1].hexsha  # not the latest (index 0)
+
+    print("[DEBUG] HEAD before checkout:", app.repo.head.commit.hexsha)
+    print("[DEBUG] Target SHA for checkout:", old_sha)
+
+    # 🔧 Force clean state to prevent dirty file warning (optional but safe)
+    app.has_unsaved_changes = lambda: False
+
+    result = app.checkout_selected_commit(commit_sha=old_sha)
+    print("[DEBUG] checkout result:", result)
+    assert result["status"] != "blocked", f"Checkout was blocked: {result}"
+
+    print("[DEBUG] HEAD after checkout:", app.repo.head.commit.hexsha)
+    print("[DEBUG] HEAD is_detached?", app.repo.head.is_detached)
+
     assert app.repo.head.is_detached
     qtbot.wait(100)
 

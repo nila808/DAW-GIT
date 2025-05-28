@@ -1,8 +1,9 @@
-from pathlib import Path
-import subprocess
 import os
 import json
+import subprocess
+import shutil
 import re
+from pathlib import Path
 from datetime import datetime
 from git import Repo, GitCommandError
 
@@ -222,3 +223,35 @@ class GitProjectManager:
             not tag.startswith("-") and
             re.match(r"^[A-Za-z0-9._/-]+$", tag)
         )
+    
+
+def backup_latest_commit_state(repo, project_path, commit_sha=None):
+    """
+    🎛️ Snapshot Safety Anchor
+    """
+    if not repo or not project_path:
+        print("[backup] Skipped — no project loaded.")
+        return
+
+    latest_commit = commit_sha or repo.head.commit.hexsha
+    backup_dir = project_path / ".dawgit_cache" / "latest_snapshot" / latest_commit
+
+    if backup_dir.exists():
+        print(f"[backup] Already safe — folder exists for: {latest_commit}")
+        return
+
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[backup] Backing up current session to: {backup_dir}")
+
+    for item in project_path.iterdir():
+        if item.name.startswith(".dawgit"):
+            continue
+        dest = backup_dir / item.name
+        try:
+            if item.is_dir():
+                shutil.copytree(item, dest)
+            else:
+                shutil.copy(item, dest)
+        except Exception as e:
+            print(f"[backup] Failed to copy {item.name}: {e}")
+

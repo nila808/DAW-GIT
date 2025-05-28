@@ -1728,7 +1728,11 @@ class DAWGitApp(QMainWindow):
         self.assign_commit_role(sha, clean_label)
         self.save_commit_roles()
         self.status_message(f"✏️ Commit tagged as '{clean_label}': {sha[:7]}")
-        QTimer.singleShot(100, self.load_commit_history)
+        if os.getenv("DAWGIT_TEST_MODE") == "1":
+            print("[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly")
+            self.load_commit_history()
+        else:
+            QTimer.singleShot(100, self.load_commit_history)
 
 
     def tag_main_mix(self):
@@ -1773,7 +1777,11 @@ class DAWGitApp(QMainWindow):
         self.assign_commit_role(sha, "Main Mix")
         self.save_commit_roles()
         self.status_message(f"🌟 Commit tagged as 'Main Mix': {sha[:7]}")
-        QTimer.singleShot(100, self.load_commit_history)
+        if os.getenv("DAWGIT_TEST_MODE") == "1":
+            print("[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly")
+            self.load_commit_history()
+        else:
+            QTimer.singleShot(100, self.load_commit_history)
 
 
     def tag_creative_take(self):
@@ -1800,7 +1808,11 @@ class DAWGitApp(QMainWindow):
         self.assign_commit_role(sha, safe_label)
         self.save_commit_roles()
         self.status_message(f"🎨 Commit tagged as '{safe_label}': {sha[:7]}")
-        QTimer.singleShot(100, self.load_commit_history)
+        if os.getenv("DAWGIT_TEST_MODE") == "1":
+            print("[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly")
+            self.load_commit_history()
+        else:
+            QTimer.singleShot(100, self.load_commit_history)
 
 
 
@@ -1828,7 +1840,11 @@ class DAWGitApp(QMainWindow):
         self.assign_commit_role(sha, safe_label)
         self.save_commit_roles()
         self.status_message(f"🎛️ Commit tagged as '{safe_label}': {sha[:7]}")
-        QTimer.singleShot(100, self.load_commit_history)
+        if os.getenv("DAWGIT_TEST_MODE") == "1":
+            print("[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly")
+            self.load_commit_history()
+        else:
+            QTimer.singleShot(100, self.load_commit_history)
 
 
     def show_commit_checkout_info(self, commit):
@@ -2039,18 +2055,6 @@ class DAWGitApp(QMainWindow):
                 return {"status": "error", "message": "No SHA available in commit row."}
 
         try:
-            # if self.als_recently_modified() and os.getenv("DAWGIT_TEST_MODE") != "1":
-            #     confirm = QMessageBox.question(
-            #         self,
-            #         "Ableton Still Open?",
-            #         "🎛️ Ableton project modified recently.\n\n"
-            #         "Save + close it before switching to avoid 'Save As' issues.\n\n"
-            #         "Still want to continue?",
-            #         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
-            #     )
-            #     if confirm != QMessageBox.StandardButton.Yes:
-            #         return {"status": "cancelled", "message": "User cancelled due to recent modification."}
-
 
             # ✅ Ignore tracked noise files (safe even if modified)
             ignored = {".DS_Store", "PROJECT_MARKER.json", ".dawgit_roles.json"}
@@ -2060,7 +2064,8 @@ class DAWGitApp(QMainWindow):
             for line in dirty_lines:
                 path = line[3:].strip()
                 name = Path(path).name
-                if name not in ignored:
+                # 🔒 Skip ignored files AND files in .dawgit_cache
+                if name not in ignored and not path.startswith(".dawgit_cache/"):
                     relevant_dirty.append(path)
 
             if relevant_dirty:
@@ -2072,13 +2077,22 @@ class DAWGitApp(QMainWindow):
                 )
                 return {"status": "blocked", "files": relevant_dirty}
 
-            # ✅ Skip if already on this commit
+             # ✅ Skip if already on this commit
             if self.repo.head.commit.hexsha == commit_sha:
                 QMessageBox.information(self, "Already Viewing Snapshot",
                     f"🎧 Already viewing this snapshot.\n\nCommit ID: {commit_sha[:7]}")
                 return {"status": "noop", "message": "Already on this commit."}
 
+            # 🎛️ Snapshot Safety — backup latest state before switching
+            try:
+                from daw_git_core import backup_latest_commit_state
+                if self.repo and self.project_path:
+                    backup_latest_commit_state(self.repo, Path(self.project_path))
+            except Exception as e:
+                print(f"[WARN] Snapshot backup failed: {e}")
+
             # ⬅️ Perform checkout
+
             # 🔧 PATCH: Auto-discard safe tracked project files before checkout
             safe_to_reset = {".DS_Store", "PROJECT_MARKER.json", ".dawgit_roles.json"}
             reset_targets = []
@@ -2091,6 +2105,9 @@ class DAWGitApp(QMainWindow):
                 print(f"[DEBUG] Resetting safe dirty files: {reset_targets}")
                 subprocess.run(["git", "checkout", "--"] + reset_targets, cwd=self.project_path, env=self.custom_env(), check=True)
 
+            # 🎛️ Backup current project folder before switching snapshots
+            from daw_git_core import backup_latest_commit_state
+            backup_latest_commit_state(self.repo, Path(self.project_path))
 
             subprocess.run(["git", "checkout", commit_sha], cwd=self.project_path, env=self.custom_env(), check=True)
             subprocess.run(["git", "lfs", "checkout"], cwd=self.project_path, env=self.custom_env(), check=True)
@@ -2761,6 +2778,9 @@ class DAWGitApp(QMainWindow):
 
             if self.has_unsaved_changes():
                 self.backup_unsaved_changes()
+            
+            from daw_git_core import backup_latest_commit_state
+            backup_latest_commit_state(self.repo, Path(self.project_path))
 
             if not branches:
                 QMessageBox.information(

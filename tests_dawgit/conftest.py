@@ -26,12 +26,28 @@ def pytest_configure():
     os.environ["DAWGIT_TEST_MODE"] = "1"
 
 
+@pytest.fixture
+def real_test_project(tmp_path):
+    """Returns a copy of a real DAW project with audio and MIDI files."""
+    src = Path(__file__).parent.parent / "test_assets" / "TestProjectReal"
+    dst = tmp_path / "RealTestProject"
+    shutil.copytree(src, dst)
+    return dst.resolve()
+
+
 @pytest.fixture(scope="session")
 def qapp():
     app = QApplication.instance()
     if app is None:
         app = QApplication([])
     return app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_qapp_exists():
+    app = QApplication.instance()
+    if not app:
+        _ = QApplication([])
 
 
 @pytest.fixture
@@ -64,7 +80,8 @@ def app(qtbot, temp_project):
     test_app.init_git()
     test_app.repo = Repo(test_app.project_path)
     qtbot.addWidget(test_app)
-    return test_app
+    yield test_app
+    test_app.close()
 
 
 @pytest.fixture(autouse=True)
@@ -151,4 +168,8 @@ def app_with_repo(tmp_path, qtbot):
     app.init_git()
     qtbot.addWidget(app)
     app.show()
-    return app
+    yield app
+    app.close()
+
+
+
