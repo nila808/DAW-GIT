@@ -1,6 +1,6 @@
 {
   "project_name": "TEST 1 Project",
-  "project_version": "push-it \"\u2705 Snapshot safety and editing UX \u2014 101 tests pass, editable checkout stable, return-to-latest logic verified\"",
+  "project_version": "v1.1.6",
   "creator": "Niccavendish",
   "repository_info": {
     "current_branch": "main",
@@ -26,7 +26,7 @@
   },
   "metadata": {
     "tags": {
-      "version_marker": "push-it \"\u2705 Snapshot safety and editing UX \u2014 101 tests pass, editable checkout stable, return-to-latest logic verified\""
+      "version_marker": "v1.1.6"
     },
     "qa": {
       "qa_started": true

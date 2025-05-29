@@ -146,6 +146,8 @@ pytest --last-failed --tb=short -q
 
 
 
+NEXT TAG NO: 
+v1.1.7
 
 
 

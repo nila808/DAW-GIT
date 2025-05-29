@@ -272,49 +272,49 @@ class DAWGitApp(QMainWindow):
 
         # Show the modal only if no project path is set
         if not self.project_path:
-            print("[DEBUG] No project path set, showing modal...")  # Debug check for project path
+            print("[DEBUG] No project path set, showing modal...")
 
-            # Show modal asking the user if they want to open a project
             choice = QMessageBox.warning(
                 self,
                 "🎉 Welcome to DAW Git",
                 "No project folder selected. Would you like to open a project now?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No  # Yes and No buttons
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
             )
 
             if choice == QMessageBox.StandardButton.Yes:
-                print("[DEBUG] User chose 'Yes'")  # Debug choice "Yes"
-                # User chose Yes: Open the file dialog to select a project folder
+                print("[DEBUG] User chose 'Yes'")
                 selected = QFileDialog.getExistingDirectory(self, "Select Your Project Folder")
-                print(f"[DEBUG] User selected folder: {selected}")  # Debug folder selection
+                print(f"[DEBUG] User selected folder: {selected}")
                 if selected:
                     self.project_path = Path(selected)
-                    self.init_git()  # Initialize git in the selected folder
-                    self.load_commit_history()  # Update the project log
+                    self.init_git()
+                    self.load_commit_history()
                     return
                 else:
-                    # User cancelled the selection, close the setup
-                    print("[DEBUG] No folder selected, exiting setup.")  # Debug cancellation
-                    self.close()  # Explicitly close if the user cancels
-
-            elif choice == QMessageBox.StandardButton.No:  # If "No" is selected
-                print("[DEBUG] User chose 'No'")  # Debug choice "No"
-                # User chose No: Do not open Finder, just close the window
-                self.close()  # Close the setup without opening Finder
-                # **Reset the project path** and **clear last path in settings**
+                    print("[DEBUG] No folder selected, exiting setup.")
+                    self.close()
+            elif choice == QMessageBox.StandardButton.No:
+                print("[DEBUG] User chose 'No'")
+                self.close()
                 self.project_path = None
-                self.clear_last_project_path()  # Explicitly clear last path in settings
-                print("[DEBUG] Last path reset after 'No' selected.")  # Explicit reset of project_path
-                
-            print("[DEBUG] Last path reset after 'No' selected.")  # Explicit reset of project_path
+                self.clear_last_project_path()
+                print("[DEBUG] Last path reset after 'No' selected.")
 
-            # After "No" was selected, skip all path loading and repo initialization:
-
-            # Show fallback status label if user cancels project selection
-            self.snapshot_page.status_label.setText("❌ No Git repo loaded.")
-            self.status_label = self.snapshot_page.status_label  # Ensure pointer match
-            self.update()
+            # ✅ Only access snapshot_page if it exists
+            if hasattr(self, "snapshot_page"):
+                self.snapshot_page.status_label.setText("❌ No Git repo loaded.")
+                self.status_label = self.snapshot_page.status_label
+                self.update()
             return
+
+        # After "No" selected or if path is invalid
+        print("[DEBUG] Skipping last path loading and repo setup after 'No' selected.")
+        self.clear_last_project_path()
+        self.project_path = None
+        if hasattr(self, "snapshot_page"):
+            self.snapshot_page.status_label.setText("❌ No Git repo loaded.")
+            self.update()
+        return
 
         # After "No" was selected, skip all path loading and repo initialization:
         print("[DEBUG] Skipping last path loading and repo setup after 'No' selected.")  # Debug message confirming skipping

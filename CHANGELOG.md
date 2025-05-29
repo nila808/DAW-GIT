@@ -1,5 +1,14 @@
 
 
+## [v1.1.6] – 2025-05-29
+**Author:** @niccavendish
+- 🧹 Merge conflict resolved: commit role persistence tests restored
+- ✅ Merge feature/v1.1.6-new-feature into master — preserve editable checkout and safety features
+- ✅ Snapshot safety and editing UX — 101 tests pass, editable checkout stable, return-to-latest logic verified
+- 🔀 Merge: Add snapshot backup and audio file protection (v1.1.2)
+- 🛠️ Fix: Add missing files to v1.1.2 release commit
+
+
 ## [push-it "✅ Snapshot safety and editing UX — 101 tests pass, editable checkout stable, return-to-latest logic verified"] – 2025-05-29
 **Author:** @niccavendish
 - 🔀 Merge: Add snapshot backup and audio file protection (v1.1.2)
