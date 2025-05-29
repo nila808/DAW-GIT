@@ -25,7 +25,8 @@ def build_main_ui(app):
     app.branch_page = BranchManagerPage(app)
     app.pages.add_page("branches", app.branch_page)
 
-    app.commit_page = CommitPage(app)
+    # app.commit_page = CommitPage(app)
+    app.commit_page = CommitPage(app, parent=app)
     app.pages.add_page("commit", app.commit_page)
 
     app.setup_page = ProjectSetupPage(app)

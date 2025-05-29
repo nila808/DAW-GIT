@@ -14,8 +14,28 @@ RETURN_TO_LATEST_TITLE = "🎯 Return to Latest"
 RETURN_TO_LATEST_MSG = "You're now back on the latest version line: '{branch}'"
 
 # Snapshot Viewing
+SNAPSHOT_INFO_TITLE = "🎧 Snapshot loaded"
+SNAPSHOT_INFO_MSG = (
+    "🎧 Snapshot loaded — {label}\n\n"
+    "🕒 Committed: {date} ({diff})\n"
+    "📦 This version is read-only — explore freely.\n\n"
+    "🎼 Want to make edits? Click “🎼 Start New Version Line” to begin a new take."
+)
+
 SNAPSHOT_ALREADY_VIEWING_TITLE = "Already Viewing Snapshot"
 SNAPSHOT_ALREADY_VIEWING_MSG = "🎧 You're already previewing this version.\n\nCommit ID: {sha}"
+SNAPSHOT_EDIT_BLOCK_TOOLTIP = "🎧 Snapshot mode: You’re previewing an old take. Start a new version to edit and save in your DAW."
+DIRTY_EDIT_WARNING = (
+    "🎧 Your current editing session hasn’t been saved.\n\n"
+    "Please save a snapshot to keep this take before switching."
+)
+
+UNSAVED_CHANGES_TITLE = "Unsaved Changes Detected"
+UNSAVED_CHANGES_WARNING = (
+    "🎧 Your latest take has unsaved edits.\n\n"
+    "To keep your progress safe, please **Save a Snapshot** "
+    "or **Start a New Version Line** before switching versions."
+)
 
 # Restore
 PROJECT_RESTORED_TITLE = "Project Restored"
@@ -33,6 +53,12 @@ NO_BACKUP_FOUND_MSG = "There are no backup folders for this project."
 # Errors
 NO_REPO_TITLE = "No Repo"
 NO_REPO_MSG = "🎛️ Please initialize version control first."
+
+ALREADY_ON_COMMIT_TITLE = "Already Viewing Snapshot"
+ALREADY_ON_COMMIT_MESSAGE = (
+    "🎧 Already viewing this snapshot.\n\n"
+    "Commit ID: {sha}"
+)
 
 NO_SNAPSHOT_SELECTED_MSG = "Please select a version row to load."
 NO_SELECTION_TITLE = "No Selection"
@@ -61,4 +87,12 @@ NO_REPO_COMMIT_MSG = "🎛️ Please initialize version control before saving yo
 NO_REPO_STATUS_LABEL = "❌ No Git repo loaded."
 
 NO_REPO_SAVE_MSG = "🎛️ Please initialize version control before saving your project."
+
+
+UNSAFE_DIRTY_EDITS_TITLE = "Unsaved Changes Outside Snapshot"
+UNSAFE_DIRTY_EDITS_MSG = (
+    "🎧 You’ve made changes that aren’t saved inside your editable version.\n\n"
+    "Please save your session (e.g., use '🎼 Start New Version Line') before switching versions:\n\n"
+    "{file_list}"
+)
 

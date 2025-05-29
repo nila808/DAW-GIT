@@ -9,17 +9,27 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QCheckBox
 )
 from PyQt6.QtCore import Qt
+from ui_strings import SNAPSHOT_EDIT_BLOCK_TOOLTIP
+
 
 class CommitPage(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, app=None, parent=None):
         super().__init__(parent)
-        self.app: 'DAWGitApp' = parent  # ✅ Clean, type-safe, no circular import
+        self.app = app  # 🔗 Store main app reference
+
 
         layout = QVBoxLayout(self)
 
         # 🎼 Title
         self.title_label = QLabel("📥 Commit Snapshot")
         layout.addWidget(self.title_label)
+
+        self.snapshot_status_label = QLabel("")
+        self.snapshot_status_label.setObjectName("snapshotStatusLabel")
+        self.snapshot_status_label.setText(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
+        self.snapshot_status_label.setToolTip(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
+
+        layout.addWidget(self.snapshot_status_label)
 
         # 📝 Commit message
         self.commit_message = QTextEdit()
@@ -44,6 +54,10 @@ class CommitPage(QWidget):
         layout.addWidget(self.commit_button)
         self.commit_button.clicked.connect(self.commit_snapshot)
 
+        self.btn_version_main = QPushButton("Main Mix")
+        self.btn_version_creative = QPushButton("Creative")
+        self.btn_version_alt = QPushButton("Alt Mix")
+
 
         # 🏷️ Tagging Buttons
         tag_layout = QHBoxLayout()
@@ -62,6 +76,16 @@ class CommitPage(QWidget):
         self.tag_alt_btn.clicked.connect(self.app.tag_alt_mix)
         self.tag_custom_btn.clicked.connect(self.app.tag_custom_label)
 
+        # 🎧 Open in DAW button
+        self.open_in_daw_btn = QPushButton("🎧 Open This Version in Ableton")
+        self.open_in_daw_btn.setToolTip("Launch Ableton with the checked-out snapshot")
+        self.open_in_daw_btn.setVisible(False)  # Hidden by default
+        layout.addWidget(self.open_in_daw_btn)
+
+        # Connect to app method
+        self.open_in_daw_btn.clicked.connect(self.app.open_in_daw)
+
+
         # 🎯 Status label
         self.status_label = QLabel("📦 Ready to commit")
         layout.addWidget(self.status_label)
@@ -72,6 +96,17 @@ class CommitPage(QWidget):
         if hasattr(self.app, "auto_save_toggle") is False:
             self.app.auto_save_toggle = self.auto_save_toggle
 
+
+    def update_snapshot_editing_state(self):
+        """
+        Update snapshot status label and tooltips based on HEAD state.
+        """
+        if self.app and self.app.repo and self.app.repo.head.is_detached:
+            self.snapshot_status_label.setText(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
+            self.snapshot_status_label.setToolTip(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
+        else:
+            self.snapshot_status_label.setText("")
+            self.snapshot_status_label.setToolTip("")
 
 
     def commit_snapshot(self):
@@ -93,3 +128,23 @@ class CommitPage(QWidget):
     def toggle_auto_commit(self, state):
         if hasattr(self.app, "handle_auto_save_toggle"):
             self.app.handle_auto_save_toggle(state)
+
+    
+    def set_commit_controls_enabled(self, enabled: bool, tooltip: str = ""):
+        self.commit_button.setEnabled(enabled)
+        self.commit_button.setToolTip(tooltip)
+
+        self.commit_message.setEnabled(enabled)
+        self.commit_message.setToolTip(tooltip)
+
+        self.tag_main_btn.setEnabled(enabled)
+        self.tag_main_btn.setToolTip(tooltip)
+
+        self.tag_creative_btn.setEnabled(enabled)
+        self.tag_creative_btn.setToolTip(tooltip)
+
+        self.tag_alt_btn.setEnabled(enabled)
+        self.tag_alt_btn.setToolTip(tooltip)
+
+        self.tag_custom_btn.setEnabled(enabled)
+        self.tag_custom_btn.setToolTip(tooltip)

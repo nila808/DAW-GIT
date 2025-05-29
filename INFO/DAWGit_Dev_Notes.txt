@@ -150,7 +150,7 @@ pytest --last-failed --tb=short -q
 
 
 ------------------------------------------------------------------------------------------------------------------------
-✅ Copy & Paste This into a New Chat:
+✅ Copy & Paste This into a New Chat: push-ctx New chat Name ROADMAP 1.1.4
 ------------------------------------------------------------------------------------------------------------------------
 
 Hi ChatGPT, please load the full context of my previous project called **DAW Git App**. It includes:

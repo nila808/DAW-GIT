@@ -53,6 +53,18 @@ class SnapshotBrowserPage(QWidget):
             self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
         layout.addWidget(self.where_am_i_btn)
 
+        # Return to Latest button
+        # self.return_to_latest_btn = QPushButton("🔁 Return to Latest")
+        # self.return_to_latest_btn.setToolTip("Switch back to the latest saved version on the main branch.")
+        # self.return_to_latest_btn.clicked.connect(parent.return_to_latest_clicked)
+        # layout.addWidget(self.return_to_latest_btn)
+
+        self.return_to_latest_btn = QPushButton("🔁 Return to Latest")
+        self.return_to_latest_btn.setToolTip("Switch back to the latest saved version on the main branch.")
+        if self.app and hasattr(self.app, "return_to_latest_clicked"):
+            self.return_to_latest_btn.clicked.connect(self.app.return_to_latest_clicked)
+        layout.addWidget(self.return_to_latest_btn)
+
         # 🧭 Snapshot Action Bar (Quick Save + Tags)
         action_row = QHBoxLayout()
 
@@ -96,6 +108,12 @@ class SnapshotBrowserPage(QWidget):
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
 
+    def update_return_to_latest_visibility(self):
+        if self.app and self.app.repo:
+            is_detached = self.app.repo.head.is_detached
+            self.return_to_latest_btn.setVisible(is_detached)
+        else:
+            self.return_to_latest_btn.setVisible(False)
     
 
     def highlight_row_by_sha(self, sha: str):
@@ -110,9 +128,11 @@ class SnapshotBrowserPage(QWidget):
                         cell.setBackground(Qt.GlobalColor.green)
                 break
 
+
     def clear_table(self):
         self.commit_table.setRowCount(0)
         self.commit_table.clearSelection()
+
 
     def show_placeholder_row(self):
         self.commit_table.setRowCount(0)

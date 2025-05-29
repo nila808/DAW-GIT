@@ -19,7 +19,52 @@ import traceback
 from gui_layout import build_main_ui
 from daw_git_core import GitProjectManager
 from daw_git_core import sanitize_git_input
-from ui_strings import *
+from ui_strings import (
+    ALREADY_ON_COMMIT_TITLE, 
+    ALREADY_ON_COMMIT_MESSAGE,
+    COMMIT_SUCCESS_TITLE,
+    COMMIT_SUCCESS_MSG,
+    COMMIT_INFO_EMPTY,
+    CURRENT_COMMIT_TITLE,
+    AUTO_SAVE_TITLE,
+    RETURN_TO_LATEST_TITLE,
+    RETURN_TO_LATEST_MSG,
+    SNAPSHOT_ALREADY_VIEWING_TITLE,
+    SNAPSHOT_ALREADY_VIEWING_MSG,
+    SNAPSHOT_EDIT_BLOCK_TOOLTIP,
+    PROJECT_RESTORED_TITLE,
+    PROJECT_RESTORED_MSG,
+    ALREADY_ON_BRANCH_TITLE,
+    ALREADY_ON_BRANCH_MSG,
+    BACKUP_RESTORED_TITLE,
+    BACKUP_RESTORED_MSG,
+    NO_BACKUP_FOUND_MSG,
+    NO_REPO_TITLE,
+    NO_REPO_MSG,
+    NO_SNAPSHOT_SELECTED_MSG,
+    NO_SELECTION_TITLE,
+    NO_SELECTION_MSG,
+    DELETE_ROOT_ERROR_TITLE,
+    DELETE_ROOT_ERROR_MSG,
+    INVALID_LABEL_TITLE,
+    INVALID_LABEL_MSG,
+    COMMIT_NOT_FOUND_TITLE,
+    COMMIT_NOT_FOUND_MSG,
+    DETACHED_HEAD_TITLE,
+    DETACHED_HEAD_MSG,
+    DIRTY_EDIT_WARNING,
+    HEADS_UP_TITLE,
+    NO_REPO_COMMIT_TITLE,
+    NO_REPO_COMMIT_MSG,
+    NO_REPO_STATUS_LABEL,
+    NO_REPO_SAVE_MSG,
+    SNAPSHOT_INFO_TITLE, 
+    SNAPSHOT_INFO_MSG,
+    UNSAVED_CHANGES_TITLE,
+    UNSAVED_CHANGES_WARNING, 
+    UNSAFE_DIRTY_EDITS_TITLE, 
+    UNSAFE_DIRTY_EDITS_MSG
+)
 
 
 # --- Git ---
@@ -421,7 +466,6 @@ class DAWGitApp(QMainWindow):
 
     def show_branch_selector(self):
         if not self.repo:
-            from ui_strings import NO_REPO_TITLE, NO_REPO_MSG
             QMessageBox.warning(self, NO_REPO_TITLE, NO_REPO_MSG)
             return
 
@@ -601,10 +645,37 @@ class DAWGitApp(QMainWindow):
             if hasattr(self, "update_role_buttons"):
                 self.update_role_buttons()
 
+            # ✅ NEW: Update commit button state based on safe/unsafe mode
+            if hasattr(self.commit_page, "update_snapshot_editing_state"):
+                self.commit_page.update_snapshot_editing_state()
+
+            if hasattr(self, "commit_page"):
+                is_detached = self.repo.head.is_detached
+                in_editable = ".dawgit_checkout_work" in str(self.project_path)
+
+                if is_detached and not in_editable:
+                    # 🧠 Disable commit panel if editing not allowed
+                    if hasattr(self.commit_page, "set_commit_controls_enabled"):
+                        is_detached = self.repo.head.is_detached
+                        in_editable = ".dawgit_checkout_work" in str(self.project_path)
+                        tooltip = ""
+                        if is_detached and not in_editable:
+                            tooltip = SNAPSHOT_EDIT_BLOCK_TOOLTIP
+                            self.commit_page.set_commit_controls_enabled(False, tooltip)
+                        else:
+                            self.commit_page.set_commit_controls_enabled(True, "")
+                else:
+                    self.commit_page.set_commit_controls_enabled(True, "")
+
         except Exception as e:
             print(f"[ERROR] Failed to bind repo: {e}")
-            self.repo = None
-            self.current_commit_id = None
+            import traceback
+            traceback.print_exc()
+
+            # Only clear if repo is truly broken — not on UI errors
+            if not self.repo or not hasattr(self.repo, "head"):
+                self.repo = None
+                self.current_commit_id = None
 
     @property
     def branch_dropdown(self):
@@ -632,6 +703,63 @@ class DAWGitApp(QMainWindow):
         self.branch_dropdown.blockSignals(False)
 
 
+    def open_in_daw(self):
+        """🎧 Launch the current snapshot in the DAW (uses editable copy if available)."""
+        try:
+            editable_dir = Path(self.project_path) / ".dawgit_checkout_work"
+            editable_als = next(editable_dir.glob("*_editable.als"), None)
+
+            if editable_als and editable_als.exists():
+                subprocess.run(["open", str(editable_als)])
+                print(f"[DEBUG] Opened editable copy in DAW: {editable_als}")
+            elif self.current_daw_file and Path(self.current_daw_file).exists():
+                subprocess.run(["open", str(self.current_daw_file)])
+                print(f"[DEBUG] Opened original DAW file: {self.current_daw_file}")
+            else:
+                QMessageBox.warning(
+                    self,
+                    "No DAW File Found",
+                    "❌ Could not locate a valid DAW project file to open."
+                )
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Failed", f"⚠️ Could not launch DAW:\n\n{e}")
+
+
+    def get_relevant_dirty_files(self):
+        """Returns a list of user-relevant dirty files, excluding safe noise and editable folders."""
+        ignored = {
+            ".DS_Store",
+            "PROJECT_MARKER.json",
+            ".dawgit_roles.json",
+            ".dawgit_meta.json",  # optional, in case you add it
+        }
+        excluded_paths = [".dawgit_cache/", ".dawgit_checkout_work/"]
+        excluded_keywords = ["editable", "placeholder"]
+
+        relevant_dirty = []
+
+        try:
+            dirty_lines = self.repo.git.status("--porcelain").splitlines()
+        except Exception as e:
+            print(f"[WARN] Failed to read dirty status: {e}")
+            return []
+
+        for line in dirty_lines:
+            path = line[3:].strip()
+            name = Path(path).name
+
+            if (
+                name not in ignored
+                and not any(path.startswith(p) for p in excluded_paths)
+                and not any(k in name.lower() for k in excluded_keywords)
+            ):
+                relevant_dirty.append(path)
+
+        return relevant_dirty
+
+
+
+
     def return_to_latest_clicked(self):
         try:
             if not self.repo:
@@ -642,53 +770,77 @@ class DAWGitApp(QMainWindow):
             if self.repo.head.is_detached:
                 print("[DEBUG] Repo is in detached HEAD. Attempting to switch to 'main'")
 
+                relevant_dirty = []  # ✅ Always declare this early
+
+                ignored = {
+                    ".DS_Store",
+                    "PROJECT_MARKER.json",
+                    ".dawgit_roles.json",
+                    ".dawgit_meta.json",
+                }
+                excluded_paths = [".dawgit_cache/", ".dawgit_checkout_work/"]
+                excluded_keywords = ["editable", "placeholder"]
+
+                dirty_lines = self.repo.git.status("--porcelain").splitlines()
+
+                for line in dirty_lines:
+                    path = line[3:].strip()
+                    name = Path(path).name
+                    if (
+                        name not in ignored
+                        and not any(path.startswith(p) for p in excluded_paths)
+                        and not any(k in name.lower() for k in excluded_keywords)
+                    ):
+                        relevant_dirty.append(path)
+
+                relevant_dirty = self.get_relevant_dirty_files()
+                if relevant_dirty:
+                    print(f"[BLOCK] Dirty files detected that are not safe to discard: {relevant_dirty}")
+                    QMessageBox.warning(
+                        self,
+                        UNSAFE_DIRTY_EDITS_TITLE,
+                        UNSAFE_DIRTY_EDITS_MSG.format(file_list="\n".join(f"• {f}" for f in relevant_dirty))
+                    )
+                    return
+
                 # 🩹 PATCH: Clean tracked and untracked noise files to prevent checkout conflicts
-                safe_noise_files = {".DS_Store", "PROJECT_MARKER.json", ".dawgit_roles.json"}
+                safe_noise_files = {
+                    ".DS_Store",
+                    "PROJECT_MARKER.json",
+                    ".dawgit_roles.json",
+                    ".dawgit_cache",  # ✅ NEW — allow StudioGit cache folder as safe
+                }
                 reset_tracked = []
                 remove_untracked = []
 
-                # 🔁 Collect dirty tracked files to reset
                 for path in self.repo.index.diff(None):
                     if Path(path.a_path).name in safe_noise_files:
                         reset_tracked.append(path.a_path)
 
-                # 🔁 Collect untracked noise files to delete
                 untracked = {Path(f).name: f for f in self.repo.untracked_files}
                 for name in safe_noise_files:
                     if name in untracked:
                         full_path = self.project_path / untracked[name]
                         remove_untracked.append(str(full_path))
 
-                # ✅ Unstage safe files (if they were added to the index)
                 if reset_tracked:
-                    print(f"[DEBUG] Resetting index (staged) for: {reset_tracked}")
-                    subprocess.run(
-                        ["git", "restore", "--staged"] + reset_tracked,
-                        cwd=self.project_path,
-                        env=self.custom_env(),
-                        check=True
-                    )        
+                    subprocess.run(["git", "restore", "--staged"] + reset_tracked,
+                                cwd=self.project_path, env=self.custom_env(), check=True)
+                    subprocess.run(["git", "checkout", "--"] + reset_tracked,
+                                cwd=self.project_path, env=self.custom_env(), check=True)
 
-                # ✅ Reset dirty tracked files
-                if reset_tracked:
-                    print(f"[DEBUG] Resetting safe dirty files before switch: {reset_tracked}")
-                    subprocess.run(["git", "checkout", "--"] + reset_tracked, cwd=self.project_path, env=self.custom_env(), check=True)
-
-                # ✅ Remove untracked noise files
                 for path in remove_untracked:
                     try:
                         os.remove(path)
-                        print(f"[DEBUG] Removed untracked blocking file: {path}")
+                        print(f"[DEBUG] Removed untracked file: {path}")
                     except Exception as e:
                         print(f"[WARNING] Could not remove {path}: {e}")
 
-                
-                # 🧹 Also clear QFileSystemWatcher cache for known noise files, if your watcher supports it
                 if hasattr(self, "file_watcher"):
                     for path in remove_untracked:
                         self.file_watcher.removePath(str(path))
 
-                # 🔍 DEBUG: List branches before attempting switch
+                # 🔍 DEBUG: List branches
                 try:
                     branch_list = subprocess.run(
                         ["git", "branch", "-vv"],
@@ -699,10 +851,31 @@ class DAWGitApp(QMainWindow):
                         check=True,
                     )
                     print("[DEBUG] git branch -vv BEFORE SWITCH:\n", branch_list.stdout)
+
+                    # ❗ Check if 'main' branch exists
+                    branch_names = [line.strip().lstrip("* ").split()[0] for line in branch_list.stdout.splitlines()]
+                    if "main" not in branch_names:
+                        print("[ERROR] 'main' branch does not exist — cannot return to latest.")
+                        self._show_warning("Cannot return to latest — no 'main' version line exists in this project.")
+                        return
+
                 except subprocess.CalledProcessError as e:
-                    print("[ERROR] Failed to list branches before switch:")
-                    print("STDOUT:", e.stdout)
-                    print("STDERR:", e.stderr)
+                    print("[ERROR] Failed to list branches before switch:", e)
+                    self._show_error("❌ Failed to retrieve branch list before attempting switch.")
+                    return
+
+
+                # ✅ Remove editable checkout folder to prevent overwrite error
+                checkout_path = self.project_path / ".dawgit_checkout_work"
+                if checkout_path.exists():
+                    try:
+                        shutil.rmtree(checkout_path)
+                        print(f"[CLEANUP] Removed editable snapshot folder: {checkout_path}")
+                    except Exception as e:
+                        print(f"[ERROR] Failed to remove editable folder: {e}")
+                        self._show_error(f"❌ Failed to remove editable snapshot folder:\n{e}")
+                        return
+
 
                 # ✅ Attempt to switch to main
                 try:
@@ -718,7 +891,6 @@ class DAWGitApp(QMainWindow):
                     print("[DEBUG] git switch stdout:\n", result.stdout)
                     print("[DEBUG] git switch stderr:\n", result.stderr)
 
-                    # 🔍 Diagnostic: check Git state after switch
                     status = subprocess.run(
                         ["git", "status"],
                         cwd=self.project_path,
@@ -733,23 +905,19 @@ class DAWGitApp(QMainWindow):
                     print("STDOUT:", e.stdout)
                     print("STDERR:", e.stderr)
                     self._show_error("❌ Git switch to 'main' failed. Please check your branches.")
-                    return  # ❌ Important: exit if the switch fails
+                    return
 
-                # ✅ Only runs if switch succeeded
                 self.repo = Repo(self.project_path)
-                print("[DEBUG] Switched to main")
                 subprocess.run(["git", "lfs", "checkout"], cwd=self.project_path, env=self.custom_env(), check=True)
 
-                # 🔄 Rebind and update UI
                 self.bind_repo()
 
-                # ✅ Safely get HEAD SHA
                 try:
                     head_commit = self.repo.head.commit
                     self.current_commit_id = head_commit.hexsha
                 except Exception as e:
                     print(f"[ERROR] Failed to get HEAD commit after switch: {e}")
-                    self._show_error("❌ Failed to return to the latest commit.\n\nCould not identify latest commit.")
+                    self._show_error("❌ Failed to return to the latest commit.")
                     return
 
                 print(f"[DEBUG] Repo rebound: HEAD = {self.current_commit_id[:7]}")
@@ -757,34 +925,56 @@ class DAWGitApp(QMainWindow):
                 self.update_status_label()
                 self.update_role_buttons()
                 self.update_project_label()
-                self.branch_label.setText(f"Session branch: {self.repo.active_branch.name} • Current take: {self.get_current_take_name()}")
+
+                # ✅ Create editable snapshot copy (after switching to HEAD)
+                editable_path = self._create_editable_snapshot_copy()
+                if editable_path:
+                    QTimer.singleShot(2000, self._launch_editable_version_in_daw)
+                else:
+                    print("[WARN] No .als file found after return-to-latest")
+                    self.editable_checkout_path = None
+
+                # ✅ Update snapshot UI state
+                self.update_snapshot_status_labels()
+
+                if self.repo.head.is_detached:
+                    self.branch_label.setText("ℹ️ Detached snapshot — not on an active version line")
+                else:
+                    self.branch_label.setText(f"Session branch: {self.repo.active_branch.name} • Current take: {self.get_current_take_name()}")
+
+                self.commit_label.setText(f"🎶 Commit: {self.current_commit_id[:7]}")                       
                 self.commit_label.setText(f"🎶 Commit: {self.current_commit_id[:7]}")
                 self.detached_warning_label.hide()
                 self.open_in_daw_btn.setVisible(True)
 
-                # 🎯 Scroll to HEAD row ...
                 head_sha = self.repo.head.commit.hexsha[:7]
                 selected_row = None
                 for row in range(self.snapshot_page.commit_table.rowCount()):
-                    item = self.snapshot_page.commit_table.item(row, 2)  # SHA col
+                    item = self.snapshot_page.commit_table.item(row, 2)
                     if item and head_sha in (item.toolTip() or item.text()):
                         selected_row = row
                         break
 
                 if selected_row is not None:
                     QTimer.singleShot(0, lambda: (
-                        self.snapshot_page.commit_table.scrollToItem(self.snapshot_page.commit_table.item(selected_row, 1), QTableWidget.ScrollHint.PositionAtCenter),
+                        self.snapshot_page.commit_table.scrollToItem(
+                            self.snapshot_page.commit_table.item(selected_row, 1),
+                            QTableWidget.ScrollHint.PositionAtCenter),
                         self.snapshot_page.commit_table.selectRow(selected_row)
                     ))
                     print(f"[DEBUG] ✅ Delayed scroll and select to HEAD row {selected_row}")
 
-                from ui_strings import RETURN_TO_LATEST_TITLE, RETURN_TO_LATEST_MSG
                 QMessageBox.information(self, RETURN_TO_LATEST_TITLE, RETURN_TO_LATEST_MSG.format(branch="main"))
 
             else:
-                # Already on a named branch (not detached)
                 current_branch = self.repo.active_branch.name
-                self._show_info(f"Already on branch '{current_branch}'. No action needed.")
+                # self._show_info(f"Already on branch '{current_branch}'. No action needed.")
+                QMessageBox.information(
+                    self,
+                    RETURN_TO_LATEST_TITLE,
+                    f"🎉 You're already on the latest version line!\n\n"
+                    f"Branch: {current_branch}\nCommit: {self.repo.head.commit.hexsha[:7]}"
+                )
                 self._set_commit_id_from_selected_row()
                 self.update_status_label()
                 self.update_role_buttons()
@@ -793,6 +983,21 @@ class DAWGitApp(QMainWindow):
                 self.commit_label.setText(f"🎶 Commit: {self.current_commit_id[:7]}")
                 self.detached_warning_label.hide()
                 self.open_in_daw_btn.setVisible(True)
+
+            # 🔁 Refresh commit UI state after returning to main
+            if hasattr(self.commit_page, "update_snapshot_editing_state"):
+                self.commit_page.update_snapshot_editing_state()
+
+            if hasattr(self, "commit_page"):
+                is_detached = self.repo.head.is_detached
+                in_editable = ".dawgit_checkout_work" in str(self.project_path)
+                if is_detached and not in_editable:
+                    self.commit_page.set_commit_controls_enabled(
+                        False,
+                        "🎧 Snapshot mode: You’re previewing an old take. Start a new version to edit and save in your DAW."
+                    )
+                else:
+                    self.commit_page.set_commit_controls_enabled(True, "")
 
         except Exception as e:
             self._show_error(f"❌ Failed to return to the latest commit:\n\n{e}")
@@ -906,7 +1111,6 @@ class DAWGitApp(QMainWindow):
 
     def connect_to_remote_repo(self):
         if not self.repo:
-            from ui_strings import NO_REPO_TITLE, NO_REPO_MSG
             QMessageBox.warning(self, NO_REPO_TITLE, NO_REPO_MSG)
             return
 
@@ -1132,7 +1336,6 @@ class DAWGitApp(QMainWindow):
         except TypeError:
             branch = str(self.repo.head.ref) if self.repo.head.ref else "detached"
 
-        from ui_strings import COMMIT_SUCCESS_TITLE, COMMIT_SUCCESS_MSG
         QMessageBox.information(self, COMMIT_SUCCESS_TITLE, COMMIT_SUCCESS_MSG.format(branch=branch, sha=short_sha))
 
 
@@ -1143,6 +1346,55 @@ class DAWGitApp(QMainWindow):
             self.save_project_marker()
 
         return {"status": "success", "sha": short_sha, "branch": branch}
+
+
+    def update_snapshot_status_labels(self):
+        """Update all relevant status labels with the current editing state."""
+        if not self.repo:
+            return
+
+        is_detached = self.repo.head.is_detached
+        branch = self.repo.active_branch.name if not is_detached else "detached"
+
+        try:
+            commit_count = len(list(self.repo.iter_commits()))
+        except Exception:
+            commit_count = "?"
+
+        label = (
+            f"🎵 Session branch: {branch} — 🎧 Take: version {commit_count}"
+            if not is_detached
+            else "ℹ️ Detached snapshot — not on an active version line"
+        )
+
+        self.status_label.setText(label)
+        if hasattr(self.snapshot_page, "status_label"):
+            self.snapshot_page.status_label.setText(label)
+
+
+    def _create_editable_snapshot_copy(self):
+        """Creates a safe editable copy of the current .als file into .dawgit_checkout_work/"""
+        try:
+            editable_dir = Path(self.project_path) / ".dawgit_checkout_work"
+            editable_dir.mkdir(exist_ok=True)
+            als_files = list(Path(self.project_path).glob("*.als"))
+
+            if als_files:
+                als_file = als_files[0]
+                editable_name = f"{self.project_path.name}_editable.als"
+                editable_path = editable_dir / editable_name
+                shutil.copy2(als_file, editable_path)
+                self.editable_checkout_path = editable_path
+                print(f"[DEBUG] Created editable snapshot copy at: {editable_path}")
+                return editable_path
+            else:
+                print("[WARN] No .als file found for editable copy.")
+                return None
+        except Exception as e:
+            print(f"[ERROR] Editable snapshot creation failed: {e}")
+            return None
+
+
 
 
     def update_role_buttons(self):
@@ -1193,7 +1445,6 @@ class DAWGitApp(QMainWindow):
         timestamp = current.committed_datetime.strftime("%d %b %Y, %H:%M")
 
         body = f"{label}\n\n" + ("-" * 40) + f"\n\nCommitted: {timestamp}"
-        from ui_strings import CURRENT_COMMIT_TITLE
         QMessageBox.information(self, CURRENT_COMMIT_TITLE, body)
 
     
@@ -1450,6 +1701,17 @@ class DAWGitApp(QMainWindow):
 
 
     def open_latest_daw_project(self):
+        # ✅ NEW: Launch editable snapshot directly and skip modal
+        editable = getattr(self, "editable_checkout_path", None)
+        if editable and Path(editable).exists():
+            try:
+                subprocess.Popen(["open", str(editable)])
+                print(f"[DEBUG] Opened editable snapshot in DAW: {editable}")
+                return
+            except Exception as e:
+                print(f"[WARN] Failed to open editable copy: {e}")
+                # Fall through to regular warning/modal logic
+
         # ✅ Delay warning until user actually tries to open in DAW
         if self.als_recently_modified() and os.getenv("DAWGIT_TEST_MODE") != "1":
             confirm = QMessageBox.question(
@@ -1462,7 +1724,7 @@ class DAWGitApp(QMainWindow):
             )
             if confirm != QMessageBox.StandardButton.Yes:
                 return
-            
+
         # ✅ Skip snapshot dialog if testing
         if self.repo and self.repo.head.is_detached:
             if os.getenv("DAWGIT_TEST_MODE") == "1":
@@ -1480,6 +1742,18 @@ class DAWGitApp(QMainWindow):
                 if confirm != QMessageBox.StandardButton.Ok:
                     print(f"[DEBUG] Early exit at snapshot confirmation")
                     return
+
+
+        # ✅ NEW: Prefer editable snapshot copy if it exists
+        editable = getattr(self, "editable_checkout_path", None)
+        if editable and Path(editable).exists():
+            try:
+                subprocess.Popen(["open", str(editable)])
+                print(f"[DEBUG] Opened editable snapshot in DAW: {editable}")
+                return
+            except Exception as e:
+                print(f"[WARN] Failed to open editable copy: {e}")
+                # Fallback continues to original logic
 
         repo_path = Path(self.repo.working_tree_dir)
         daw_files = list(repo_path.glob("*.als")) + list(repo_path.glob("*.logicx"))
@@ -1716,7 +1990,6 @@ class DAWGitApp(QMainWindow):
         label = "".join(c for c in label if c.isalnum() or c in ("_", "-"))
 
         if not label:
-            from ui_strings import INVALID_LABEL_TITLE, INVALID_LABEL_MSG
             QMessageBox.warning(self, INVALID_LABEL_TITLE, INVALID_LABEL_MSG)
             return
 
@@ -2050,40 +2323,39 @@ class DAWGitApp(QMainWindow):
 
             print(f"[DEBUG] commit_item.text = {commit_item.text()}")
             print(f"[DEBUG] commit_item.toolTip = {commit_item.toolTip()}")
+
             commit_sha = commit_item.toolTip() or commit_item.text().strip()
+
             if not commit_sha:
                 return {"status": "error", "message": "No SHA available in commit row."}
 
         try:
-
-            # ✅ Ignore tracked noise files (safe even if modified)
-            ignored = {".DS_Store", "PROJECT_MARKER.json", ".dawgit_roles.json"}
-            dirty_lines = self.repo.git.status("--porcelain").splitlines()
-
-            relevant_dirty = []
-            for line in dirty_lines:
-                path = line[3:].strip()
-                name = Path(path).name
-                # 🔒 Skip ignored files AND files in .dawgit_cache
-                if name not in ignored and not path.startswith(".dawgit_cache/"):
-                    relevant_dirty.append(path)
+            # ✅ Ignore tracked noise files via helper
+            relevant_dirty = self.get_relevant_dirty_files()
+            print(f"[DEBUG] Filtered relevant_dirty files: {relevant_dirty}")
 
             if relevant_dirty:
                 print(f"[BLOCK] Dirty files detected: {relevant_dirty}")
+                file_list = "\n".join(f"• {f}" for f in relevant_dirty)
+
                 QMessageBox.warning(
-                    self, "Uncommitted Changes Detected",
-                    "❌ Uncommitted changes detected.\n\n"
-                    "Please commit or stash before switching:\n\n" + "\n".join(relevant_dirty)
+                    self,
+                    UNSAFE_DIRTY_EDITS_TITLE,
+                    UNSAFE_DIRTY_EDITS_MSG.format(file_list=file_list)
                 )
                 return {"status": "blocked", "files": relevant_dirty}
 
-             # ✅ Skip if already on this commit
+            # ⛔ Skip if already on this commit
+
             if self.repo.head.commit.hexsha == commit_sha:
-                QMessageBox.information(self, "Already Viewing Snapshot",
-                    f"🎧 Already viewing this snapshot.\n\nCommit ID: {commit_sha[:7]}")
+                QMessageBox.information(
+                    self,
+                    ALREADY_ON_COMMIT_TITLE,
+                    ALREADY_ON_COMMIT_MESSAGE.format(sha=commit_sha[:7])
+                )
                 return {"status": "noop", "message": "Already on this commit."}
 
-            # 🎛️ Snapshot Safety — backup latest state before switching
+            # 🧠 Backup latest state before switching
             try:
                 from daw_git_core import backup_latest_commit_state
                 if self.repo and self.project_path:
@@ -2091,23 +2363,12 @@ class DAWGitApp(QMainWindow):
             except Exception as e:
                 print(f"[WARN] Snapshot backup failed: {e}")
 
-            # ⬅️ Perform checkout
-
-            # 🔧 PATCH: Auto-discard safe tracked project files before checkout
+            # 🔧 Discard tracked noise files
             safe_to_reset = {".DS_Store", "PROJECT_MARKER.json", ".dawgit_roles.json"}
-            reset_targets = []
-
-            for path in self.repo.index.diff(None):
-                if Path(path.a_path).name in safe_to_reset:
-                    reset_targets.append(path.a_path)
-
+            reset_targets = [p.a_path for p in self.repo.index.diff(None) if Path(p.a_path).name in safe_to_reset]
             if reset_targets:
                 print(f"[DEBUG] Resetting safe dirty files: {reset_targets}")
                 subprocess.run(["git", "checkout", "--"] + reset_targets, cwd=self.project_path, env=self.custom_env(), check=True)
-
-            # 🎛️ Backup current project folder before switching snapshots
-            from daw_git_core import backup_latest_commit_state
-            backup_latest_commit_state(self.repo, Path(self.project_path))
 
             subprocess.run(["git", "checkout", commit_sha], cwd=self.project_path, env=self.custom_env(), check=True)
             subprocess.run(["git", "lfs", "checkout"], cwd=self.project_path, env=self.custom_env(), check=True)
@@ -2120,7 +2381,7 @@ class DAWGitApp(QMainWindow):
             self.current_commit_id = self.repo.head.commit.hexsha
             self.show_commit_checkout_info(self.repo.commit(commit_sha))
 
-            # Scroll to selected commit
+            # Highlight selected commit
             for row in range(self.snapshot_page.commit_table.rowCount()):
                 item = self.snapshot_page.commit_table.item(row, 2)
                 if item and commit_sha.startswith(item.toolTip() or item.text()):
@@ -2128,9 +2389,44 @@ class DAWGitApp(QMainWindow):
                     self.snapshot_page.commit_table.scrollToItem(item, QTableWidget.ScrollHint.PositionAtCenter)
                     break
 
-            QMessageBox.information(self, "Project Restored",
-                f"✅ Version restored.\n\n🎛️ Commit ID: {commit_sha[:7]}")
+            # ✅ Create editable snapshot copy
+            editable_path = self._create_editable_snapshot_copy()
+            if editable_path:
+                QTimer.singleShot(2000, self._launch_editable_version_in_daw)
+            else:
+                print("[WARN] No .als file found after checkout")
+                self.editable_checkout_path = None
+
+            self.update_snapshot_status_labels()
+
+            # ✅ Show success message
+            if hasattr(self.snapshot_page, "status_label"):
+                self.snapshot_page.status_label.setText(
+                    f"✅ Snapshot {commit_sha[:7]} loaded — read-only mode. Explore or start a new version line."
+                )
             self.open_in_daw_btn.setVisible(True)
+
+            # ✅ Show success message
+            if hasattr(self.snapshot_page, "status_label"):
+                self.snapshot_page.status_label.setText(
+                    f"✅ Snapshot {commit_sha[:7]} loaded — read-only mode. Explore or start a new version line."
+                )
+            self.open_in_daw_btn.setVisible(True)
+
+            # 🧠 Update commit UI state
+            if hasattr(self.commit_page, "update_snapshot_editing_state"):
+                self.commit_page.update_snapshot_editing_state()
+
+            if hasattr(self, "commit_page"):
+                is_detached = self.repo.head.is_detached
+                in_editable = ".dawgit_checkout_work" in str(self.project_path)
+                if is_detached and not in_editable:
+                    self.commit_page.set_commit_controls_enabled(
+                        False,
+                        "🎧 Snapshot mode: You’re previewing an old take. Start a new version to edit and save in your DAW."
+                    )
+                else:
+                    self.commit_page.set_commit_controls_enabled(True, "")
 
             return result
 
@@ -2141,6 +2437,7 @@ class DAWGitApp(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Unexpected Error", f"⚠️ Unexpected error:\n\n{e}")
             return {"status": "error", "message": str(e)}
+
 
 
     def switch_version_line(self):
@@ -2411,6 +2708,41 @@ class DAWGitApp(QMainWindow):
                 "Import Failed",
                 f"⚠️ Something went wrong while importing your snapshot:\n\n{e}"
             )
+
+
+    def _launch_editable_version_in_daw(self):
+        if not self.editable_checkout_path:
+            print("[WARN] No editable path to launch.")
+            return
+
+        is_fresh_snapshot = str(self.editable_checkout_path).startswith(
+            str(Path(self.project_path) / ".dawgit_checkout_work")
+        )
+
+        if os.getenv("DAWGIT_TEST_MODE") == "1" or is_fresh_snapshot:
+            print("[AUTO] Launching fresh editable snapshot without modal.")
+            subprocess.Popen(["open", str(self.editable_checkout_path)])
+            return
+
+        # Otherwise, warn user
+        confirm = QMessageBox.question(
+            self,
+            "Open in Ableton",
+            "📁 This project was modified just now.\n\n"
+            "Ableton may ask to 'Save As' or overwrite your changes.\n\n"
+            "Open this version anyway?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
+        )
+
+        if confirm == QMessageBox.StandardButton.Yes:
+            try:
+                subprocess.Popen(["open", str(self.editable_checkout_path)])
+                print(f"[DEBUG] Opened editable snapshot in DAW: {self.editable_checkout_path}")
+            except Exception as e:
+                print(f"[ERROR] Failed to open DAW file: {e}")
+                self._show_error(f"❌ Could not launch Ableton:\n{e}")
+
+
 
         
     def load_commit_history(self, limit=20, offset=0):
@@ -2768,7 +3100,6 @@ class DAWGitApp(QMainWindow):
 
 
     def switch_branch(self, branch_name=None):
-        from ui_strings import NO_REPO_TITLE, NO_REPO_MSG
         if not self.repo:
             QMessageBox.warning(self, NO_REPO_TITLE, NO_REPO_MSG)
             return {"status": "error", "message": "No repo loaded."}
@@ -2822,12 +3153,10 @@ class DAWGitApp(QMainWindow):
                 return result
 
             if result["status"] == "detached":
-                from ui_strings import DETACHED_HEAD_TITLE, DETACHED_HEAD_MSG
                 QMessageBox.warning(self, DETACHED_HEAD_TITLE, DETACHED_HEAD_MSG)
                 return result
 
             if result["status"] == "noop":
-                from ui_strings import ALREADY_ON_BRANCH_TITLE, ALREADY_ON_BRANCH_MSG
                 QMessageBox.information(self, ALREADY_ON_BRANCH_TITLE, ALREADY_ON_BRANCH_MSG.format(branch=selected_branch))
 
                 return {"status": "success", "message": result["message"]}
@@ -3020,16 +3349,6 @@ class DAWGitApp(QMainWindow):
                 self.snapshot_page.status_label.setText("📦 Snapshot loaded — read-only mode")
                 print("[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line")
 
-                # Disable and hide role buttons
-                for btn in [
-                    self.btn_set_version_main,
-                    self.btn_set_version_creative,
-                    self.btn_set_version_alt
-                ]:
-                    btn.setEnabled(False)
-                    btn.setToolTip("Tagging is only available on active version lines.")
-                    btn.hide()
-
             else:
                 try:
                     branch = self.repo.active_branch.name
@@ -3047,30 +3366,30 @@ class DAWGitApp(QMainWindow):
                 self.snapshot_page.status_label.setText(label_text)
                 print(f"[DEBUG] status label set: {label_text}")
 
-                # ✅ Re-enable and show role buttons
-                if hasattr(self, "commit_page"):
-                    for attr in [
-                        "tag_main_btn",
-                        "tag_creative_btn",
-                        "tag_alt_btn",
-                        "tag_custom_btn"
-                    ]:
-                        btn = getattr(self.commit_page, attr, None)
-                        if btn:
-                            btn.setEnabled(not self.repo.head.is_detached)
-                            btn.setToolTip(
-                                "❌ Tagging is only available on active version lines."
-                                if self.repo.head.is_detached
-                                else ""
-                            )
-                            if self.repo.head.is_detached:
-                                btn.hide()
-                            else:
-                                btn.show()
+            # ✅ Show/hide and enable/disable role buttons based on HEAD state
+            if hasattr(self, "commit_page"):
+                for attr in [
+                    "tag_main_btn",
+                    "tag_creative_btn",
+                    "tag_alt_btn",
+                    "tag_custom_btn"
+                ]:
+                    btn = getattr(self.commit_page, attr, None)
+                    if btn:
+                        btn.setEnabled(not self.repo.head.is_detached)
+                        btn.setToolTip(
+                            "❌ Tagging is only available on active version lines."
+                            if self.repo.head.is_detached else ""
+                        )
+                        if self.repo.head.is_detached:
+                            btn.hide()
+                        else:
+                            btn.show()
 
         except Exception as e:
             self.snapshot_page.status_label.setText(f"⚠️ Git status error: {e}")
             print(f"[DEBUG] status label set: ⚠️ Git status error: {e}")
+
 
 
 
