@@ -1,11 +1,12 @@
 import sys
 import os
+import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import pytest
 from git import Repo
 from daw_git_gui import DAWGitApp
 
-def test_autocommit_marker_before_version_branch(tmp_path):
+def test_autocommit_marker_before_version_branch(tmp_path, qtbot):
     # 🗂️ Create dummy Ableton file to satisfy commit rules
     project_file = tmp_path / "track.als"
     project_file.write_text("Ableton session")
@@ -19,7 +20,7 @@ def test_autocommit_marker_before_version_branch(tmp_path):
 
     # 🧪 Launch app with proper initialization
     app = DAWGitApp(project_path=tmp_path, build_ui=False)
-    app.repo = Repo(tmp_path)
+    app.init_git()
 
     # 🧪 Call method under test
     result = app.create_new_version_line("MyNewIdea")

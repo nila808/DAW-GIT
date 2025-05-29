@@ -19,7 +19,7 @@ def test_prevent_branch_switch_with_uncommitted_changes(tmp_path):
     project_file.write_text("Uncommitted edit")
 
     app = DAWGitApp(project_path=tmp_path, build_ui=False)
-    app.repo = repo
+    app.init_git()
 
     # Attempt branch switch to new-branch with uncommitted changes
     result = app.safe_switch_branch("new-branch")

@@ -32,7 +32,7 @@ pytest tests_dawgit/
 
 
 // If you only want to run the single full workflow test:
-pytest tests_dawgit/test_full_workflow.py
+pytest tests_dawgit/test_full_user_session_flow.py
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -65,6 +65,11 @@ Run this in your terminal before running tests:
 unset DAWGIT_FORCE_TEST_PATH
 ./run_tests.sh
 
+E.G. 
+
+./run_tests.sh -k test_no_path_selection_resets_project
+
+
 
 This removes the override and allows each test to create its own clean temp folder.
 
@@ -89,6 +94,52 @@ This document is used as a persistent .txt reference. You can update it anytime 
     show dev notes
 
 ------------------------------------------------------------------------------------------------------------------------
+push-it
+------------------------------------------------------------------------------------------------------------------------
+
+It now:
+
+🧪 Runs your full test suite
+
+🔄 Updates PROJECT_STATUS.md
+
+📝 Appends to CHANGELOG.md
+
+📁 Updates PROJECT_MARKER.json
+
+🛣️ Creates/updates ROADMAP.md
+
+📥 Stages all of the above via:
+
+python
+Copy
+Edit
+os.system("git add PROJECT_STATUS.md CHANGELOG.md PROJECT_MARKER.json ROADMAP.md")
+✅ Commits
+
+📤 Pushes to your branch
+
+🏷️ Tags the release
+
+📚 Logs the version to release.log
+
+
+
+To run only the last failed tests in your terminal using pytest, use:
+
+pytest --last-failed --tb=short
+
+
+You can also add -q for even more compact output:
+pytest --last-failed --tb=short -q
+
+
+
+
+
+
+
+
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -98,11 +149,8 @@ This document is used as a persistent .txt reference. You can update it anytime 
 
 
 
-
-
-
 ------------------------------------------------------------------------------------------------------------------------
-✅ Copy & Paste This into a New Chat:
+✅ Copy & Paste This into a New Chat: push-ctx New chat Name ROADMAP 1.1.4
 ------------------------------------------------------------------------------------------------------------------------
 
 Hi ChatGPT, please load the full context of my previous project called **DAW Git App**. It includes:

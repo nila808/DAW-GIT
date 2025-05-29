@@ -4,8 +4,9 @@ import tempfile
 from pathlib import Path
 from git import Repo, GitCommandError
 import pytest
+import pytest
 
-def test_daw_git_end_to_end():
+def test_daw_git_end_to_end( qtbot):
     with tempfile.TemporaryDirectory() as temp_dir:
         project_path = Path(temp_dir) / "TestProject"
         project_path.mkdir()
@@ -25,7 +26,19 @@ def test_daw_git_end_to_end():
         gitattributes = project_path / ".gitattributes"
         gitattributes.write_text("*.logicx/** filter=lfs diff=lfs merge=lfs -text")
 
-        repo.index.add([str(gitattributes.relative_to(project_path)), "MyTrack.logicx/ProjectData"])
+        try:
+            cwd = os.getcwd()
+        except FileNotFoundError:
+            cwd = "/tmp"
+
+        os.chdir(project_path)
+        try:
+            repo.index.add([str(gitattributes.relative_to(project_path)), "MyTrack.logicx/ProjectData"])
+            repo.index.commit("Initial commit")
+        finally:
+            os.chdir(cwd)
+
+
         repo.index.commit("Initial commit: tracking MyTrack.logicx")
 
         assert repo.active_branch.name == "main"

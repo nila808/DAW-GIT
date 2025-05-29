@@ -16,3 +16,4 @@ build/
 
 # Local virtual environment
 daw-git-env/
+.DS_Store

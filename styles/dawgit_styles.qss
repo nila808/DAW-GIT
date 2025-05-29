@@ -1,17 +1,48 @@
 /* styles/dawgit_styles.qss */
 
-QLabel#branchLabel {
-    color: #00BFD8;        /* Aqua blue */
+/* === Labels === */
+
+QLabel#branchLabel,
+#branchLabel {
+    color: #00BFD8; /* Aqua blue */
     font-weight: bold;
     font-size: 14px;
     background-color: transparent;
 }
 
-#branchLabel {
-    color: #00ced1; /* aqua blue */
+QLabel#status_label {
+    color: #00BCD4;
     font-weight: bold;
     font-size: 14px;
+    padding: 6px 10px;
 }
+
+QLabel#setup_label {
+    font-weight: bold;
+}
+
+QLabel#detached_warning_label {
+    color: orange;
+    font-style: italic;
+    padding: 4px;
+}
+
+/* === Unsaved Changes Indicator === */
+
+QLabel#unsaved_indicator {
+    font-weight: bold;
+    padding-left: 6px;
+}
+
+QLabel#unsaved_indicator[alert="true"] {
+    color: orange;
+}
+
+QLabel#unsaved_indicator[alert="false"] {
+    color: transparent;
+}
+
+/* === Buttons === */
 
 QPushButton#setVersionBtn,
 QPushButton#setExperimentBtn,
@@ -21,4 +52,12 @@ QPushButton#setAltMixBtn {
     border-radius: 6px;
     color: #ffffff;
     font-weight: bold;
+}
+
+
+#snapshotStatusLabel {
+    color: #888;
+    font-style: italic;
+    padding: 4px;
+    margin-bottom: 4px;
 }

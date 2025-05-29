@@ -11,7 +11,6 @@ from git import Repo
 
 @pytest.fixture
 def repo_with_multiple_commits(tmp_path):
-    """Creates a repo with two committed .als files."""
     project_dir = tmp_path / "DeleteCommitTest"
     project_dir.mkdir()
 
@@ -20,44 +19,48 @@ def repo_with_multiple_commits(tmp_path):
     file1.write_text("First version")
     file2.write_text("Second version")
 
-    app = DAWGitApp(project_path=project_dir, build_ui=False)
+    repo = Repo.init(project_dir)
+    repo.index.add(["a.als", "b.als"])
+    repo.index.commit("Commit A + B")
+
+    return project_dir, repo
+
+
+def test_deleted_commit_disappears_from_history(qtbot, repo_with_multiple_commits, monkeypatch):
+    project_dir, repo = repo_with_multiple_commits
+
+    # Add second commit to delete
+    second_file = project_dir / "b.als"
+    second_file.write_text("another session")
+    repo.index.add(["b.als"])
+    repo.index.commit("Second commit")
+
+    commit_sha = repo.head.commit.hexsha
+
+    # Launch app with full UI
+    app = DAWGitApp(project_path=project_dir, build_ui=True)
     app.init_git()
+    qtbot.addWidget(app)
 
-    # ✅ Use relative paths *from project_dir* for git add
-    app.repo.index.add([str(file1.relative_to(project_dir))])
-    app.repo.index.commit("First commit")
-    app.repo.index.add([str(file2.relative_to(project_dir))])
-    app.repo.index.commit("Second commit")
+    # Simulate UI selection state
+    app.current_commit_id = commit_sha
+    app.load_commit_history()
 
-    return app
+    # Confirm dialog auto-accept
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: QMessageBox.StandardButton.Yes)
 
-
-def test_deleted_commit_disappears_from_history(repo_with_multiple_commits):
-    app = repo_with_multiple_commits
-
-    initial_commits = list(app.repo.iter_commits("HEAD"))
-    assert len(initial_commits) >= 2
-
-    target_commit = initial_commits[-2]  # ✅ Non-root, safe to delete
-    target_sha = target_commit.hexsha
-
-    # 🔁 Simulate user selection in UI
-    app.history_table = QTableWidget(1, 3)
-    item_sha = QTableWidgetItem(target_sha[:7])
-    item_sha.setToolTip(target_sha)
-    item_msg = QTableWidgetItem(target_commit.message.strip())
-    app.history_table.setItem(0, 1, item_sha)
-    app.history_table.setItem(0, 2, item_msg)
-    app.history_table.selectRow(0)
-
-    # 🧪 Simulate confirmation
-    QMessageBox.question = lambda *a, **k: QMessageBox.StandardButton.Yes
-
-    # 🧨 Delete via app logic (not raw Git)
+    # Delete the commit
     app.delete_selected_commit()
 
-    # 🔍 Confirm commit is gone
-    updated_commits = list(app.repo.iter_commits("HEAD"))
-    updated_shas = [c.hexsha for c in updated_commits]
+    # Rebuild commit list post-delete
+    app.load_commit_history()
 
-    assert target_sha not in updated_shas, "Deleted commit should no longer be in history"
+    # Validate it's gone from Git
+    remaining_shas = [c.hexsha for c in repo.iter_commits()]
+    assert commit_sha not in remaining_shas, "Commit still exists in Git history"
+
+    # Validate it's gone from UI
+    table = app.snapshot_page.commit_table
+    for row in range(table.rowCount()):
+        tooltip = table.item(row, 2).toolTip()  # Column 2 = SHA
+        assert tooltip != commit_sha, "Commit still displayed in UI table"

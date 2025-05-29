@@ -1,3 +1,7 @@
+import os
+os.environ["DAWGIT_TEST_MODE"] = "1"
+import daw_git_testing  # patches modals at import
+
 from pathlib import Path
 from git import Repo
 from daw_git_gui import DAWGitApp
@@ -42,7 +46,7 @@ def test_commit_log_display_on_startup(tmp_path, qtbot):
 
     latest_sha = repo.head.commit.hexsha
     tooltips = [
-        app.history_table.item(row, 1).toolTip()
+        app.history_table.item(row, 2).toolTip()
         for row in range(app.history_table.rowCount())
     ]
     found = any(tip and latest_sha.startswith(tip[:7]) for tip in tooltips)
@@ -66,34 +70,40 @@ def test_checked_out_commit_highlighted_on_startup(tmp_path, qtbot):
     app.update_log()  # ✅ Populate history table before check
 
     checked_out_sha = repo.head.commit.hexsha[:7]
+
+    # ✅ Updated: column 2 = Commit ID (with SHA tooltip)
     found = any(
-        app.history_table.item(row, 1).toolTip().startswith(checked_out_sha)
+        app.history_table.item(row, 2) and app.history_table.item(row, 2).toolTip().startswith(checked_out_sha)
         for row in range(app.history_table.rowCount())
     )
-    assert found
+
+    assert found, f"Commit {checked_out_sha} not found in any tooltip in column 2"
 
 
 
 def test_branch_dropdown_shows_active_branch(tmp_path, qtbot):
-    project_path = tmp_path / "BranchDrop"
-    project_path.mkdir()
-    (project_path / "a.als").write_text("B")
+    from git import Repo  # ✅ Make sure Repo is imported here too
 
-    repo = Repo.init(project_path)
-    repo.index.add(["a.als"])
-    repo.index.commit("start")
-    repo.git.branch("-M", "main")
+    # Create repo with a branch
+    repo = Repo.init(tmp_path)
+    (tmp_path / "track.als").write_text("Ableton session")
+    repo.index.add(["track.als"])
+    repo.index.commit("Initial")
 
-    app = DAWGitApp(project_path=str(project_path), build_ui=True)
+    # App with full UI
+    app = DAWGitApp(project_path=tmp_path, build_ui=True)
     qtbot.addWidget(app)
-    app.repo = repo
+
     app.init_git()
+    app.update_branch_dropdown()
 
-    if hasattr(app, "update_branch_dropdown"):
-        app.update_branch_dropdown()
+    # ✅ Fail-proof: Check if dropdown exists first
+    assert hasattr(app, "branch_dropdown"), "branch_dropdown not found on DAWGitApp"
 
-    assert hasattr(app, "branch_dropdown")
-    assert app.branch_dropdown.currentText() == "main"
+    active_branch = repo.active_branch.name
+    dropdown_text = app.branch_dropdown.currentText()
+
+    assert dropdown_text == active_branch
 
 
 def test_startup_in_detached_head_warns_user(tmp_path, qtbot):

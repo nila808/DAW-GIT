@@ -6,22 +6,31 @@ from git import Repo
 from daw_git_gui import DAWGitApp
 
 def test_untracked_file_warning_on_checkout(tmp_path):
-    project_file = tmp_path / "track.als"
-    project_file.write_text("Original")
+    from daw_git_gui import DAWGitApp
+
+    # Step 1: Init repo with valid .als file
     repo = Repo.init(tmp_path)
-    repo.index.add(["track.als"])
-    repo.index.commit("Initial commit")
-    commit_hash = repo.head.commit.hexsha
+    als_file = tmp_path / "session.als"
+    als_file.write_text("Session 1")
+    repo.index.add(["session.als"])
+    repo.index.commit("Initial version")
 
-    # Create untracked file
-    untracked = tmp_path / "extra.wav"
-    untracked.write_text("Untracked audio")
+    # Step 2: Add 2nd commit with change
+    als_file.write_text("Session 2")
+    repo.index.add(["session.als"])
+    repo.index.commit("Second version")
 
+    # Step 3: Create an untracked file
+    untracked = tmp_path / "notes.txt"
+    untracked.write_text("Do not lose me")
+
+    # Step 4: Launch app and try checkout
     app = DAWGitApp(project_path=tmp_path, build_ui=False)
-    app.repo = repo
+    app.init_git()
 
-    # Attempt to checkout the commit hash
-    result = app.checkout_selected_commit(commit_hash)
+    old_commit_sha = list(repo.iter_commits("HEAD", max_count=2))[1].hexsha
+    result = app.checkout_selected_commit(old_commit_sha)
 
-    assert result["status"] == "warning"
-    assert "untracked" in result["message"].lower()
+    # Step 5: Check the response
+    assert result["status"] == "blocked"
+    assert "notes.txt" in result["files"]
