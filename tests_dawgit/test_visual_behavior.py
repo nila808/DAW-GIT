@@ -48,6 +48,8 @@ def test_full_snapshot_flow(app, qtbot):
             break
 
     # Now perform checkout
+    print(">>> COMMIT SHA:", app.repo.head.commit.hexsha)
+    print(">>> Selected row SHA:", app.history_table.item(row, 2).text())
     result = app.checkout_selected_commit()
     if result["status"] == "noop":
         assert result["message"].startswith("Already on this commit")

@@ -5,6 +5,26 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
+from ui_strings import (
+    RETURN_TO_LATEST_BTN, 
+    TOOLTIP_RETURN_TO_LATEST, 
+    TOOLTIP_LOAD_VERSION_SAFELY,
+    TOOLTIP_SHOW_CURRENT_VERSION,   
+    TOOLTIP_SAVE_WITH_LAST_MESSAGE, 
+    TOOLTIP_TAG_CREATIVE,
+    TOOLTIP_TAG_ALT_MIX,
+    TOOLTIP_OPEN_COMMIT_PANEL,
+    BTN_LOAD_SNAPSHOT, 
+    BTN_WHERE_AM_I, 
+    BTN_QUICK_SAVE, 
+    BTN_MAIN_MIX, 
+    BTN_CREATIVE_TAKE, 
+    BTN_ALT_MIX, 
+    BTN_OPEN_COMMIT_PANEL,
+    TOOLTIP_TAG_MAIN_MIX
+)
+
+
 class SnapshotBrowserPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -41,26 +61,20 @@ class SnapshotBrowserPage(QWidget):
         layout.addWidget(self.status_label)
 
         # 📥 Load + Info
-        self.load_snapshot_btn = QPushButton("🎧 Load This Snapshot")
-        self.load_snapshot_btn.setToolTip("Load this version of your project safely")
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
         if self.app and hasattr(self.app, "load_snapshot_clicked"):
             self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
         layout.addWidget(self.load_snapshot_btn)
 
-        self.where_am_i_btn = QPushButton("📍 Where Am I?")
-        self.where_am_i_btn.setToolTip("Show current snapshot version")
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
         if self.app and hasattr(self.app, "show_current_commit"):
             self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
         layout.addWidget(self.where_am_i_btn)
 
-        # Return to Latest button
-        # self.return_to_latest_btn = QPushButton("🔁 Return to Latest")
-        # self.return_to_latest_btn.setToolTip("Switch back to the latest saved version on the main branch.")
-        # self.return_to_latest_btn.clicked.connect(parent.return_to_latest_clicked)
-        # layout.addWidget(self.return_to_latest_btn)
-
-        self.return_to_latest_btn = QPushButton("🔁 Return to Latest")
-        self.return_to_latest_btn.setToolTip("Switch back to the latest saved version on the main branch.")
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+        self.return_to_latest_btn.setToolTip(TOOLTIP_RETURN_TO_LATEST)
         if self.app and hasattr(self.app, "return_to_latest_clicked"):
             self.return_to_latest_btn.clicked.connect(self.app.return_to_latest_clicked)
         layout.addWidget(self.return_to_latest_btn)
@@ -68,28 +82,28 @@ class SnapshotBrowserPage(QWidget):
         # 🧭 Snapshot Action Bar (Quick Save + Tags)
         action_row = QHBoxLayout()
 
-        self.quick_commit_btn = QPushButton("💾 Quick Save")
-        self.quick_commit_btn.setToolTip("Save a snapshot using the most recent commit message")
+        self.quick_commit_btn = QPushButton(BTN_QUICK_SAVE)
+        self.quick_commit_btn.setToolTip(TOOLTIP_SAVE_WITH_LAST_MESSAGE)
         if self.app and hasattr(self.app, "quick_commit"):
             self.quick_commit_btn.clicked.connect(self.app.quick_commit)
 
-        self.quick_tag_main_btn = QPushButton("🌟 Main Mix")
-        self.quick_tag_main_btn.setToolTip("Tag the selected snapshot as your Main Mix")
+        self.quick_tag_main_btn = QPushButton(BTN_MAIN_MIX)
+        self.quick_tag_main_btn.setToolTip(TOOLTIP_TAG_MAIN_MIX)
         if self.app and hasattr(self.app, "tag_main_mix"):
             self.quick_tag_main_btn.clicked.connect(self.app.tag_main_mix)
 
-        self.quick_tag_creative_btn = QPushButton("🎨 Creative")
-        self.quick_tag_creative_btn.setToolTip("Tag the selected snapshot as a creative take")
+        self.quick_tag_creative_btn = QPushButton(BTN_CREATIVE_TAKE)
+        self.quick_tag_creative_btn.setToolTip(TOOLTIP_TAG_CREATIVE)
         if self.app and hasattr(self.app, "tag_creative_take"):
             self.quick_tag_creative_btn.clicked.connect(self.app.tag_creative_take)
 
-        self.quick_tag_alt_btn = QPushButton("🎛️ Alt Mix")
-        self.quick_tag_alt_btn.setToolTip("Tag the selected snapshot as an alternate version")
+        self.quick_tag_alt_btn = QPushButton(BTN_ALT_MIX)
+        self.quick_tag_alt_btn.setToolTip(TOOLTIP_TAG_ALT_MIX)
         if self.app and hasattr(self.app, "tag_alt_mix"):
             self.quick_tag_alt_btn.clicked.connect(self.app.tag_alt_mix)
 
-        self.open_commit_page_btn = QPushButton("✏️ Open Commit Panel")
-        self.open_commit_page_btn.setToolTip("Open full snapshot editor")
+        self.open_commit_page_btn = QPushButton(BTN_OPEN_COMMIT_PANEL)
+        self.open_commit_page_btn.setToolTip(TOOLTIP_OPEN_COMMIT_PANEL)
         if self.app and hasattr(self.app, "pages"):
             self.open_commit_page_btn.clicked.connect(lambda: self.app.pages.switch_to("commit"))
 

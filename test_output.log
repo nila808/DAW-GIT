@@ -5201,3 +5201,1318 @@ tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2 [DEBUG] 
 PASSED
 
 ============================== 5 passed in 6.19s ===============================
+============================= test session starts ==============================
+platform darwin -- Python 3.12.3, pytest-8.3.5, pluggy-1.5.0 -- /Users/niccavendish/.pyenv/versions/3.12.3/bin/python3.12
+cachedir: .pytest_cache
+PyQt6 6.9.0 -- Qt runtime 6.9.0 -- Qt compiled 6.9.0
+rootdir: /Users/niccavendish/Projects/DAWGitApp
+configfile: pytest.ini
+plugins: qt-4.4.0, env-1.1.5, timeout-2.4.0, rich-0.2.0
+timeout: 10.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 5 items
+
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[Main Mix] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_5f786809f3a94985b38c2d24b3b2ce3c/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[creative_take] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_34ba1cca33e94aa0bd8c1be17b210a79/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[alt_mixdown] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_4830a331f0e24e4485e9fc5f8561a102/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[my_custom_tag] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_6cb8fa7a86a94f46922f4924edac3128/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2 [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-1/test_tag_custom_label_assigns_0/.dawgit_roles.json
+FAILED
+
+=================================== FAILURES ===================================
+__________________ test_assign_commit_role_variants[Main Mix] __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d89d970>
+qtbot = <pytestqt.qtbot.QtBot object at 0x10d89da60>, label = 'Main Mix'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x10d8aca50>
+parent = <daw_git_gui.DAWGitApp object at 0x109d8c370>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+>       self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+E       NameError: name 'RETURN_TO_LATEST_BTN' is not defined
+
+snapshot_browser_page.py:76: NameError
+_______________ test_assign_commit_role_variants[creative_take] ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10dc96ff0>
+qtbot = <pytestqt.qtbot.QtBot object at 0x10dc970e0>, label = 'creative_take'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x10dc93570>
+parent = <daw_git_gui.DAWGitApp object at 0x10dc93250>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+>       self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+E       NameError: name 'RETURN_TO_LATEST_BTN' is not defined
+
+snapshot_browser_page.py:76: NameError
+________________ test_assign_commit_role_variants[alt_mixdown] _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10dc97380>
+qtbot = <pytestqt.qtbot.QtBot object at 0x10dc971a0>, label = 'alt_mixdown'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x10dc93ed0>
+parent = <daw_git_gui.DAWGitApp object at 0x10dc92f30>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+>       self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+E       NameError: name 'RETURN_TO_LATEST_BTN' is not defined
+
+snapshot_browser_page.py:76: NameError
+_______________ test_assign_commit_role_variants[my_custom_tag] ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10dccb380>
+qtbot = <pytestqt.qtbot.QtBot object at 0x10dcca5d0>, label = 'my_custom_tag'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x10dcdaad0>
+parent = <daw_git_gui.DAWGitApp object at 0x10dcda490>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+>       self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+E       NameError: name 'RETURN_TO_LATEST_BTN' is not defined
+
+snapshot_browser_page.py:76: NameError
+______________________ test_tag_custom_label_assigns_alt2 ______________________
+
+mock_input = <MagicMock name='getText' id='4386917504'>
+tmp_path = PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-1/test_tag_custom_label_assigns_0')
+qtbot = <pytestqt.qtbot.QtBot object at 0x1057b06b0>
+
+    @patch("PyQt6.QtWidgets.QInputDialog.getText", return_value=("alt_2", True))
+    def test_tag_custom_label_assigns_alt2(mock_input, tmp_path, qtbot):
+        (tmp_path / "track.als").write_text("Ableton")
+    
+        repo = Repo.init(tmp_path)
+        git_add_and_commit(repo, tmp_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(tmp_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x10dc93390>
+parent = <daw_git_gui.DAWGitApp object at 0x10dc93890>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+>       self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+E       NameError: name 'RETURN_TO_LATEST_BTN' is not defined
+
+snapshot_browser_page.py:76: NameError
+=========================== short test summary info ============================
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[Main Mix]
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[creative_take]
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[alt_mixdown]
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[my_custom_tag]
+FAILED tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2
+============================== 5 failed in 2.44s ===============================
+============================= test session starts ==============================
+platform darwin -- Python 3.12.3, pytest-8.3.5, pluggy-1.5.0 -- /Users/niccavendish/.pyenv/versions/3.12.3/bin/python3.12
+cachedir: .pytest_cache
+PyQt6 6.9.0 -- Qt runtime 6.9.0 -- Qt compiled 6.9.0
+rootdir: /Users/niccavendish/Projects/DAWGitApp
+configfile: pytest.ini
+plugins: qt-4.4.0, env-1.1.5, timeout-2.4.0, rich-0.2.0
+timeout: 10.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 5 items
+
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[Main Mix] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_89b6d555ca384a56b0a1ec738da89900/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[creative_take] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_4846738d173547b082fa0d5d18433203/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[alt_mixdown] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_41874f858a53450785762eba29b7a938/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[my_custom_tag] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_ad843c4c36104cb1934c0d4a63beda7d/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2 [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+FAILED
+
+=================================== FAILURES ===================================
+__________________ test_assign_commit_role_variants[Main Mix] __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x119765dc0>
+qtbot = <pytestqt.qtbot.QtBot object at 0x119765eb0>, label = 'Main Mix'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x119770c30>
+parent = <daw_git_gui.DAWGitApp object at 0x115b48370>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+_______________ test_assign_commit_role_variants[creative_take] ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11a746ed0>
+qtbot = <pytestqt.qtbot.QtBot object at 0x11a746fc0>, label = 'creative_take'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x11a7436b0>
+parent = <daw_git_gui.DAWGitApp object at 0x11a743390>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+________________ test_assign_commit_role_variants[alt_mixdown] _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11a747170>
+qtbot = <pytestqt.qtbot.QtBot object at 0x11a747b30>, label = 'alt_mixdown'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x11a788190>
+parent = <daw_git_gui.DAWGitApp object at 0x11a743070>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+_______________ test_assign_commit_role_variants[my_custom_tag] ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11a776b70>
+qtbot = <pytestqt.qtbot.QtBot object at 0x11a7769f0>, label = 'my_custom_tag'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x11a78ad50>
+parent = <daw_git_gui.DAWGitApp object at 0x11a78a710>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+______________________ test_tag_custom_label_assigns_alt2 ______________________
+
+mock_input = <MagicMock name='getText' id='4659969152'>
+tmp_path = PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0')
+qtbot = <pytestqt.qtbot.QtBot object at 0x115c17b90>
+
+    @patch("PyQt6.QtWidgets.QInputDialog.getText", return_value=("alt_2", True))
+    def test_tag_custom_label_assigns_alt2(mock_input, tmp_path, qtbot):
+        (tmp_path / "track.als").write_text("Ableton")
+    
+        repo = Repo.init(tmp_path)
+        git_add_and_commit(repo, tmp_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(tmp_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x111552a30>
+parent = <daw_git_gui.DAWGitApp object at 0x111552b70>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+=========================== short test summary info ============================
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[Main Mix]
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[creative_take]
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[alt_mixdown]
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[my_custom_tag]
+FAILED tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2
+============================== 5 failed in 2.28s ===============================
+============================= test session starts ==============================
+platform darwin -- Python 3.12.3, pytest-8.3.5, pluggy-1.5.0 -- /Users/niccavendish/.pyenv/versions/3.12.3/bin/python3.12
+cachedir: .pytest_cache
+PyQt6 6.9.0 -- Qt runtime 6.9.0 -- Qt compiled 6.9.0
+rootdir: /Users/niccavendish/Projects/DAWGitApp
+configfile: pytest.ini
+plugins: qt-4.4.0, env-1.1.5, timeout-2.4.0, rich-0.2.0
+timeout: 10.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 5 items
+
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[Main Mix] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_a83443b79fbd4c669ff2474b03d997d2/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[creative_take] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_e9a1e2c21cb14c51844bd720e41d4ab2/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[alt_mixdown] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_93ee4b9bebed4072a4d84b76fdf40cbb/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[my_custom_tag] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_a45329027b0849399fc2f8a68e5ab8fe/.dawgit_roles.json
+FAILED
+tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2 [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+FAILED
+
+=================================== FAILURES ===================================
+__________________ test_assign_commit_role_variants[Main Mix] __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x118c6d880>
+qtbot = <pytestqt.qtbot.QtBot object at 0x118c6d9d0>, label = 'Main Mix'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x118c7ccd0>
+parent = <daw_git_gui.DAWGitApp object at 0x11501c370>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+_______________ test_assign_commit_role_variants[creative_take] ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11906b080>
+qtbot = <pytestqt.qtbot.QtBot object at 0x11906b170>, label = 'creative_take'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x119067750>
+parent = <daw_git_gui.DAWGitApp object at 0x119067430>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+________________ test_assign_commit_role_variants[alt_mixdown] _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11906b380>
+qtbot = <pytestqt.qtbot.QtBot object at 0x11906b290>, label = 'alt_mixdown'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x1190ac230>
+parent = <daw_git_gui.DAWGitApp object at 0x119067110>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+_______________ test_assign_commit_role_variants[my_custom_tag] ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11909b200>
+qtbot = <pytestqt.qtbot.QtBot object at 0x11909a0c0>, label = 'my_custom_tag'
+
+    @pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+    def test_assign_commit_role_variants(monkeypatch, qtbot, label):
+        project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
+        project_path.mkdir(parents=True)
+        (project_path / "track.als").write_text("init")
+    
+        repo = Repo.init(project_path)
+        git_add_and_commit(repo, project_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(project_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x1190aedf0>
+parent = <daw_git_gui.DAWGitApp object at 0x1190ae7b0>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+______________________ test_tag_custom_label_assigns_alt2 ______________________
+
+mock_input = <MagicMock name='getText' id='4648254544'>
+tmp_path = PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0')
+qtbot = <pytestqt.qtbot.QtBot object at 0x1150eb740>
+
+    @patch("PyQt6.QtWidgets.QInputDialog.getText", return_value=("alt_2", True))
+    def test_tag_custom_label_assigns_alt2(mock_input, tmp_path, qtbot):
+        (tmp_path / "track.als").write_text("Ableton")
+    
+        repo = Repo.init(tmp_path)
+        git_add_and_commit(repo, tmp_path, "track.als", message="init")
+    
+>       app = DAWGitApp(project_path=str(tmp_path), build_ui=True)
+
+tests_dawgit/test_commit_tagging.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+daw_git_gui.py:229: in __init__
+    self.setup_ui()
+daw_git_gui.py:341: in setup_ui
+    build_main_ui(self)
+gui_layout.py:43: in build_main_ui
+    app.snapshot_page = SnapshotBrowserPage(app)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <snapshot_browser_page.SnapshotBrowserPage object at 0x110a16a30>
+parent = <daw_git_gui.DAWGitApp object at 0x110a16b70>
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.app = parent  # Safe access to DAWGitApp
+        layout = QVBoxLayout(self)
+    
+        # 🎧 Header
+        self.title_label = QLabel("🎧 Snapshot Browser")
+        layout.addWidget(self.title_label)
+    
+        # 📜 Commit History Table
+        self.commit_table = QTableWidget()
+        self.commit_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.commit_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+    
+        layout.addWidget(self.commit_table)
+        self.commit_table.setColumnCount(9)
+        self.commit_table.setHorizontalHeaderLabels([
+            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+        ])
+        self.commit_table.setSortingEnabled(True)
+        self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
+    
+        self.commit_table.setAlternatingRowColors(True)
+        self.commit_table.setStyleSheet("""
+            QTableWidget::item:selected {
+                background-color: #b3d9ff;  /* light blue highlight */
+            }
+        """)
+        self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
+    
+        # 📦 Status
+        self.status_label = QLabel("📦 Ready")
+        layout.addWidget(self.status_label)
+    
+        # 📥 Load + Info
+        self.load_snapshot_btn = QPushButton(BTN_LOAD_SNAPSHOT)
+        self.load_snapshot_btn.setToolTip(TOOLTIP_LOAD_VERSION_SAFELY)
+        if self.app and hasattr(self.app, "load_snapshot_clicked"):
+            self.load_snapshot_btn.clicked.connect(self.app.load_snapshot_clicked)
+        layout.addWidget(self.load_snapshot_btn)
+    
+        self.where_am_i_btn = QPushButton(BTN_WHERE_AM_I)
+        self.where_am_i_btn.setToolTip(TOOLTIP_SHOW_CURRENT_VERSION)
+        if self.app and hasattr(self.app, "show_current_commit"):
+            self.where_am_i_btn.clicked.connect(self.app.show_current_commit)
+        layout.addWidget(self.where_am_i_btn)
+    
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+>       self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
+E       NameError: name 'RETURN_TO_LATEST_TOOLTIP' is not defined
+
+snapshot_browser_page.py:77: NameError
+=========================== short test summary info ============================
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[Main Mix]
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[creative_take]
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[alt_mixdown]
+FAILED tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[my_custom_tag]
+FAILED tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2
+============================== 5 failed in 2.35s ===============================

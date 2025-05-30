@@ -39,4 +39,5 @@ def test_no_path_selection_resets_project(mock_app):
         assert mock_app.repo is None
         
         # Verify that no further actions were taken
-        assert mock_app.status_label.text() == "❌ No Git repo loaded."
+        # assert mock_app.status_label.text() == "❌ No Git repo loaded."
+        assert mock_app.status_label.text() == "Please load or set up a DAW project folder before continuing."

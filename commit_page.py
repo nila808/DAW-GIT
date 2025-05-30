@@ -9,7 +9,24 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QCheckBox
 )
 from PyQt6.QtCore import Qt
-from ui_strings import SNAPSHOT_EDIT_BLOCK_TOOLTIP
+
+from ui_strings import (
+    RETURN_TO_LATEST_BTN,
+    BTN_COMMIT_NOW,
+    BTN_TAG_MAIN_MIX,
+    BTN_TAG_CREATIVE_TAKE,
+    BTN_TAG_ALT_MIX,
+    BTN_TAG_CUSTOM_LABEL,
+    BTN_LAUNCH_DAW_FILE,
+    COMMIT_REQUIRED_MSG,
+    COMMIT_REQUIRED_MSG,
+    SNAPSHOT_EDIT_BLOCK_TOOLTIP, 
+    TOOLTIP_RETURN_TO_LATEST,
+    TOOLTIP_LAUNCH_DAW_FILE,  
+    TAG_MAIN_MIX_LABEL,
+    TAG_CREATIVE_LABEL,
+    TAG_ALT_LABEL
+)
 
 
 class CommitPage(QWidget):
@@ -43,28 +60,28 @@ class CommitPage(QWidget):
         self.auto_save_toggle.stateChanged.connect(self.toggle_auto_commit)
 
         # 🎯 Return to Latest button
-        self.return_to_latest_btn = QPushButton("🎯 Return to Latest")
-        self.return_to_latest_btn.setToolTip("Return to the most recent snapshot on your version line")
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+        self.return_to_latest_btn.setToolTip(TOOLTIP_RETURN_TO_LATEST)
         if parent and hasattr(parent, "return_to_latest_clicked"):
             self.return_to_latest_btn.clicked.connect(parent.return_to_latest_clicked)
         layout.addWidget(self.return_to_latest_btn)
 
         # 💾 Commit button
-        self.commit_button = QPushButton("💾 Commit Now")
+        self.commit_button = QPushButton(BTN_COMMIT_NOW)
         layout.addWidget(self.commit_button)
         self.commit_button.clicked.connect(self.commit_snapshot)
 
-        self.btn_version_main = QPushButton("Main Mix")
-        self.btn_version_creative = QPushButton("Creative")
-        self.btn_version_alt = QPushButton("Alt Mix")
+        self.btn_version_main = QPushButton(TAG_MAIN_MIX_LABEL)
+        self.btn_version_creative = QPushButton(TAG_CREATIVE_LABEL)
+        self.btn_version_alt = QPushButton(TAG_ALT_LABEL)
 
 
         # 🏷️ Tagging Buttons
         tag_layout = QHBoxLayout()
-        self.tag_main_btn = QPushButton("🌟 Mark as Final Mix")
-        self.tag_creative_btn = QPushButton("🎨 Mark as Creative Version")
-        self.tag_alt_btn = QPushButton("🎛️ Mark as Alternate Mix")
-        self.tag_custom_btn = QPushButton("✏️ Add Custom Tag")
+        self.tag_main_btn = QPushButton(BTN_TAG_MAIN_MIX)
+        self.tag_creative_btn = QPushButton(BTN_TAG_CREATIVE_TAKE)
+        self.tag_alt_btn = QPushButton(BTN_TAG_ALT_MIX)
+        self.tag_custom_btn = QPushButton(BTN_TAG_CUSTOM_LABEL)
         tag_layout.addWidget(self.tag_main_btn)
         tag_layout.addWidget(self.tag_creative_btn)
         tag_layout.addWidget(self.tag_alt_btn)
@@ -77,8 +94,8 @@ class CommitPage(QWidget):
         self.tag_custom_btn.clicked.connect(self.app.tag_custom_label)
 
         # 🎧 Open in DAW button
-        self.open_in_daw_btn = QPushButton("🎧 Open This Version in Ableton")
-        self.open_in_daw_btn.setToolTip("Launch Ableton with the checked-out snapshot")
+        self.open_in_daw_btn = QPushButton(BTN_LAUNCH_DAW_FILE)
+        self.open_in_daw_btn.setToolTip(TOOLTIP_LAUNCH_DAW_FILE)
         self.open_in_daw_btn.setVisible(False)  # Hidden by default
         layout.addWidget(self.open_in_daw_btn)
 
@@ -105,14 +122,15 @@ class CommitPage(QWidget):
             self.snapshot_status_label.setText(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
             self.snapshot_status_label.setToolTip(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
         else:
-            self.snapshot_status_label.setText("")
-            self.snapshot_status_label.setToolTip("")
+            self.snapshot_status_label.setText("") # intentionally blank
+            self.snapshot_status_label.setToolTip("") # intentionally blank
 
 
     def commit_snapshot(self):
         message = self.commit_message.toPlainText().strip()
         if not message:
-            self.status_label.setText("❌ Commit message is required.")
+            self.status_label.setText(COMMIT_REQUIRED_MSG)
+            self.status_label.setText(COMMIT_MESSAGE_REQUIRED_STATUS)
             return
 
         result = self.app.commit_changes(commit_message=message)

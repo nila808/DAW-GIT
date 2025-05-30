@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# --- Always run from repo root ---
+cd "$(git rev-parse --show-toplevel)"
+
 VERSION="$1"
 MESSAGE="$2"
 
@@ -22,11 +25,24 @@ if [[ -z "$MESSAGE" ]]; then
   MESSAGE="📦 $VERSION: 🔖 automated release commit"
 fi
 
-# 🧪 Run test suite with full output
+# --- Check if tag already exists ---
+if git rev-parse "$VERSION" >/dev/null 2>&1; then
+  echo "❌ Tag '$VERSION' already exists. Use a new tag."
+  exit 1
+fi
+
+echo "✅ Automatically staging all changes with 'git add .'"
+git add .
+
+echo ""
+echo "🔍 Git status before tests:"
+git status --short
+
+# --- Run test suite ---
 echo "🧪 Running test suite..."
-# 🧪 Enable test mode
 export DAWGIT_TEST_MODE=1
 export DAWGIT_FORCE_INPUT=1
+
 pytest -v || {
   echo ""
   echo "❌ Tests failed — aborting release."
@@ -35,7 +51,10 @@ pytest -v || {
 }
 echo "✅ All tests passed."
 
-# 🧾 Project Status
+# ✅ All green — now commit and release
+echo "✅ All tests passed — proceeding with commit and release..."
+
+# --- Update project status ---
 echo "🔧 Updating PROJECT_STATUS.md..."
 if [[ -f PROJECT_STATUS.md ]]; then
   sed -i '' "s/^Current Version:.*/Current Version: $VERSION/" PROJECT_STATUS.md
@@ -43,11 +62,11 @@ else
   echo "Current Version: $VERSION" > PROJECT_STATUS.md
 fi
 
-# 📖 Changelog
+# --- Update changelog ---
 echo "📝 Updating CHANGELOG.md..."
 echo "- $VERSION ($(date +%Y-%m-%d)): $MESSAGE" >> CHANGELOG.md
 
-# 🧩 Project Marker
+# --- Update marker file ---
 echo "📁 Updating PROJECT_MARKER.json..."
 if [[ -f PROJECT_MARKER.json ]]; then
   jq --arg ver "$VERSION" '.version = $ver' PROJECT_MARKER.json > tmp_marker && mv tmp_marker PROJECT_MARKER.json
@@ -55,7 +74,7 @@ else
   echo "{ \"version\": \"$VERSION\" }" > PROJECT_MARKER.json
 fi
 
-# 📦 Git
+# --- Git Commit + Push + Tag ---
 echo "📦 Staging all changes..."
 git add -A
 

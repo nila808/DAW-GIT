@@ -2,6 +2,20 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QCheckBox
 )
 from PyQt6.QtCore import Qt
+from ui_strings import (
+    BTN_START_TRACKING,
+    BTN_LOAD_ALT_SESSION,
+    BTN_CHANGE_PROJECT_FOLDER,
+    BTN_CLEAR_SAVED_PROJECT,
+    BTN_EXPORT_SNAPSHOT,
+    BTN_IMPORT_SNAPSHOT,
+    BTN_RESTORE_BACKUP,
+    BTN_CONNECT_REMOTE_REPO, 
+    CLICK_TO_OPEN_IN_FINDER_TOOLTIP, 
+    SETUP_REMOTE_TOOLTIP
+)
+
+
 
 class ProjectSetupPage(QWidget):
     def __init__(self, parent=None):
@@ -21,7 +35,7 @@ class ProjectSetupPage(QWidget):
             Qt.TextInteractionFlag.LinksAccessibleByMouse
         )
         self.app.project_label.setOpenExternalLinks(True)
-        self.app.project_label.setToolTip("Click to open in Finder")
+        self.app.project_label.setToolTip(CLICK_TO_OPEN_IN_FINDER_TOOLTIP)
         self.app.project_label.setWordWrap(True)
         layout.addWidget(self.app.project_label)
 
@@ -31,8 +45,8 @@ class ProjectSetupPage(QWidget):
         layout.addWidget(self.app.path_label)
 
         # 🛠️ Setup + Load
-        self.setup_btn = QPushButton("Start Tracking")
-        self.load_alt_btn = QPushButton("Load Alternate Session")
+        self.setup_btn = QPushButton(BTN_START_TRACKING)
+        self.load_alt_btn = QPushButton(BTN_LOAD_ALT_SESSION)
 
         setup_row = QHBoxLayout()
         setup_row.addWidget(self.setup_btn)
@@ -44,8 +58,8 @@ class ProjectSetupPage(QWidget):
 
         # 📁 Folder controls
         folder_controls = QHBoxLayout()
-        self.change_folder_btn = QPushButton("Change Project Folder")
-        self.clear_project_btn = QPushButton("Clear Saved Project")
+        self.change_folder_btn = QPushButton(BTN_CHANGE_PROJECT_FOLDER)
+        self.clear_project_btn = QPushButton(BTN_CLEAR_SAVED_PROJECT)
         folder_controls.addWidget(self.change_folder_btn)
         folder_controls.addWidget(self.clear_project_btn)
         layout.addLayout(folder_controls)
@@ -55,9 +69,9 @@ class ProjectSetupPage(QWidget):
 
         # 📦 Snapshot export/import
         snapshot_controls = QHBoxLayout()
-        self.export_btn = QPushButton("Export Snapshot")
-        self.import_btn = QPushButton("Import Snapshot")
-        self.restore_btn = QPushButton("Restore Last Backup")
+        self.export_btn = QPushButton(BTN_EXPORT_SNAPSHOT)
+        self.import_btn = QPushButton(BTN_IMPORT_SNAPSHOT)
+        self.restore_btn = QPushButton(BTN_RESTORE_BACKUP)
         snapshot_controls.addWidget(self.export_btn)
         snapshot_controls.addWidget(self.import_btn)
         snapshot_controls.addWidget(self.restore_btn)
@@ -66,8 +80,8 @@ class ProjectSetupPage(QWidget):
         self.remote_checkbox = QCheckBox("Push to remote after snapshot")
         layout.addWidget(self.remote_checkbox)
 
-        self.connect_remote_btn = QPushButton("🔗 Connect to Remote Repo")
-        self.connect_remote_btn.setToolTip("Set up a remote Git URL (e.g. GitHub)")
+        self.connect_remote_btn = QPushButton(BTN_CONNECT_REMOTE_REPO)
+        self.connect_remote_btn.setToolTip(SETUP_REMOTE_TOOLTIP)
         self.connect_remote_btn.clicked.connect(self.app.connect_to_remote_repo)
 
         layout.addWidget(self.connect_remote_btn)

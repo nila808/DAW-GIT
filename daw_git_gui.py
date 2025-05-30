@@ -1,3 +1,4 @@
+from ui_strings import SNAPSHOT_MODE_UNKNOWN
 #!/usr/bin/env python3
 
 # --- Standard Library ---
@@ -20,52 +21,137 @@ from gui_layout import build_main_ui
 from daw_git_core import GitProjectManager
 from daw_git_core import sanitize_git_input
 from ui_strings import (
-    ALREADY_ON_COMMIT_TITLE, 
+    # === General Status & Info ===
+    STATUS_READY,
+    HEADS_UP_MSG,
+    HEADS_UP_TITLE,
+    SESSION_SETUP_FAILED_MSG,
+    PROJECT_RESTORED_MSG,
+    TRACKING_NONE,
+    CURRENT_BRANCH_UNKNOWN,
+    CURRENT_COMMIT_UNKNOWN,
+    INVALID_REPO_MSG,
+    GIT_NOT_INITIALIZED_MSG,
+    ALREADY_ON_COMMIT_TITLE,
     ALREADY_ON_COMMIT_MESSAGE,
-    COMMIT_SUCCESS_TITLE,
-    COMMIT_SUCCESS_MSG,
-    COMMIT_INFO_EMPTY,
-    CURRENT_COMMIT_TITLE,
-    AUTO_SAVE_TITLE,
-    RETURN_TO_LATEST_TITLE,
-    RETURN_TO_LATEST_MSG,
+
+    # === Snapshot View / State ===
+    SNAPSHOT_INFO_TITLE,
+    SNAPSHOT_INFO_MSG,
     SNAPSHOT_ALREADY_VIEWING_TITLE,
     SNAPSHOT_ALREADY_VIEWING_MSG,
     SNAPSHOT_EDIT_BLOCK_TOOLTIP,
-    PROJECT_RESTORED_TITLE,
-    PROJECT_RESTORED_MSG,
-    ALREADY_ON_BRANCH_TITLE,
-    ALREADY_ON_BRANCH_MSG,
-    BACKUP_RESTORED_TITLE,
-    BACKUP_RESTORED_MSG,
-    NO_BACKUP_FOUND_MSG,
-    NO_REPO_TITLE,
-    NO_REPO_MSG,
-    NO_SNAPSHOT_SELECTED_MSG,
+    SNAPSHOT_EDIT_UNKNOWN,
+    SNAPSHOT_MODE_UNKNOWN,
+    SNAPSHOT_NO_VERSION_LINE,
+    SNAPSHOT_READONLY_TOOLTIP,
+    SNAPSHOT_HISTORY_LOADING,
+    SNAPSHOT_HISTORY_LOADED,
+    SNAPSHOT_LOAD_SUCCESS,
+    SNAPSHOT_LOAD_FAILED,
+    SNAPSHOT_SAVED_AUTODISABLED,
+    SNAPSHOT_SAVED_WAITING,
+    SNAPSHOT_SAVED_WAITING_TOOLTIP,
+
+    # === Commit / Snapshot Status ===
+    COMMIT_SUCCESS_TITLE,
+    COMMIT_SUCCESS_MSG,
+    CURRENT_COMMIT_TITLE,
+    COMMIT_INFO_EMPTY,
+    COMMIT_INFO_TITLE,
+    COMMIT_REQUIRED_MSG,
+
+    # === Snapshot Selection & Errors ===
     NO_SELECTION_TITLE,
     NO_SELECTION_MSG,
-    DELETE_ROOT_ERROR_TITLE,
-    DELETE_ROOT_ERROR_MSG,
-    INVALID_LABEL_TITLE,
-    INVALID_LABEL_MSG,
+    NO_SNAPSHOT_SELECTED_TITLE,
+    NO_SNAPSHOT_SELECTED_MSG,
+    NO_VERSION_SELECTED_MSG,
     COMMIT_NOT_FOUND_TITLE,
     COMMIT_NOT_FOUND_MSG,
-    DETACHED_HEAD_TITLE,
-    DETACHED_HEAD_MSG,
-    DIRTY_EDIT_WARNING,
-    HEADS_UP_TITLE,
+
+    # === Repo Errors ===
+    NO_REPO_TITLE,
+    NO_REPO_MSG,
     NO_REPO_COMMIT_TITLE,
     NO_REPO_COMMIT_MSG,
-    NO_REPO_STATUS_LABEL,
     NO_REPO_SAVE_MSG,
-    SNAPSHOT_INFO_TITLE, 
-    SNAPSHOT_INFO_MSG,
-    SNAPSHOT_EDIT_BLOCK_TOOLTIP,
+    NO_REPO_STATUS_LABEL,
+
+    # === Commit Errors ===
+    DELETE_FAILED_TITLE,
+    DELETE_FAILED_MSG,
+    CANT_DELETE_ROOT_TITLE,
+    CANT_DELETE_ROOT_MSG,
+    COULDNT_SWITCH_TITLE,
+    COULDNT_SWITCH_MSG,
+    CHECKOUT_FAILED_TITLE,
+    CHECKOUT_FAILED_MSG,
+    REBASE_FAILED_TITLE,
+    REBASE_FAILED_MSG,
+    UNEXPECTED_ERROR_TITLE,
+    UNEXPECTED_ERROR_MSG,
+    UNEXPECTED_ISSUE_TITLE,
+    UNEXPECTED_ISSUE_MSG,
+    CROSS_BRANCH_COMMIT_MSG,
+
+    # === Branching ===
+    ALREADY_ON_BRANCH_TITLE,
+    ALREADY_ON_BRANCH_MSG,
+    DETACHED_HEAD_LABEL,
+    DETACHED_HEAD_MSG,
+    DETACHED_HEAD_LABEL,
+
+    # === Backup ===
+    BACKUP_RESTORED_TITLE,
+    BACKUP_RESTORED_MSG,
+    NO_BACKUP_FOUND_TITLE,
+    NO_BACKUP_FOUND_MSG,
+
+    # === Remote ===
+    REMOTE_ADDED_TITLE,
+    REMOTE_ADDED_MSG,
+    REMOTE_SETUP_FAILED_TITLE,
+    REMOTE_SETUP_FAILED_MSG,
+
+    # === Warnings & Safety ===
     UNSAVED_CHANGES_TITLE,
-    UNSAVED_CHANGES_WARNING, 
-    UNSAFE_DIRTY_EDITS_TITLE, 
-    UNSAFE_DIRTY_EDITS_MSG
+    UNSAVED_CHANGES_WARNING,
+    UNSAFE_DIRTY_EDITS_TITLE,
+    UNSAFE_DIRTY_EDITS_MSG,
+    DIRTY_EDIT_WARNING,
+
+    # === Return to Latest ===
+    RETURN_TO_LATEST_TITLE,
+    RETURN_TO_LATEST_MSG,
+    TOOLTIP_RETURN_TO_LATEST,
+
+    # === UI Labels & Buttons ===
+    COMMIT_CHANGES_BTN,
+    CONNECT_REMOTE_BTN,
+    START_NEW_VERSION_BTN,
+    TAG_SNAPSHOT_BTN,
+    RETURN_TO_LATEST_BTN,
+    BTN_TAG_MAIN_MIX,
+    BTN_TAG_CREATIVE_TAKE,
+    BTN_TAG_ALT_MIX,
+    BTN_TAG_CUSTOM_LABEL,
+    BTN_LAUNCH_DAW_FILE,
+    BTN_OPEN_VERSION_IN_DAW,
+    BTN_OPEN_COMMIT_PANEL,
+    BTN_MAIN_MIX,
+    BTN_CREATIVE_TAKE,
+    BTN_ALT_MIX,
+    BTN_LOAD_SNAPSHOT,
+    BTN_WHERE_AM_I,
+    BTN_QUICK_SAVE, 
+    SNAPSHOT_MODE_UNKNOWN,
+    SNAPSHOT_EDITABLE_TOOLTIP, 
+    STATUS_UNKNOWN, 
+    STATUS_READY
+    
 )
+
 
 
 # --- Git ---
@@ -196,14 +282,14 @@ class DAWGitApp(QMainWindow):
                 if hasattr(self, "project_label"):
                     self.project_label.setText(f"🎵 Tracking Project: {self.project_path.name}")
                 if hasattr(self, "status_label"):
-                    self.snapshot_page.status_label.setText("🎶 Project loaded from last session.")
+                    self.snapshot_page.status_label.setText(PROJECT_RESTORED_MSG)
                 if build_ui and hasattr(self, "history_table"):
                     self.load_commit_history()
             else:
                 if hasattr(self, "project_label"):
-                    self.project_label.setText("❌ Could not load session.")
+                    self.project_label.setText(SNAPSHOT_LOAD_FAILED)
                 if hasattr(self, "status_label"):
-                    self.snapshot_page.status_label.setText("⚠️ Invalid repo setup.")
+                    self.snapshot_page.status_label.setText(INVALID_REPO_MSG)
 
         elif build_ui:
             folder = QFileDialog.getExistingDirectory(self, "🎵 Select Your DAW Project Folder")
@@ -235,14 +321,14 @@ class DAWGitApp(QMainWindow):
                     if hasattr(self, "project_label"):
                         self.project_label.setText(f"🎵 Tracking Project: {self.project_path.name}")
                     if hasattr(self, "status_label"):
-                        self.snapshot_page.status_label.setText("🎚️ New project selected.")
+                        self.snapshot_page.status_label.setText(NEW_PROJECT_SELECTED_MSG)
                     if hasattr(self, "history_table"):
                         self.load_commit_history()
                 else:
                     if hasattr(self, "project_label"):
-                        self.project_label.setText("❌ Could not load session.")
+                        self.project_label.setText(SNAPSHOT_LOAD_FAILED)
                     if hasattr(self, "status_label"):
-                        self.snapshot_page.status_label.setText("⚠️ Invalid repo setup.")
+                        self.snapshot_page.status_label.setText(INVALID_REPO_MSG)
             else:
                 QMessageBox.information(
                     self,
@@ -250,9 +336,9 @@ class DAWGitApp(QMainWindow):
                     "🎛️ No project folder selected. Click 'Setup Project' to start tracking your music session."
                 )
                 if hasattr(self, "project_label"):
-                    self.project_label.setText("🎵 Tracking: None")
+                    self.project_label.setText(TRACKING_NONE)
                 if hasattr(self, "status_label"):
-                    self.snapshot_page.status_label.setText("Ready to roll.")
+                    self.snapshot_page.status_label.setText(STATUS_READY)
 
         # ✅ Final UI sync safety net
         if hasattr(self, "status_label"):
@@ -306,7 +392,7 @@ class DAWGitApp(QMainWindow):
 
             # ✅ Only access snapshot_page if it exists
             if hasattr(self, "snapshot_page"):
-                self.snapshot_page.status_label.setText("❌ No Git repo loaded.")
+                self.snapshot_page.status_label.setText(NO_REPO_MSG)
                 self.status_label = self.snapshot_page.status_label
                 self.update()
             return
@@ -316,7 +402,7 @@ class DAWGitApp(QMainWindow):
         self.clear_last_project_path()
         self.project_path = None
         if hasattr(self, "snapshot_page"):
-            self.snapshot_page.status_label.setText("❌ No Git repo loaded.")
+            self.snapshot_page.status_label.setText(NO_REPO_MSG)
             self.update()
         return
 
@@ -328,7 +414,7 @@ class DAWGitApp(QMainWindow):
         self.project_path = None  # Explicitly clear the project path to prevent any further operations
 
         # Update status label to reflect no repo loaded
-        self.snapshot_page.status_label.setText("❌ No Git repo loaded.")  # Set the status label text
+        self.snapshot_page.status_label.setText(NO_REPO_MSG) # Set the status label text
         self.update()  # Force the UI to refresh and update with new status
         return  # End method flow after "No"
 
@@ -490,9 +576,8 @@ class DAWGitApp(QMainWindow):
     def load_snapshot_clicked(self):
         selected_row = self.snapshot_page.commit_table.currentRow()
         if selected_row < 0:
-            QMessageBox.warning(self, "No Snapshot Selected", "Please select a version row to load.")
+            QMessageBox.warning(self, NO_SNAPSHOT_SELECTED_TITLE, NO_SNAPSHOT_SELECTED_MSG)
             return
-
         self.checkout_selected_commit()
 
 
@@ -519,7 +604,7 @@ class DAWGitApp(QMainWindow):
         Switch to a different branch/version line safely.
         """
         if not self.repo:
-            self.snapshot_page.status_label.setText("⚠️ No Git repo initialized.")
+            self.snapshot_page.status_label.setText(GIT_NOT_INITIALIZED_MSG)
             return
 
         if branch_name not in [h.name for h in self.repo.heads]:
@@ -609,7 +694,7 @@ class DAWGitApp(QMainWindow):
         elif result["status"] == "detached":
             self.repo = self.git.repo  # still bind the repo to self
             if hasattr(self, "status_label"):
-                self.snapshot_page.status_label.setText("🔍 Detached snapshot • Not on a version line")
+                self.snapshot_page.status_label.setText(DETACHED_HEAD_LABEL)
             if hasattr(self, "detached_warning_label"):
                 self.detached_warning_label.setText(
                     "🧭 You’re viewing a snapshot — to save changes, return to latest or start a new version line."
@@ -692,18 +777,19 @@ class DAWGitApp(QMainWindow):
 
     def update_snapshot_mode_label(self):
         if not self.repo:
-            self.snapshot_mode_label.setText("🎧 Snapshot mode: unknown")
+            self.snapshot_mode_label.setText(SNAPSHOT_MODE_UNKNOWN_LINE)
             return
 
         if self.repo.head.is_detached:
-            self.snapshot_mode_label.setText("🎧 Snapshot mode: Not on an active version line")
+            self.snapshot_mode_label.setText(SNAPSHOT_UNKNOWN_STATE)
+
         else:
             try:
                 branch = self.repo.active_branch.name
                 sha = self.repo.head.commit.hexsha[:7]
                 self.snapshot_mode_label.setText(f"🎧 Editing: {sha} on {branch}")
             except Exception:
-                self.snapshot_mode_label.setText("🎧 Editing: unknown")
+                self.snapshot_mode_label.setText(SNAPSHOT_EDIT_UNKNOWN)
 
 
     def update_session_status_mode(self):
@@ -715,12 +801,12 @@ class DAWGitApp(QMainWindow):
         in_editable = ".dawgit_checkout_work" in str(self.project_path)
 
         if is_detached and not in_editable:
-            self.status_mode_label.setText("🎧 Snapshot mode: read-only preview")
-            self.status_mode_label.setToolTip("You’re previewing an old take. Start a new version to edit and save in your DAW.")
+            self.status_mode_label.setText(SNAPSHOT_READONLY_TOOLTIP)
+            self.status_mode_label.setToolTip(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
         else:
             branch = self.repo.active_branch.name if not is_detached else "detached"
             self.status_mode_label.setText(f"🎚️ Editing: version on '{branch}'")
-            self.status_mode_label.setToolTip("You’re working on the latest editable version.")
+            self.status_mode_label.setToolTip(SNAPSHOT_EDITABLE_TOOLTIP)
 
 
     def update_branch_dropdown(self):
@@ -761,7 +847,7 @@ class DAWGitApp(QMainWindow):
                     "❌ Could not locate a valid DAW project file to open."
                 )
         except Exception as e:
-            QMessageBox.critical(self, "Launch Failed", f"⚠️ Could not launch DAW:\n\n{e}")
+            QMessageBox.critical(self, LAUNCH_FAILED_TITLE, LAUNCH_FAILED_MSG.format(error=e))
 
 
     def get_relevant_dirty_files(self):
@@ -973,7 +1059,7 @@ class DAWGitApp(QMainWindow):
                 self.update_snapshot_status_labels()
 
                 if self.repo.head.is_detached:
-                    self.branch_label.setText("ℹ️ Detached snapshot — not on an active version line")
+                    self.branch_label.setText(SNAPSHOT_UNKNOWN_STATE)
                 else:
                     self.branch_label.setText(f"Session branch: {self.repo.active_branch.name} • Current take: {self.get_current_take_name()}")
 
@@ -1029,7 +1115,7 @@ class DAWGitApp(QMainWindow):
                 if is_detached and not in_editable:
                     self.commit_page.set_commit_controls_enabled(
                         False,
-                        "🎧 Snapshot mode: You’re previewing an old take. Start a new version to edit and save in your DAW."
+                        SNAPSHOT_EDIT_BLOCK_TOOLTIP
                     )
                 else:
                     self.commit_page.set_commit_controls_enabled(True, "")
@@ -1140,7 +1226,7 @@ class DAWGitApp(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Setup Error",
-                f"⚠️ Something went wrong while preparing your session:\n\n{e}"
+                UNEXPECTED_ISSUE_MSG.format(error=str(e))
             )
         if hasattr(self, "branch_page"):
             self.branch_page.populate_branches()
@@ -1153,7 +1239,7 @@ class DAWGitApp(QMainWindow):
 
         url, ok = QInputDialog.getText(
             self,
-            "🔗 Connect to Remote",
+            CONNECT_REMOTE_BTN,
             "Enter Git remote URL (e.g. https://github.com/user/repo.git):"
         )
 
@@ -1169,7 +1255,7 @@ class DAWGitApp(QMainWindow):
                 self.repo.delete_remote("origin")
 
             self.repo.create_remote("origin", url)
-            QMessageBox.information(self, "Remote Added", f"✅ Remote 'origin' set to:\n{url}")
+            QMessageBox.information(self, REMOTE_ADDED_TITLE, REMOTE_ADDED_MSG.format(url=url))
 
             # Optionally push current branch
             if self.repo.head.is_valid():
@@ -1186,8 +1272,7 @@ class DAWGitApp(QMainWindow):
                 )
 
         except Exception as e:
-            QMessageBox.critical(self, "Remote Setup Failed", f"❌ Could not set up remote:\n\n{e}")
-
+            QMessageBox.critical(self, REMOTE_SETUP_FAILED_TITLE, REMOTE_SETUP_FAILED_MSG.format(error=e))
 
 
     # Have removed the branch dropdown logic as the Load Alt Session button does the same thing
@@ -1281,14 +1366,14 @@ class DAWGitApp(QMainWindow):
                 branch = str(self.repo.head.ref) if self.repo.head.ref else "detached"
             self.branch_label.setText(f"Branch: {branch}")
         else:
-            self.branch_label.setText("Branch: unknown")
+            self.branch_label.setText(CURRENT_BRANCH_UNKNOWN)
 
     def update_commit_label(self):
         if self.repo.head.is_valid():
             short_sha = self.repo.head.commit.hexsha[:7]
             self.commit_label.setText(f"Commit: {short_sha}")
         else:
-            self.commit_label.setText("Commit: unknown")
+            self.commit_label.setText(CURRENT_COMMIT_UNKNOWN)
 
     def quick_commit(self):
         default_message = "Quick snapshot"
@@ -1315,7 +1400,7 @@ class DAWGitApp(QMainWindow):
 
         if commit_message is None:
             commit_message, ok = QInputDialog.getText(
-                self, "🎤 Commit Your Changes", "Enter commit message:"
+                self, COMMIT_CHANGES_BTN, "Enter commit message:"
             )
             if not ok or not isinstance(commit_message, str) or not commit_message.strip():
                 if hasattr(self, "_show_warning"):
@@ -1459,7 +1544,7 @@ class DAWGitApp(QMainWindow):
 
     def show_current_commit(self):
         if not self.repo or not self.repo.head.is_valid():
-            QMessageBox.information(self, "Commit Info", "No commits yet.")
+            QMessageBox.information(self, COMMIT_INFO_TITLE, COMMIT_INFO_EMPTY)
             return
 
         commits = list(self.repo.iter_commits(max_count=50))
@@ -1596,7 +1681,7 @@ class DAWGitApp(QMainWindow):
             reachable = [c.hexsha for c in self.repo.iter_commits()]
             if commit_sha not in reachable:
                 delete_action.setEnabled(False)
-                delete_action.setToolTip("❌ This commit is from another version line.")
+                delete_action.setToolTip(CROSS_BRANCH_COMMIT_MSG)
         except Exception as e:
             print(f"[WARN] Could not validate commit reachability: {e}")
 
@@ -1641,7 +1726,7 @@ class DAWGitApp(QMainWindow):
             branch_name = self.repo.active_branch.name
             self.version_line_label.setText(f"🎚️ You’re working on version line: {branch_name}")
         except Exception:
-            self.version_line_label.setText("🎧 Snapshot mode: no active version line")
+            self.version_line_label.setText(SNAPSHOT_MODE_UNKNOWN_LINE)
 
 
     def delete_selected_commit(self):
@@ -1656,7 +1741,7 @@ class DAWGitApp(QMainWindow):
 
         row = table.currentRow()
         if row == -1:
-            QMessageBox.warning(self, "No Selection", "Please select a snapshot to delete.")
+            QMessageBox.warning(self, NO_SELECTION_TITLE, "Please select a snapshot to delete.")
             return
 
         commit_id = table.item(row, 1).toolTip()
@@ -1684,7 +1769,7 @@ class DAWGitApp(QMainWindow):
                 raise Exception("Commit not found in history.")
 
             if not target_commit.parents:
-                QMessageBox.warning(self, "Can't Delete Root", "The very first commit in the repo cannot be deleted.")
+                QMessageBox.warning(self, CANT_DELETE_ROOT_TITLE, "The very first commit in the repo cannot be deleted.")
                 return
 
             parent_sha = target_commit.parents[0].hexsha
@@ -1713,7 +1798,7 @@ class DAWGitApp(QMainWindow):
             # self.open_latest_daw_project()
 
         except Exception as e:
-            QMessageBox.critical(self, "Delete Failed", f"Failed to delete commit:\n{e}")
+            QMessageBox.critical(self, DELETE_FAILED_TITLE, f"Failed to delete commit:\n{e}")
 
 
     def als_recently_modified(self, threshold_seconds=60):
@@ -1873,9 +1958,9 @@ class DAWGitApp(QMainWindow):
             # self.open_latest_daw_project()
 
         except subprocess.CalledProcessError as e:
-            QMessageBox.critical(self, "Rebase Failed", f"Git error:\n{e}")
+            QMessageBox.critical(self, REBASE_FAILED_TITLE, f"Git error:\n{e}")
         except Exception as e:
-            QMessageBox.critical(self, "Unexpected Error", f"❌ {e}")
+            QMessageBox.critical(self, UNEXPECTED_ERROR_TITLE, f"❌ {e}")
 
 
     def get_commit_sha(app, row):
@@ -2024,7 +2109,7 @@ class DAWGitApp(QMainWindow):
 
         label, ok = QInputDialog.getText(
             self,
-            "Tag Snapshot",
+            TAG_SNAPSHOT_BTN,
             "Enter a label (e.g., 'alt_take', 'pre_master', 'idea_A'):\n\n"
             "✅ Letters, numbers, dashes, underscores only.\n"
             "🚫 No spaces or special characters."
@@ -2208,11 +2293,11 @@ class DAWGitApp(QMainWindow):
         if hasattr(self, "auto_save_toggle") and self.auto_save_toggle:
             self.auto_save_toggle.setEnabled(False)
             self.auto_save_toggle.setEnabled(False)
-            self.auto_save_toggle.setToolTip("⏳ Saving snapshot...")
+            self.auto_save_toggle.setToolTip(SAVING_SNAPSHOT_LABEL)
 
         if hasattr(self, "snapshot_button") and self.snapshot_button:
             self.snapshot_button.setEnabled(False)
-            self.snapshot_button.setToolTip("⏳ Saving snapshot...")
+            self.snapshot_button.setToolTip(SAVING_SNAPSHOT_LABEL)
 
         try:
             subprocess.run(["git", "add", "-A"], cwd=self.project_path, env=self.custom_env(), check=True)
@@ -2251,14 +2336,14 @@ class DAWGitApp(QMainWindow):
 
             # ✅ Update tooltips to reflect final state
             if hasattr(self, "auto_save_toggle") and self.auto_save_toggle:
-                self.auto_save_toggle.setToolTip("✅ Snapshot saved. Auto-commit disabled until further changes.")
+                self.auto_save_toggle.setToolTip(SNAPSHOT_SAVED_AUTODISABLED)
 
             if hasattr(self, "snapshot_button") and self.snapshot_button:
-                self.snapshot_button.setToolTip("✅ Snapshot saved. Waiting for new changes.")
+                self.snapshot_button.setToolTip(SNAPSHOT_SAVED_WAITING_TOOLTIP)
 
             # Final confirmation
             msg = f"✅ Auto-commit completed:\n\n{message}"
-            QMessageBox.information(self, "Auto Save Complete", msg)
+            QMessageBox.information(self, AUTO_SAVE_TITLE, msg)
             print(f"✅ Auto-committed: {message}")
 
             # ✅ Refresh UI state to re-enable if new changes
@@ -2352,9 +2437,7 @@ class DAWGitApp(QMainWindow):
             if selected_row < 0:
                 current_sha = self.repo.head.commit.hexsha[:7] if self.repo else "unknown"
                 if self.sender():
-                    QMessageBox.information(self, "No Version Selected",
-                        f"🎚️ You didn’t select a version to load.\n\n"
-                        f"Current session: Commit ID {current_sha}")
+                    QMessageBox.information(self, NO_SNAPSHOT_SELECTED_TITLE, NO_SNAPSHOT_SELECTED_MSG)
                 return {"status": "cancelled", "message": "No version selected."}
 
             print(f"[DEBUG] selected_row = {selected_row}")
@@ -2367,13 +2450,14 @@ class DAWGitApp(QMainWindow):
                         commit_item = item
                         break
             if not commit_item:
-                QMessageBox.warning(self, "Commit Not Found", "❌ Could not find a valid commit at this row.")
+                QMessageBox.warning(self, COMMIT_NOT_FOUND_TITLE, "❌ Could not find a valid commit at this row.")
                 return {"status": "error", "message": "No commit item found."}
 
             print(f"[DEBUG] commit_item.text = {commit_item.text()}")
             print(f"[DEBUG] commit_item.toolTip = {commit_item.toolTip()}")
 
-            commit_sha = commit_item.toolTip() or commit_item.text().strip()
+            commit_sha = commit_item.toolTip().strip() if commit_item.toolTip() else self._get_full_sha(commit_item.text().strip())
+
 
             if not commit_sha:
                 return {"status": "error", "message": "No SHA available in commit row."}
@@ -2396,7 +2480,7 @@ class DAWGitApp(QMainWindow):
 
             # ⛔ Skip if already on this commit
 
-            if self.repo.head.commit.hexsha == commit_sha:
+            if commit_sha.startswith(self.repo.head.commit.hexsha[:7]):
                 QMessageBox.information(
                     self,
                     ALREADY_ON_COMMIT_TITLE,
@@ -2480,12 +2564,21 @@ class DAWGitApp(QMainWindow):
         
 
         except subprocess.CalledProcessError as e:
-            QMessageBox.critical(self, "Checkout Failed", f"❌ Could not switch versions:\n\n{e}")
+            QMessageBox.critical(self, CHECKOUT_FAILED_TITLE, f"❌ Could not switch versions:\n\n{e}")
             return {"status": "error", "message": str(e)}
 
         except Exception as e:
-            QMessageBox.critical(self, "Unexpected Error", f"⚠️ Unexpected error:\n\n{e}")
+            QMessageBox.critical(self, UNEXPECTED_ERROR_TITLE, f"⚠️ Unexpected error:\n\n{e}")
             return {"status": "error", "message": str(e)}
+
+
+    def _get_full_sha(self, short_sha):
+        """Return full-length SHA given a short version."""
+        try:
+            return next((c.hexsha for c in self.repo.iter_commits() if c.hexsha.startswith(short_sha)), short_sha)
+        except Exception as e:
+            print(f"[WARN] Could not resolve full SHA from short SHA '{short_sha}': {e}")
+            return short_sha
 
 
 
@@ -2820,7 +2913,7 @@ class DAWGitApp(QMainWindow):
 
         # Show loading message on UI
         if hasattr(self, "status_label"):
-            self.snapshot_page.status_label.setText("⏳ Loading snapshot history...")
+            self.snapshot_page.status_label.setText(SNAPSHOT_HISTORY_LOADING)
             QApplication.processEvents()  # Refresh UI immediately
 
         # Handle empty repo case
@@ -2832,7 +2925,7 @@ class DAWGitApp(QMainWindow):
             for col, text in enumerate(placeholders):
                 self.snapshot_page.commit_table.setItem(0, col, QTableWidgetItem(text))
             if hasattr(self, "status_label"):
-                self.snapshot_page.status_label.setText("✅ Snapshot history loaded.")
+                self.snapshot_page.status_label.setText(SNAPSHOT_HISTORY_LOADED)
             self.update_status_label()
             self.update_role_buttons()
             return
@@ -3064,7 +3157,7 @@ class DAWGitApp(QMainWindow):
     def start_new_version_line(self):
         raw_input, ok = QInputDialog.getText(
             self,
-            "🎼 Start New Version Line",
+            START_NEW_VERSION_BTN,
             "Name your new version line (e.g. 'alt_take2', 'live_mix', or 'idea_bounce'):\n\n"
             "✅ Use letters, numbers, dashes, or underscores.\n"
             "🚫 Avoid spaces, slashes, or special characters."
@@ -3198,7 +3291,7 @@ class DAWGitApp(QMainWindow):
             result = self.git.switch_branch(selected_branch)
 
             if result["status"] == "error":
-                QMessageBox.critical(self, "Couldn’t Switch", f"❌ Git error:\n\n{result['message']}")
+                QMessageBox.critical(self, COULDNT_SWITCH_TITLE, f"❌ Git error:\n\n{result['message']}")
                 return result
 
             if result["status"] == "detached":
@@ -3237,7 +3330,7 @@ class DAWGitApp(QMainWindow):
             return {"status": "success", "message": f"Switched to branch {selected_branch}"}
 
         except Exception as e:
-            QMessageBox.critical(self, "Unexpected Issue", f"⚠️ Something unexpected happened:\n\n{e}")
+            QMessageBox.critical(self, UNEXPECTED_ISSUE_TITLE, f"⚠️ Something unexpected happened:\n\n{e}")
             return {"status": "error", "message": str(e)}
 
 
@@ -3299,15 +3392,15 @@ class DAWGitApp(QMainWindow):
     def restore_last_backup(self):
         backups = sorted(Path(self.project_path.parent).glob(f"Backup_{self.project_path.name}_*"), reverse=True)
         if not backups:
-            QMessageBox.warning(self, "No Backup Found", "There are no backup folders for this project.")
+            QMessageBox.warning(self, NO_BACKUP_FOUND_TITLE, "There are no backup folders for this project.")
             return
 
         latest_backup = backups[0]
         for file in latest_backup.glob("*.*"):
             if file.is_file():
                 shutil.copy(file, self.project_path / file.name)
+        QMessageBox.information(self, BACKUP_RESTORED_TITLE, BACKUP_RESTORED_MSG.format(path=latest_backup))
 
-        QMessageBox.information(self, "Backup Restored", f"✅ Restored files from: {latest_backup}")
 
 
     def timerEvent(self, event):
@@ -3398,13 +3491,13 @@ class DAWGitApp(QMainWindow):
             return
 
         if not self.repo:
-            self.snapshot_page.status_label.setText("❌ No Git repo loaded.")
+            self.snapshot_page.status_label.setText(NO_REPO_MSG)
             print("[DEBUG] status label set: ❌ No Git repo loaded.")
             return
 
         try:
             if self.repo.head.is_detached:
-                self.snapshot_page.status_label.setText("📦 Snapshot loaded — read-only mode")
+                self.snapshot_page.status_label.setText(SNAPSHOT_LOAD_SUCCESS)
                 print("[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line")
 
             else:
@@ -3637,15 +3730,15 @@ class DAWGitApp(QMainWindow):
             
 
     def _show_info(self, message):
-        QMessageBox.information(self, "Heads up", message)
+        QMessageBox.information(self, HEADS_UP_TITLE, message)
 
 
     def _show_warning(self, message):
-        QMessageBox.warning(self, "Heads up", message)
+        QMessageBox.warning(self, HEADS_UP_TITLE, message)
 
 
     def _show_error(self, message):
-        QMessageBox.critical(self, "Something went wrong", message)
+        QMessageBox.critical(self, SESSION_SETUP_FAILED_MSG, message)
 
 
 
