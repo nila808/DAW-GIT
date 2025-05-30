@@ -1,5 +1,14 @@
 
 
+## [v1.1.7-ui-strings] – 2025-05-30
+**Author:** @niccavendish
+- pushing missed aded files to last commit v1.1.7
+- 📦 v1.1.7: 📝 updated changelog, 📊 updated project status
+- 📦 v1.1.6: 📝 updated changelog, 📊 updated project status
+- 🧹 Merge conflict resolved: commit role persistence tests restored
+- ✅ Merge feature/v1.1.6-new-feature into master — preserve editable checkout and safety features
+
+
 ## [v1.1.7] – 2025-05-30
 **Author:** @niccavendish
 - 📦 v1.1.6: 📝 updated changelog, 📊 updated project status

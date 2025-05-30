@@ -11,6 +11,27 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem
 )
 from PyQt6.QtCore import Qt, QTimer
+from ui_strings import (
+    AUTO_SAVE_SNAPSHOTS_LABEL,
+    BRANCH_MANAGER_TITLE,
+    COMMIT_PAGE_TITLE,
+    COMMIT_UNKNOWN_LABEL,
+    EMPTY_LABEL,
+    LOAD_ALTERNATE_SESSION_BUTTON,
+    NO_ACTIVE_VERSION_LINE_LABEL,
+    OPEN_IN_DAW_LABEL,
+    PROJECT_SETUP_TITLE,
+    SESSION_BRANCH_UNKNOWN_LABEL,
+    SHOW_TOOLTIPS_LABEL,
+    SNAPSHOT_BROWSER_TITLE,
+    SNAPSHOT_NOTES_LABEL,
+    SNAPSHOT_MODE_UNKNOWN_LABEL,
+    STEP1_CHOOSE_PROJECT_FOLDER_LABEL,
+    START_TRACKING_BUTTON, 
+    STATUS_UNKNOWN_LABEL, 
+    SWITCH_VERSION_LINE_BUTTON, 
+    UNCOMMITTED_CHANGES_LABEL
+)
 
 def build_main_ui(app):
     main_widget = QWidget()
@@ -44,12 +65,12 @@ def build_main_ui(app):
     main_layout.addWidget(app.status_label)
 
     # 🎧 Add snapshot/editing mode display
-    app.snapshot_mode_label = QLabel("🎧 Snapshot mode: unknown")
+    app.snapshot_mode_label = QLabel(SNAPSHOT_MODE_UNKNOWN_LABEL)
     app.snapshot_mode_label.setObjectName("snapshot_mode_label")
     main_layout.addWidget(app.snapshot_mode_label)
 
     # 📢 Persistent session/editing state label
-    app.status_mode_label = QLabel("🎚️ Status: unknown")
+    app.status_mode_label = QLabel(STATUS_UNKNOWN_LABEL)
     app.status_mode_label.setObjectName("status_mode_label")
     main_layout.addWidget(app.status_mode_label)
 
@@ -60,15 +81,15 @@ def build_main_ui(app):
 
     # Navigation buttons
     nav_layout = QHBoxLayout()
-    app.goto_branch_btn = QPushButton("🔀 Branch Manager")
-    app.goto_snapshots_btn = QPushButton("🎧 Snapshot Browser")
-    app.goto_commit_btn = QPushButton("📥 Commit Page")
+    app.goto_branch_btn = QPushButton(BRANCH_MANAGER_TITLE)
+    app.goto_snapshots_btn = QPushButton(SNAPSHOT_BROWSER_TITLE)
+    app.goto_commit_btn = QPushButton(COMMIT_PAGE_TITLE)
 
     app.goto_branch_btn.clicked.connect(lambda: app.pages.switch_to("branches"))
     app.goto_snapshots_btn.clicked.connect(lambda: app.pages.switch_to("snapshots"))
     app.goto_commit_btn.clicked.connect(lambda: app.pages.switch_to("commit"))
 
-    app.goto_setup_btn = QPushButton("🛠 Project Setup")
+    app.goto_setup_btn = QPushButton(PROJECT_SETUP_TITLE)
     app.goto_setup_btn.clicked.connect(lambda: app.pages.switch_to("setup"))
     nav_layout.addWidget(app.goto_setup_btn)
 
@@ -93,54 +114,39 @@ def build_main_ui(app):
 def build_project_controls(app):
     layout = QVBoxLayout()
 
-    # app.unsaved_indicator = QLabel("● Uncommitted Changes")
-    # app.unsaved_indicator.setObjectName("unsaved_indicator")
-    # app.unsaved_indicator.setVisible(False)
-    # app.unsaved_flash = False
-    # app.unsaved_timer = app.startTimer(800)
-    # layout.addWidget(app.unsaved_indicator)
-
-    # app.project_label = QLabel()
-    # app.project_label.setObjectName("project_label")
-    # app.project_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse | Qt.TextInteractionFlag.LinksAccessibleByMouse)
-    # app.project_label.setOpenExternalLinks(True)
-    # app.project_label.setToolTip("Click to open in Finder")
-    # app.project_label.setWordWrap(True)
-    # layout.addWidget(app.project_label)
-
     app.path_label = QLabel(str(app.project_path))
     app.path_label.setVisible(False)
     layout.addWidget(app.path_label)
     app.update_project_label()
 
-    app.setup_label = QLabel("🎚️ Step 1: Choose your Ableton or Logic project folder")
+    app.setup_label = QLabel(STEP1_CHOOSE_PROJECT_FOLDER_LABEL)
     app.setup_label.setObjectName("setup_label")
     layout.addWidget(app.setup_label)
 
-    app.setup_btn = QPushButton("Start Tracking")
+    app.setup_btn = QPushButton(START_TRACKING_BUTTON)
     app.setup_btn.setToolTip("Start tracking the folder where your current Ableton or Logic project is saved.")
     app.setup_btn.clicked.connect(app.run_setup)
     layout.addWidget(app.setup_btn)
 
-    app.load_branch_btn = QPushButton("🎹 Load Alternate Session")
+    app.load_branch_btn = QPushButton(LOAD_ALTERNATE_SESSION_BUTTON)
     app.load_branch_btn.setToolTip("Switch to a different creative version of this track")
     app.load_branch_btn.clicked.connect(app.show_branch_selector)
     layout.addWidget(app.load_branch_btn)
 
     controls_layout = QHBoxLayout()
-    app.change_folder_btn = QPushButton("Change Project Folder")
+    app.change_folder_btn = QPushButton(CHANGE_PROJECT_FOLDER_BUTTON)
     app.change_folder_btn.clicked.connect(app.change_project_folder)
 
-    app.clear_project_btn = QPushButton("Clear Saved Project")
+    app.clear_project_btn = QPushButton(CLEAR_PROJECT_BUTTON)
     app.clear_project_btn.clicked.connect(app.clear_saved_project)
 
-    app.export_btn = QPushButton("Export Snapshot")
+    app.export_btn = QPushButton(EXPORT_SNAPSHOT_BUTTON)
     app.export_btn.clicked.connect(app.export_snapshot)
 
-    app.import_btn = QPushButton("Import Snapshot")
+    app.import_btn = QPushButton(IMPORT_SNAPSHOT_BUTTON)
     app.import_btn.clicked.connect(app.import_snapshot)
 
-    app.restore_backup_btn = QPushButton("Restore Last Backup")
+    app.restore_backup_btn = QPushButton(RESTORE_BACKUP_BUTTON)
     app.restore_backup_btn.clicked.connect(app.restore_last_backup)
 
     for btn in [app.change_folder_btn, app.clear_project_btn, app.export_btn, app.import_btn, app.restore_backup_btn]:
@@ -152,11 +158,11 @@ def build_project_controls(app):
 
 def build_commit_controls(app):
     layout = QVBoxLayout()
-    layout.addWidget(QLabel("Snapshot Notes:"))
+    layout.addWidget(QLabel(SNAPSHOT_NOTES_LABEL))
 
     buttons = QHBoxLayout()
 
-    app.auto_save_toggle = QCheckBox("🎹 Auto-Save Snapshots")
+    app.auto_save_toggle = QCheckBox(AUTO_SAVE_SNAPSHOTS_LABEL)
     app.auto_save_toggle.setToolTip("Enable to auto-commit when changes are detected")
     app.auto_save_toggle.stateChanged.connect(app.handle_auto_save_toggle)
     buttons.addWidget(app.auto_save_toggle)
@@ -173,7 +179,7 @@ def build_commit_controls(app):
 def build_checkout_controls(app):
     layout = QHBoxLayout()
  
-    app.switch_branch_btn = QPushButton("🔀 Switch Version Line")
+    app.switch_branch_btn = QPushButton(SWITCH_VERSION_LINE_BUTTON)
     app.switch_branch_btn.setToolTip("Switch to another creative path or saved version")
     app.switch_branch_btn.clicked.connect(app.switch_branch)
 
@@ -184,13 +190,13 @@ def build_checkout_controls(app):
 
 
 def build_commit_info_display(app):
-    app.detached_warning_label = QLabel("")
+    app.detached_warning_label = QLabel(EMPTY_LABEL)
     app.detached_warning_label.setWordWrap(True)
     app.detached_warning_label.hide()
 
-    app.version_line_label = QLabel("🎚️ No active version line")
-    app.branch_label = QLabel("Session branch: unknown • Current take: unknown")
-    app.commit_label = QLabel("🎶 Commit: unknown")
+    app.version_line_label = QLabel(NO_ACTIVE_VERSION_LINE_LABEL)
+    app.branch_label = QLabel(SESSION_BRANCH_UNKNOWN_LABEL)
+    app.commit_label = QLabel(COMMIT_UNKNOWN_LABEL)
 
     wrapper = QWidget()
     layout = QVBoxLayout()
@@ -205,19 +211,19 @@ def build_commit_info_display(app):
 def build_bottom_controls(app):
     layout = QVBoxLayout()
 
-    app.unsaved_indicator = QLabel("● Uncommitted Changes")
+    app.unsaved_indicator = QLabel(UNCOMMITTED_CHANGES_LABEL)
     app.unsaved_indicator.setObjectName("unsaved_indicator")
     app.unsaved_indicator.setVisible(False)
     app.unsaved_flash = False
     app.unsaved_timer = app.startTimer(800)
     layout.addWidget(app.unsaved_indicator)
 
-    app.open_in_daw_btn = QPushButton("🎧 Open This Version in DAW")
+    app.open_in_daw_btn = QPushButton(OPEN_IN_DAW_LABEL)
     app.open_in_daw_btn.setVisible(False)
     app.open_in_daw_btn.clicked.connect(app.open_latest_daw_project)
     layout.addWidget(app.open_in_daw_btn)
 
-    app.show_tooltips_checkbox = QCheckBox("Show Tooltips")
+    app.show_tooltips_checkbox = QCheckBox(SHOW_TOOLTIPS_LABEL)
     app.show_tooltips_checkbox.setChecked(True)
     app.show_tooltips_checkbox.stateChanged.connect(app.toggle_tooltips)
     layout.addWidget(app.show_tooltips_checkbox)

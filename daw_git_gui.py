@@ -44,6 +44,8 @@ from ui_strings import (
     NO_SNAPSHOT_SELECTED_MSG,
     NO_SELECTION_TITLE,
     NO_SELECTION_MSG,
+    NO_PROJECT_SELECTED_TITLE,
+    NO_PROJECT_SELECTED_MSG,
     DELETE_ROOT_ERROR_TITLE,
     DELETE_ROOT_ERROR_MSG,
     INVALID_LABEL_TITLE,
@@ -61,10 +63,16 @@ from ui_strings import (
     SNAPSHOT_INFO_TITLE, 
     SNAPSHOT_INFO_MSG,
     SNAPSHOT_EDIT_BLOCK_TOOLTIP,
+    SNAPSHOT_VIEWING_WARNING_TITLE,
+    SNAPSHOT_VIEWING_WARNING_MSG,
+    SNAPSHOT_LOADED_STATUS_LABEL,
     UNSAVED_CHANGES_TITLE,
     UNSAVED_CHANGES_WARNING, 
     UNSAFE_DIRTY_EDITS_TITLE, 
-    UNSAFE_DIRTY_EDITS_MSG
+    UNSAFE_DIRTY_EDITS_MSG, 
+    VERSION_LINE_COMMIT_MSG, 
+    VERSION_LINE_CREATED_TITLE,
+    VERSION_LINE_CREATED_CONFIRM_MSG
 )
 
 
@@ -246,8 +254,8 @@ class DAWGitApp(QMainWindow):
             else:
                 QMessageBox.information(
                     self,
-                    "No Project Selected",
-                    "🎛️ No project folder selected. Click 'Setup Project' to start tracking your music session."
+                        NO_PROJECT_SELECTED_TITLE,
+                        NO_PROJECT_SELECTED_MSG
                 )
                 if hasattr(self, "project_label"):
                     self.project_label.setText("🎵 Tracking: None")
@@ -1528,7 +1536,7 @@ class DAWGitApp(QMainWindow):
             try:
                 print(f"[DEBUG] Committing files: {files_to_commit}")
                 self.repo.index.add(files_to_commit)
-                commit_message = f"🎼 Start New Version Line: {branch_name}"
+                commit_message = VERSION_LINE_COMMIT_MSG.format(branch=branch_name)
                 self.repo.index.commit(commit_message)
             except Exception as e:
                 print(f"[ERROR] Failed to commit new version line: {e}")
@@ -2454,16 +2462,7 @@ class DAWGitApp(QMainWindow):
 
             # ✅ Show success message
             if hasattr(self.snapshot_page, "status_label"):
-                self.snapshot_page.status_label.setText(
-                    f"✅ Snapshot {commit_sha[:7]} loaded — read-only mode. Explore or start a new version line."
-                )
-            self.open_in_daw_btn.setVisible(True)
-
-            # ✅ Show success message
-            if hasattr(self.snapshot_page, "status_label"):
-                self.snapshot_page.status_label.setText(
-                    f"✅ Snapshot {commit_sha[:7]} loaded — read-only mode. Explore or start a new version line."
-                )
+                self.status_label.setText(SNAPSHOT_LOADED_STATUS_LABEL.format(sha=commit_sha[:7]))
             self.open_in_daw_btn.setVisible(True)
 
             # 🧠 Update commit UI state
@@ -3126,8 +3125,8 @@ class DAWGitApp(QMainWindow):
 
                 QMessageBox.information(
                     self,
-                    "Version Line Created",
-                    f"🌱 You’re now working on version line:\n\n{branch_name}"
+                    VERSION_LINE_CREATED_TITLE,
+                    VERSION_LINE_CREATED_CONFIRM_MSG.format(branch=branch)
                 )
 
             except subprocess.CalledProcessError as e:
@@ -3179,9 +3178,8 @@ class DAWGitApp(QMainWindow):
             if self.repo.head.is_detached:
                 choice = QMessageBox.question(
                     self,
-                    "Currently Viewing Snapshot",
-                    "🎧 You’re currently exploring a snapshot.\n\n"
-                    "Switching now will move you to a saved version line.\n\nContinue?",
+                    SNAPSHOT_VIEWING_WARNING_TITLE,
+                    SNAPSHOT_VIEWING_WARNING_MSG,
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
                 )
                 if choice != QMessageBox.StandardButton.Yes:

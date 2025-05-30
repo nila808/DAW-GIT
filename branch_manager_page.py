@@ -1,4 +1,12 @@
+# branch_manager_page.py
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton
+from ui_strings import (
+    BRANCH_MANAGER_TITLE,
+    SWITCH_BRANCH_BUTTON,
+    START_VERSION_LINE_BUTTON,
+    NO_REPO_LOADED_LABEL,
+    BRANCHES_LOADED_LABEL,
+)
 
 class BranchManagerPage(QWidget):
     def __init__(self, parent=None):
@@ -7,7 +15,7 @@ class BranchManagerPage(QWidget):
         layout = QVBoxLayout(self)
 
         # Title
-        self.title_label = QLabel("🌳 Branch Manager")
+        self.title_label = QLabel(BRANCH_MANAGER_TITLE)
         layout.addWidget(self.title_label)
 
         # Branch dropdown
@@ -16,8 +24,8 @@ class BranchManagerPage(QWidget):
 
         # Buttons
         actions = QHBoxLayout()
-        self.switch_branch_btn = QPushButton("🔀 Switch Branch")
-        self.start_new_branch_btn = QPushButton("🎼 Start New Version Line")
+        self.switch_branch_btn = QPushButton(SWITCH_BRANCH_BUTTON)
+        self.start_new_branch_btn = QPushButton(START_VERSION_LINE_BUTTON)
         actions.addWidget(self.switch_branch_btn)
         actions.addWidget(self.start_new_branch_btn)
         layout.addLayout(actions)
@@ -26,15 +34,12 @@ class BranchManagerPage(QWidget):
         self.start_new_branch_btn.clicked.connect(self.app.start_new_version_line)
 
         # Status label
-        self.status_label = QLabel("📍 No branch selected")
+        self.status_label = QLabel(NO_REPO_LOADED_LABEL)
         layout.addWidget(self.status_label)
-
-        # self.populate_branches()  # 👈 Load the dropdown on init
-
 
     def populate_branches(self):
         if not self.app or not self.app.repo:
-            self.status_label.setText("⚠️ No Git repo loaded.")
+            self.status_label.setText(NO_REPO_LOADED_LABEL)
             return
 
         branches = [head.name for head in self.app.repo.heads]
@@ -47,12 +52,9 @@ class BranchManagerPage(QWidget):
             index = branches.index(current_branch)
             self.branch_dropdown.setCurrentIndex(index)
         except Exception:
-            # If in detached HEAD or branch not found, select none
             self.branch_dropdown.setCurrentIndex(-1)
 
-        self.status_label.setText(f"✅ {len(branches)} branches loaded.")
-
-
+        self.status_label.setText(BRANCHES_LOADED_LABEL.format(count=len(branches)))
 
     def switch_selected_branch(self):
         branch_name = self.branch_dropdown.currentText()

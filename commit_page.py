@@ -9,7 +9,32 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QCheckBox
 )
 from PyQt6.QtCore import Qt
-from ui_strings import SNAPSHOT_EDIT_BLOCK_TOOLTIP
+from ui_strings import (
+    COMMIT_FAILED_LABEL,
+    COMMIT_MESSAGE_REQUIRED_ERROR,
+    COMMIT_MESSAGE_PLACEHOLDER,
+    COMMIT_NOW_BUTTON,
+    COMMIT_PAGE_TITLE,
+    COMMIT_READY_LABEL,
+    COMMIT_SUCCESS_LABEL,
+    EMPTY_LABEL,
+    ENABLE_AUTO_SNAPSHOT_LABEL,
+    RETURN_TO_LATEST_BTN,
+    RETURN_TO_LATEST_TOOLTIP,
+    SNAPSHOT_EDIT_BLOCK_TOOLTIP,
+    RETURN_TO_LATEST_BTN,
+    RETURN_TO_LATEST_TOOLTIP,
+    COMMIT_NOW_BUTTON,    
+    ROLE_MAIN_MIX_LABEL, 
+    ROLE_CREATIVE_LABEL,
+    ROLE_ALT_MIX_LABEL, 
+    ROLE_MAIN_TOOLTIP, 
+    ROLE_CREATIVE_TOOLTIP, 
+    ROLE_ALT_TOOLTIP, 
+    ROLE_CUSTOM_TOOLTIP,
+    OPEN_IN_DAW_BUTTON, 
+    OPEN_IN_DAW_TOOLTIP,
+)
 
 
 class CommitPage(QWidget):
@@ -21,10 +46,10 @@ class CommitPage(QWidget):
         layout = QVBoxLayout(self)
 
         # 🎼 Title
-        self.title_label = QLabel("📥 Commit Snapshot")
+        self.title_label = QLabel(COMMIT_PAGE_TITLE)
         layout.addWidget(self.title_label)
 
-        self.snapshot_status_label = QLabel("")
+        self.snapshot_status_label = QLabel(EMPTY_LABEL)
         self.snapshot_status_label.setObjectName("snapshotStatusLabel")
         self.snapshot_status_label.setText(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
         self.snapshot_status_label.setToolTip(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
@@ -33,38 +58,38 @@ class CommitPage(QWidget):
 
         # 📝 Commit message
         self.commit_message = QTextEdit()
-        self.commit_message.setPlaceholderText("Describe what changed in this snapshot")
+        self.commit_message.setPlaceholderText(COMMIT_MESSAGE_PLACEHOLDER)
         self.commit_message.setFixedHeight(80)
         layout.addWidget(self.commit_message)
 
         # 🧠 Auto-save toggle
-        self.auto_save_toggle = QCheckBox("Enable Auto-Snapshot")
+        self.auto_save_toggle = QCheckBox(ENABLE_AUTO_SNAPSHOT_LABEL)
         layout.addWidget(self.auto_save_toggle)
         self.auto_save_toggle.stateChanged.connect(self.toggle_auto_commit)
 
         # 🎯 Return to Latest button
-        self.return_to_latest_btn = QPushButton("🎯 Return to Latest")
-        self.return_to_latest_btn.setToolTip("Return to the most recent snapshot on your version line")
+        self.return_to_latest_btn = QPushButton(RETURN_TO_LATEST_BTN)
+        self.return_to_latest_btn.setToolTip(RETURN_TO_LATEST_TOOLTIP)
         if parent and hasattr(parent, "return_to_latest_clicked"):
             self.return_to_latest_btn.clicked.connect(parent.return_to_latest_clicked)
         layout.addWidget(self.return_to_latest_btn)
 
         # 💾 Commit button
-        self.commit_button = QPushButton("💾 Commit Now")
+        self.commit_button = QPushButton(COMMIT_NOW_BUTTON)
         layout.addWidget(self.commit_button)
         self.commit_button.clicked.connect(self.commit_snapshot)
 
-        self.btn_version_main = QPushButton("Main Mix")
-        self.btn_version_creative = QPushButton("Creative")
-        self.btn_version_alt = QPushButton("Alt Mix")
-
+        # 🧪 Role Buttons (for role previews if visible)
+        self.btn_version_main = QPushButton(ROLE_MAIN_MIX_LABEL)
+        self.btn_version_creative = QPushButton(ROLE_CREATIVE_LABEL)
+        self.btn_version_alt = QPushButton(ROLE_ALT_MIX_LABEL)
 
         # 🏷️ Tagging Buttons
         tag_layout = QHBoxLayout()
-        self.tag_main_btn = QPushButton("🌟 Mark as Final Mix")
-        self.tag_creative_btn = QPushButton("🎨 Mark as Creative Version")
-        self.tag_alt_btn = QPushButton("🎛️ Mark as Alternate Mix")
-        self.tag_custom_btn = QPushButton("✏️ Add Custom Tag")
+        self.tag_main_btn = QPushButton(ROLE_MAIN_TOOLTIP)
+        self.tag_creative_btn = QPushButton(ROLE_CREATIVE_TOOLTIP)
+        self.tag_alt_btn = QPushButton(ROLE_ALT_TOOLTIP)
+        self.tag_custom_btn = QPushButton(ROLE_CUSTOM_TOOLTIP)
         tag_layout.addWidget(self.tag_main_btn)
         tag_layout.addWidget(self.tag_creative_btn)
         tag_layout.addWidget(self.tag_alt_btn)
@@ -77,23 +102,20 @@ class CommitPage(QWidget):
         self.tag_custom_btn.clicked.connect(self.app.tag_custom_label)
 
         # 🎧 Open in DAW button
-        self.open_in_daw_btn = QPushButton("🎧 Open This Version in Ableton")
-        self.open_in_daw_btn.setToolTip("Launch Ableton with the checked-out snapshot")
+        self.open_in_daw_btn = QPushButton(OPEN_IN_DAW_BUTTON)
+        self.open_in_daw_btn.setToolTip(OPEN_IN_DAW_TOOLTIP)
         self.open_in_daw_btn.setVisible(False)  # Hidden by default
         layout.addWidget(self.open_in_daw_btn)
-
-        # Connect to app method
         self.open_in_daw_btn.clicked.connect(self.app.open_in_daw)
 
-
         # 🎯 Status label
-        self.status_label = QLabel("📦 Ready to commit")
+        self.status_label = QLabel(COMMIT_READY_LABEL)
         layout.addWidget(self.status_label)
 
         # Link buttons to app for timer updates
-        if hasattr(self.app, "commit_button") is False:
+        if not hasattr(self.app, "commit_button"):
             self.app.commit_button = self.commit_button
-        if hasattr(self.app, "auto_save_toggle") is False:
+        if not hasattr(self.app, "auto_save_toggle"):
             self.app.auto_save_toggle = self.auto_save_toggle
 
 
@@ -112,16 +134,16 @@ class CommitPage(QWidget):
     def commit_snapshot(self):
         message = self.commit_message.toPlainText().strip()
         if not message:
-            self.status_label.setText("❌ Commit message is required.")
+            self.status_label.setText(COMMIT_MESSAGE_REQUIRED_ERROR)
             return
 
         result = self.app.commit_changes(commit_message=message)
         if result["status"] == "success":
-            self.status_label.setText(f"✅ Committed: {result['sha'][:7]}")
+            self.status_label.setText(COMMIT_SUCCESS_LABEL.format(sha=result['sha'][:7]))
             self.commit_message.clear()
         else:
             error_msg = result.get("message", "Unknown error.")
-            self.status_label.setText(f"❌ Couldn’t save snapshot:\n{error_msg}")
+            self.status_label.setText(COMMIT_FAILED_LABEL.format(error_msg=error_msg))
             self.commit_message.clear()  # ✅ Always clear after failure
 
 
