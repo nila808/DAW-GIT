@@ -966,12 +966,8 @@ class DAWGitApp(QMainWindow):
                 self.update_project_label()
 
                 # ✅ Create editable snapshot copy (after switching to HEAD)
-                editable_path = self._create_editable_snapshot_copy()
-                if editable_path:
-                    QTimer.singleShot(2000, self._launch_editable_version_in_daw)
-                else:
-                    print("[WARN] No .als file found after return-to-latest")
-                    self.editable_checkout_path = None
+                self.editable_checkout_path = editable_path if editable_path else None
+                print("[INFO] Returned to latest — editable copy ready (not auto-launched)")
 
                 # ✅ Update snapshot UI state
                 self.update_snapshot_status_labels()
@@ -2444,11 +2440,9 @@ class DAWGitApp(QMainWindow):
 
             # ✅ Create editable snapshot copy
             editable_path = self._create_editable_snapshot_copy()
-            if editable_path:
-                QTimer.singleShot(2000, self._launch_editable_version_in_daw)
-            else:
-                print("[WARN] No .als file found after checkout")
-                self.editable_checkout_path = None
+            self.editable_checkout_path = editable_path if editable_path else None
+            print("[INFO] Snapshot checkout completed — editable copy created (not auto-launched)")
+
 
             self.update_snapshot_status_labels()
 
