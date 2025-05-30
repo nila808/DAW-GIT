@@ -447,3 +447,4 @@ Stable milestone tagged as `v1.0.2-rolepass`
 - v1.0.3-role-ui (2025-05-27): 🧩 Refactor: CommitPage role buttons + detached state safety
 - v1.0.2-commit-feedback (2025-05-27): ✅ UX: Clear commit box after error, improve error messaging
 - [2025-05-28 17:02] ## [v1.0.3] - 2025-05-28
+- v1.1.10 (2025-05-31): 🧹 Removed unused UI strings, all tests passing
