@@ -1,5 +1,14 @@
 
 
+## [v1.1.8] – 2025-05-31
+**Author:** @niccavendish
+- ✅ Manual snapshot launch only — removed auto-launch after checkout
+- 📦 v1.1.7b: 📝 updated changelog, 📊 updated project status
+- pushing missed aded files to last commit v1.1.7
+- 📦 v1.1.7: 📝 updated changelog, 📊 updated project status
+- 📦 v1.1.6: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.1.7b] – 2025-05-30
 **Author:** @niccavendish
 - pushing missed aded files to last commit v1.1.7
