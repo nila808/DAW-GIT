@@ -79,7 +79,7 @@ def test_assign_commit_role_variants(monkeypatch, qtbot, label):
 
 
 # ✅ Test 2: custom tag via button
-@patch("PyQt6.QtWidgets.QInputDialog.getText", return_value=("Alt 2", True))
+@patch("PyQt6.QtWidgets.QInputDialog.getText", return_value=("alt_2", True))
 def test_tag_custom_label_assigns_alt2(mock_input, tmp_path, qtbot):
     (tmp_path / "track.als").write_text("Ableton")
 

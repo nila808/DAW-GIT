@@ -22,12 +22,13 @@ SNAPSHOT_INFO_MSG = (
     "🎼 Want to make edits? Click “🎼 Start New Version Line” to begin a new take."
 )
 
+SNAPSHOT_EDIT_BLOCK_TOOLTIP = "🎧 Snapshot mode: You’re previewing an old take. Start a new Snapshot to edit and save in your DAW."
 SNAPSHOT_ALREADY_VIEWING_TITLE = "Already Viewing Snapshot"
-SNAPSHOT_ALREADY_VIEWING_MSG = "🎧 You're already previewing this version.\n\nCommit ID: {sha}"
-SNAPSHOT_EDIT_BLOCK_TOOLTIP = "🎧 Snapshot mode: You’re previewing an old take. Start a new version to edit and save in your DAW."
+SNAPSHOT_ALREADY_VIEWING_MSG = "🎧 You're already previewing this Snapshot.\n\nCommit ID: {sha}"
+SNAPSHOT_EDIT_BLOCK_TOOLTIP = "🎧 Snapshot mode: You’re previewing an old take. Start a new Snapshot to edit and save in your DAW."
 DIRTY_EDIT_WARNING = (
     "🎧 Your current editing session hasn’t been saved.\n\n"
-    "Please save a snapshot to keep this take before switching."
+    "Please save a Snapshot to keep this take before switching."
 )
 
 UNSAVED_CHANGES_TITLE = "Unsaved Changes Detected"
@@ -89,10 +90,10 @@ NO_REPO_STATUS_LABEL = "❌ No Git repo loaded."
 NO_REPO_SAVE_MSG = "🎛️ Please initialize version control before saving your project."
 
 
-UNSAFE_DIRTY_EDITS_TITLE = "Unsaved Changes Outside Snapshot"
+UNSAFE_DIRTY_EDITS_TITLE = "🎛️ Unsaved Session Changes Detected"
 UNSAFE_DIRTY_EDITS_MSG = (
-    "🎧 You’ve made changes that aren’t saved inside your editable version.\n\n"
-    "Please save your session (e.g., use '🎼 Start New Version Line') before switching versions:\n\n"
+    "🎹 You’ve made changes in your DAW.\n"
+    "SAVE your project in Ableton or Logic before continuing.\n\n"
+    "Then click 📝 Start New Version Line to capture this version in DAW Git.\n\n"
     "{file_list}"
 )
-

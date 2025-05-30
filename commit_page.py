@@ -131,20 +131,22 @@ class CommitPage(QWidget):
 
     
     def set_commit_controls_enabled(self, enabled: bool, tooltip: str = ""):
+        # 💾 Commit button + message
         self.commit_button.setEnabled(enabled)
         self.commit_button.setToolTip(tooltip)
 
         self.commit_message.setEnabled(enabled)
         self.commit_message.setToolTip(tooltip)
 
+        # 🏷️ Tagging buttons
         self.tag_main_btn.setEnabled(enabled)
         self.tag_main_btn.setToolTip(tooltip)
 
-        self.tag_creative_btn.setEnabled(enabled)
-        self.tag_creative_btn.setToolTip(tooltip)
-
         self.tag_alt_btn.setEnabled(enabled)
         self.tag_alt_btn.setToolTip(tooltip)
+
+        self.tag_creative_btn.setEnabled(enabled)
+        self.tag_creative_btn.setToolTip(tooltip)
 
         self.tag_custom_btn.setEnabled(enabled)
         self.tag_custom_btn.setToolTip(tooltip)

@@ -37,10 +37,21 @@ def build_main_ui(app):
     app.load_commit_history()
 
     app.history_table = app.snapshot_page.commit_table
+
     app.status_label = app.snapshot_page.status_label
     app.status_label.setText("Ready")
     app.status_label.setObjectName("status_label")
     main_layout.addWidget(app.status_label)
+
+    # 🎧 Add snapshot/editing mode display
+    app.snapshot_mode_label = QLabel("🎧 Snapshot mode: unknown")
+    app.snapshot_mode_label.setObjectName("snapshot_mode_label")
+    main_layout.addWidget(app.snapshot_mode_label)
+
+    # 📢 Persistent session/editing state label
+    app.status_mode_label = QLabel("🎚️ Status: unknown")
+    app.status_mode_label.setObjectName("status_mode_label")
+    main_layout.addWidget(app.status_mode_label)
 
     main_layout.addWidget(app.pages)   
 

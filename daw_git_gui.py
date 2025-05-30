@@ -60,6 +60,7 @@ from ui_strings import (
     NO_REPO_SAVE_MSG,
     SNAPSHOT_INFO_TITLE, 
     SNAPSHOT_INFO_MSG,
+    SNAPSHOT_EDIT_BLOCK_TOOLTIP,
     UNSAVED_CHANGES_TITLE,
     UNSAVED_CHANGES_WARNING, 
     UNSAFE_DIRTY_EDITS_TITLE, 
@@ -122,9 +123,12 @@ class DAWGitApp(QMainWindow):
             QMessageBox.warning = lambda *a, **kw: None
             QMessageBox.critical = lambda *a, **kw: None
 
-            if os.getenv("DAWGIT_FORCE_INPUT") == "1":
-                QInputDialog.getText = lambda *a, **k: ("test_input", True)
-            QInputDialog.getItem = lambda *a, **kw: ("main", True)
+            # if os.getenv("DAWGIT_FORCE_INPUT") == "1":
+            #     QInputDialog.getText = lambda *a, **k: ("test_input", True)
+            # QInputDialog.getItem = lambda *a, **kw: ("main", True)
+
+            # Input dialogs should be patched directly in tests
+            pass
 
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
 
@@ -600,6 +604,8 @@ class DAWGitApp(QMainWindow):
                 self.current_commit_id = self.repo.head.commit.hexsha
                 self.load_commit_history()
 
+            self.update_session_status_mode() 
+
         elif result["status"] == "detached":
             self.repo = self.git.repo  # still bind the repo to self
             if hasattr(self, "status_label"):
@@ -682,6 +688,39 @@ class DAWGitApp(QMainWindow):
         if hasattr(self, "branch_page"):
             return self.branch_page.branch_dropdown
         return None
+
+
+    def update_snapshot_mode_label(self):
+        if not self.repo:
+            self.snapshot_mode_label.setText("🎧 Snapshot mode: unknown")
+            return
+
+        if self.repo.head.is_detached:
+            self.snapshot_mode_label.setText("🎧 Snapshot mode: Not on an active version line")
+        else:
+            try:
+                branch = self.repo.active_branch.name
+                sha = self.repo.head.commit.hexsha[:7]
+                self.snapshot_mode_label.setText(f"🎧 Editing: {sha} on {branch}")
+            except Exception:
+                self.snapshot_mode_label.setText("🎧 Editing: unknown")
+
+
+    def update_session_status_mode(self):
+        """Updates the persistent session mode label based on HEAD state."""
+        if not hasattr(self, "status_mode_label") or not self.repo:
+            return
+
+        is_detached = self.repo.head.is_detached
+        in_editable = ".dawgit_checkout_work" in str(self.project_path)
+
+        if is_detached and not in_editable:
+            self.status_mode_label.setText("🎧 Snapshot mode: read-only preview")
+            self.status_mode_label.setToolTip("You’re previewing an old take. Start a new version to edit and save in your DAW.")
+        else:
+            branch = self.repo.active_branch.name if not is_detached else "detached"
+            self.status_mode_label.setText(f"🎚️ Editing: version on '{branch}'")
+            self.status_mode_label.setToolTip("You’re working on the latest editable version.")
 
 
     def update_branch_dropdown(self):
@@ -998,6 +1037,8 @@ class DAWGitApp(QMainWindow):
                     )
                 else:
                     self.commit_page.set_commit_controls_enabled(True, "")
+
+            self.update_session_status_mode()
 
         except Exception as e:
             self._show_error(f"❌ Failed to return to the latest commit:\n\n{e}")
@@ -1664,8 +1705,16 @@ class DAWGitApp(QMainWindow):
             self.repo.git.checkout(self.repo.active_branch.name)
             self.init_git()
             self.load_commit_history()
+            if hasattr(self, "commit_page"):
+                is_detached = self.repo.head.is_detached
+                in_editable = ".dawgit_checkout_work" in str(self.project_path)
+                if is_detached and not in_editable:
+                    self.commit_page.set_commit_controls_enabled(False, SNAPSHOT_EDIT_BLOCK_TOOLTIP)
+                else:
+                    self.commit_page.set_commit_controls_enabled(True, "")
+
             self.status_message("🗑️ Snapshot deleted using rebase --onto.")
-            self.open_latest_daw_project()
+            # self.open_latest_daw_project()
 
         except Exception as e:
             QMessageBox.critical(self, "Delete Failed", f"Failed to delete commit:\n{e}")
@@ -1825,7 +1874,7 @@ class DAWGitApp(QMainWindow):
             self.init_git()
             self.load_commit_history()
 
-            self.open_latest_daw_project()
+            # self.open_latest_daw_project()
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "Rebase Failed", f"Git error:\n{e}")
@@ -2255,6 +2304,7 @@ class DAWGitApp(QMainWindow):
         else:
             self._show_warning(result.get("message", "Failed to switch session."))
 
+
     def get_branch_take_label(self, branch_name: str) -> str:
         try:
             # Checkout the branch in detached mode to inspect its version marker
@@ -2431,7 +2481,9 @@ class DAWGitApp(QMainWindow):
                 else:
                     self.commit_page.set_commit_controls_enabled(True, "")
 
+            self.update_session_status_mode()
             return result
+        
 
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "Checkout Failed", f"❌ Could not switch versions:\n\n{e}")
@@ -3179,6 +3231,15 @@ class DAWGitApp(QMainWindow):
                 "Switched Version",
                 f"🎚️ You’re now working on version line:\n\n{selected_branch}"
             )
+
+            if hasattr(self, "commit_page"):
+                is_detached = self.repo.head.is_detached
+                in_editable = ".dawgit_checkout_work" in str(self.project_path)
+                if is_detached and not in_editable:
+                    self.commit_page.set_commit_controls_enabled(False, SNAPSHOT_EDIT_BLOCK_TOOLTIP)
+                else:
+                    self.commit_page.set_commit_controls_enabled(True, "")
+
             return {"status": "success", "message": f"Switched to branch {selected_branch}"}
 
         except Exception as e:
