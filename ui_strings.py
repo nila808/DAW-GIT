@@ -34,7 +34,7 @@ COMMIT_REQUIRED_MSG = "❌ Commit message is required."
 
 # === Auto Save ===
 AUTO_SAVE_TITLE = "Auto Save Complete"
-AUTO_SAVE_MSG = "Your Take was saved automatically."
+
 
 # === Return to Latest ===
 RETURN_TO_LATEST_BTN = "🎯 Return to Latest"
@@ -97,7 +97,6 @@ NO_BACKUP_FOUND_TITLE = "No Backup Found"
 NO_BACKUP_FOUND_MSG = "There are no backup folders for this project."
 BACKUP_RESTORED_TITLE = "Backup Restored"
 BACKUP_RESTORED_MSG = "✅ Restored files from: {path}"
-PROJECT_RESTORED_TITLE = "Project Restored"
 PROJECT_RESTORED_MSG = "✅ Version restored.\n\n🎛️ Commit ID: {sha}"
 
 # === Repo Setup / Errors ===
