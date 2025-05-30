@@ -1,5 +1,14 @@
 
 
+## [v1.1.9] – 2025-05-31
+**Author:** @niccavendish
+- 🔒 Secure all working changes missed in v1.1.8
+- 📦 v1.1.8: 📝 updated changelog, 📊 updated project status
+- ✅ Manual snapshot launch only — removed auto-launch after checkout
+- 📦 v1.1.7b: 📝 updated changelog, 📊 updated project status
+- pushing missed aded files to last commit v1.1.7
+
+
 ## [v1.1.8] – 2025-05-31
 **Author:** @niccavendish
 - ✅ Manual snapshot launch only — removed auto-launch after checkout
