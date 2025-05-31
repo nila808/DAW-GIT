@@ -10,6 +10,10 @@ TAB_SNAPSHOT_BROWSER = "🎿 Takes Browser"
 TAB_COMMIT_PAGE = "📥 Save Take"
 TAB_PROJECT_SETUP = "🚰 Project Setup"
 
+# Snapshot Browser Page
+SNAPSHOT_BROWSER_TITLE = "🎧 Snapshot Browser"
+SESSION_LABEL_UNKNOWN = "Session branch: unknown • Current take: unknown"
+
 # === Snapshot Editing State ===
 SNAPSHOT_MODE_UNKNOWN = "🎧 Snapshot mode: (not active)"
 SNAPSHOT_NO_VERSION_LINE = "🎿 Take Preview Mode: Not on an active Session Line"
