@@ -22,6 +22,8 @@ from ui_strings import (
     BTN_RESTORE_BACKUP,
     BTN_START_TRACKING,
     BTN_SWITCH_VERSION_LINE,
+    CURRENT_BRANCH_UNKNOWN,
+    CURRENT_COMMIT_UNKNOWN,
     STATUS_READY,
     TAB_BRANCH_MANAGER,
     TAB_COMMIT_PAGE,
@@ -184,9 +186,9 @@ def build_commit_info_display(app):
     app.detached_warning_label.setWordWrap(True)
     app.detached_warning_label.hide()
 
-    app.version_line_label = QLabel("🎚️ No active version line")
-    app.branch_label = QLabel("Session branch: unknown • Current take: unknown")
-    app.commit_label = QLabel("🎶 Commit: unknown")
+    app.version_line_label = QLabel("🎵 Editing: Not set")
+    app.branch_label = QLabel(CURRENT_BRANCH_UNKNOWN)   # From ui_strings.py
+    app.commit_label = QLabel(CURRENT_COMMIT_UNKNOWN)   # From ui_strings.py
 
     wrapper = QWidget()
     layout = QVBoxLayout()

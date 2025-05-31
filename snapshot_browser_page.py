@@ -21,6 +21,8 @@ from ui_strings import (
     BTN_CREATIVE_TAKE, 
     BTN_ALT_MIX, 
     BTN_OPEN_COMMIT_PANEL,
+    SNAPSHOT_BROWSER_TITLE,
+    SESSION_LABEL_UNKNOWN,
     TOOLTIP_TAG_MAIN_MIX, 
     TABLE_HEADER_TAKE_ID,
     TABLE_HEADER_TAKE_NOTES,
@@ -36,8 +38,13 @@ class SnapshotBrowserPage(QWidget):
         layout = QVBoxLayout(self)
 
         # 🎧 Header
-        self.title_label = QLabel("🎧 Snapshot Browser")
+        self.title_label = QLabel(SNAPSHOT_BROWSER_TITLE)
         layout.addWidget(self.title_label)
+
+        # 📢 Session Label (shows current branch + version info)
+        self.version_line_label = QLabel(SESSION_LABEL_UNKNOWN)
+        self.version_line_label.setObjectName("versionLineLabel")
+        layout.addWidget(self.version_line_label)
 
         # 📜 Commit History Table
         self.commit_table = QTableWidget()

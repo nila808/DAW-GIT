@@ -19,6 +19,8 @@ class BranchManagerPage(QWidget):
         layout.addWidget(self.title_label)
 
         # Branch dropdown
+        # self.branch_dropdown = QComboBox()
+        # display_name = "MAIN" if branch.name == "main" else branch.name
         self.branch_dropdown = QComboBox()
         layout.addWidget(self.branch_dropdown)
 
@@ -37,24 +39,28 @@ class BranchManagerPage(QWidget):
         self.status_label = QLabel("\ud83d\udccd No branch selected")
         layout.addWidget(self.status_label)
 
+
     def populate_branches(self):
         if not self.app or not self.app.repo:
             self.status_label.setText(NO_REPO_LOADED_MSG)
             return
 
         branches = [head.name for head in self.app.repo.heads]
-        self.branch_dropdown.clear()
-        self.branch_dropdown.addItems(branches)
+        display_branches = ["MAIN" if b == "main" else b for b in branches]
 
-        # Select the current branch in the dropdown
+        self.branch_dropdown.clear()
+        self.branch_dropdown.addItems(display_branches)
+
         try:
             current_branch = self.app.repo.active_branch.name
-            index = branches.index(current_branch)
+            display_branch = "MAIN" if current_branch == "main" else current_branch
+            index = display_branches.index(display_branch)
             self.branch_dropdown.setCurrentIndex(index)
         except Exception:
             self.branch_dropdown.setCurrentIndex(-1)
 
         self.status_label.setText(SESSION_LINES_LOADED_MSG.format(count=len(branches)))
+
         
 
     def switch_selected_branch(self):
