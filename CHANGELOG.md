@@ -1,5 +1,14 @@
 
 
+## [v1.1.11] – 2025-05-31
+**Author:** @niccavendish
+- 🧾 Update changelog for v1.1.10
+- 🧹 Remove unused UI strings (PROJECT_RESTORED_TITLE, AUTO_SAVE_MSG)
+- 🔒 Secure all working changes missed in v1.1.8
+- 📦 v1.1.8: 📝 updated changelog, 📊 updated project status
+- ✅ Manual snapshot launch only — removed auto-launch after checkout
+
+
 ## [v1.1.8] – 2025-05-31
 **Author:** @niccavendish
 - ✅ Manual snapshot launch only — removed auto-launch after checkout
