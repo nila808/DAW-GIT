@@ -19,13 +19,16 @@ from ui_strings import (
     BTN_TAG_CUSTOM_LABEL,
     BTN_LAUNCH_DAW_FILE,
     COMMIT_REQUIRED_MSG,
-    COMMIT_REQUIRED_MSG,
+    COMMIT_MESSAGE_REQUIRED_STATUS,
     SNAPSHOT_EDIT_BLOCK_TOOLTIP, 
+    SNAPSHOT_PREVIEW_SUMMARY,
+    STATUS_READY,
     TOOLTIP_RETURN_TO_LATEST,
     TOOLTIP_LAUNCH_DAW_FILE,  
     TAG_MAIN_MIX_LABEL,
     TAG_CREATIVE_LABEL,
-    TAG_ALT_LABEL
+    TAG_ALT_LABEL, 
+    TAKE_LOADED_MSG
 )
 
 
@@ -38,12 +41,12 @@ class CommitPage(QWidget):
         layout = QVBoxLayout(self)
 
         # 🎼 Title
-        self.title_label = QLabel("📥 Commit Snapshot")
+        self.title_label = QLabel(TAKE_LOADED_MSG)
         layout.addWidget(self.title_label)
 
         self.snapshot_status_label = QLabel("")
         self.snapshot_status_label.setObjectName("snapshotStatusLabel")
-        self.snapshot_status_label.setText(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
+        self.snapshot_status_label.setText(SNAPSHOT_PREVIEW_SUMMARY)
         self.snapshot_status_label.setToolTip(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
 
         layout.addWidget(self.snapshot_status_label)
@@ -55,7 +58,7 @@ class CommitPage(QWidget):
         layout.addWidget(self.commit_message)
 
         # 🧠 Auto-save toggle
-        self.auto_save_toggle = QCheckBox("Enable Auto-Snapshot")
+        self.auto_save_toggle = QCheckBox("Enable Auto-Save")
         layout.addWidget(self.auto_save_toggle)
         self.auto_save_toggle.stateChanged.connect(self.toggle_auto_commit)
 
@@ -104,7 +107,7 @@ class CommitPage(QWidget):
 
 
         # 🎯 Status label
-        self.status_label = QLabel("📦 Ready to commit")
+        self.status_label = QLabel(STATUS_READY)
         layout.addWidget(self.status_label)
 
         # Link buttons to app for timer updates
@@ -119,7 +122,7 @@ class CommitPage(QWidget):
         Update snapshot status label and tooltips based on HEAD state.
         """
         if self.app and self.app.repo and self.app.repo.head.is_detached:
-            self.snapshot_status_label.setText(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
+            self.snapshot_status_label.setText(SNAPSHOT_PREVIEW_SUMMARY)
             self.snapshot_status_label.setToolTip(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
         else:
             self.snapshot_status_label.setText("") # intentionally blank
@@ -139,7 +142,7 @@ class CommitPage(QWidget):
             self.commit_message.clear()
         else:
             error_msg = result.get("message", "Unknown error.")
-            self.status_label.setText(f"❌ Couldn’t save snapshot:\n{error_msg}")
+            self.status_label.setText(f"❌ Couldn’t save take:\n{error_msg}")
             self.commit_message.clear()  # ✅ Always clear after failure
 
 

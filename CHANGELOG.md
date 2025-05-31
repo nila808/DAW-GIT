@@ -9,6 +9,23 @@
 - ✅ Manual snapshot launch only — removed auto-launch after checkout
 
 
+## [v1.1.10] – 2025-05-31
+**Author:** @niccavendish
+-  v1.1.10: 🧾 Changelog + UI String Refinement
+- ✂️ Removed unused strings (PROJECT_RESTORED_TITLE, AUTO_SAVE_MSG)
+- 🧪 Began audit of fallback UI strings and added STATUS_UNKNOWN_SAFE alias
+- 📋 Confirmed status_label logic is consistent across all views
+
+
+## [v1.1.9] – 2025-05-31
+**Author:** @niccavendish
+-  v1.1.9: Snapshot UX + Commit Role Polish
+- 🎧 Snapshot mode clarified: “not on a version line” text added
+- 🏷️ Role tags (Main Mix, Creative Take, etc.) are now persisted + test-covered
+- 🧪 Added regression tests for tagging + updating roles
+
+
+
 ## [v1.1.8] – 2025-05-31
 **Author:** @niccavendish
 - ✅ Manual snapshot launch only — removed auto-launch after checkout

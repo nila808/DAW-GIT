@@ -23,6 +23,7 @@ from daw_git_core import sanitize_git_input
 from ui_strings import (
     # === General Status & Info ===
     STATUS_READY,
+    STATUS_UNKNOWN,
     HEADS_UP_MSG,
     HEADS_UP_TITLE,
     SESSION_SETUP_FAILED_MSG,
@@ -52,6 +53,8 @@ from ui_strings import (
     SNAPSHOT_SAVED_AUTODISABLED,
     SNAPSHOT_SAVED_WAITING,
     SNAPSHOT_SAVED_WAITING_TOOLTIP,
+    SNAPSHOT_CONFIRMATION_TITLE,
+    SNAPSHOT_CONFIRMATION_MSG,
 
     # === Commit / Snapshot Status ===
     COMMIT_SUCCESS_TITLE,
@@ -147,11 +150,8 @@ from ui_strings import (
     BTN_QUICK_SAVE, 
     SNAPSHOT_MODE_UNKNOWN,
     SNAPSHOT_EDITABLE_TOOLTIP, 
-    STATUS_UNKNOWN, 
     STATUS_READY
-    
 )
-
 
 
 # --- Git ---
@@ -777,7 +777,7 @@ class DAWGitApp(QMainWindow):
 
     def update_snapshot_mode_label(self):
         if not self.repo:
-            self.snapshot_mode_label.setText(SNAPSHOT_MODE_UNKNOWN_LINE)
+            self.snapshot_mode_label.setText(SNAPSHOT_NO_VERSION_LINE)
             return
 
         if self.repo.head.is_detached:
@@ -1129,9 +1129,8 @@ class DAWGitApp(QMainWindow):
     def run_setup(self):
         confirm = QMessageBox.question(
             self,
-            "🎚️ Set Up This Project?",
-            "🎶 Are you sure you want to start tracking this folder with version control?\n\n"
-            "You’ll be able to snapshot, loop, and branch your musical ideas from here.",
+            SNAPSHOT_CONFIRMATION_TITLE,
+            SNAPSHOT_CONFIRMATION_MSG,
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
         )
         if confirm != QMessageBox.StandardButton.Yes:
@@ -1726,7 +1725,7 @@ class DAWGitApp(QMainWindow):
             branch_name = self.repo.active_branch.name
             self.version_line_label.setText(f"🎚️ You’re working on version line: {branch_name}")
         except Exception:
-            self.version_line_label.setText(SNAPSHOT_MODE_UNKNOWN_LINE)
+            self.version_line_label.setText(SNAPSHOT_NO_VERSION_LINE)
 
 
     def delete_selected_commit(self):
@@ -1862,13 +1861,11 @@ class DAWGitApp(QMainWindow):
             else:
                 confirm = QMessageBox.question(
                     self,
-                    "🎧 Launching Snapshot",
-                    "You're viewing a snapshot from your project history.\n\n"
-                    "Ableton may prompt you to 'Save As' when this version opens.\n\n"
-                    "💡 To continue editing safely, consider clicking '🎼 Start New Version Line' first.\n\n"
-                    "Would you like to continue launching this version?",
+                    SNAPSHOT_CONFIRMATION_TITLE,
+                    SNAPSHOT_CONFIRMATION_MSG,
                     QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel
                 )
+
                 if confirm != QMessageBox.StandardButton.Ok:
                     print(f"[DEBUG] Early exit at snapshot confirmation")
                     return
@@ -3720,11 +3717,18 @@ class DAWGitApp(QMainWindow):
                 print(f"❌ Failed to open DAW project file: {e}")
 
 
-    def show_status_message(self, message, timeout=3000):
+    def show_status_message(self, message=None, timeout=3000):
+        """🎵 Display a status message to the user in the status label and status bar."""
+        
+        if message is None:
+            message = STATUS_UNKNOWN
+
+        # ✅ Show in macOS-style status bar (optional)
         self.statusBar().showMessage(message, timeout)
-        """🎵 Display a status message to the user in the status label."""
+
+        # ✅ Set direct message to UI label — no "Status:" prefix
         if hasattr(self, 'status_label'):
-            self.snapshot_page.status_label.setText(f"Status: {message}")
+            self.snapshot_page.status_label.setText(message)
         else:
             print(f"[STATUS] {message}")
             

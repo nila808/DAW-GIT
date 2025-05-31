@@ -6,7 +6,11 @@ import re
 from pathlib import Path
 from git import Repo
 import pytest
+from PyQt6.QtWidgets import QApplication
+from ui_strings import STATUS_UNKNOWN
 from daw_git_gui import DAWGitApp
+
+
 
 def strip_html(text):
     """Remove HTML tags from QLabel text content."""
@@ -62,3 +66,35 @@ def test_status_label_detects_modified_als(qtbot, clean_daw_project, app):
     qtbot.addWidget(app)
 
     assert not app.has_unsaved_changes(), "Initial project state should be clean"
+
+
+@pytest.mark.usefixtures("qtbot")
+def test_status_label_shows_clean_output_if_no_repo(tmp_path, qtbot):
+    """Ensure that the status label does not show fallback garbage like 'unknown' or unused placeholders."""
+
+    os.environ["DAWGIT_TEST_MODE"] = "1"
+
+    app = DAWGitApp()
+    qtbot.addWidget(app)
+
+    app.project_path = None
+    app.repo = None
+
+    app.show_status_message()
+
+    label_text = app.snapshot_page.status_label.text().lower()
+
+    # ✅ It should not say 'unknown', 'snapshot mode', or similar fallbacks
+    assert "unknown" not in label_text
+    assert "snapshot mode" not in label_text
+
+    # ✅ It should either be clean, empty, or something helpful
+    # Allowable clean states
+    allowed = {
+        "", "–",
+        "🎼 no active session line",
+        "🎚️ no session loaded",
+        "ℹ️ detached snapshot — not on an active version line"
+    }
+
+    assert label_text.strip().lower() in allowed

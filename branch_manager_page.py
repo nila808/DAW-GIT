@@ -4,7 +4,8 @@ from ui_strings import (
     BRANCH_MANAGER_TITLE,
     SWITCH_BRANCH_BTN,
     START_NEW_VERSION_BTN,
-    NO_REPO_LOADED_MSG
+    NO_REPO_LOADED_MSG, 
+    SESSION_LINES_LOADED_MSG
 )
 
 class BranchManagerPage(QWidget):
@@ -53,7 +54,8 @@ class BranchManagerPage(QWidget):
         except Exception:
             self.branch_dropdown.setCurrentIndex(-1)
 
-        self.status_label.setText(f"✅ {len(branches)} branches loaded.")
+        self.status_label.setText(SESSION_LINES_LOADED_MSG.format(count=len(branches)))
+        
 
     def switch_selected_branch(self):
         branch_name = self.branch_dropdown.currentText()

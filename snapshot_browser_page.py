@@ -21,7 +21,11 @@ from ui_strings import (
     BTN_CREATIVE_TAKE, 
     BTN_ALT_MIX, 
     BTN_OPEN_COMMIT_PANEL,
-    TOOLTIP_TAG_MAIN_MIX
+    TOOLTIP_TAG_MAIN_MIX, 
+    TABLE_HEADER_TAKE_ID,
+    TABLE_HEADER_TAKE_NOTES,
+    TABLE_HEADER_SESSION_LINE, 
+    STATUS_READY
 )
 
 
@@ -43,7 +47,8 @@ class SnapshotBrowserPage(QWidget):
         layout.addWidget(self.commit_table)
         self.commit_table.setColumnCount(9)
         self.commit_table.setHorizontalHeaderLabels([
-            "#", "Role", "Commit ID", "Message", "Branch", "DAW", "Files", "Tags", "Date"
+            "#", "Role", TABLE_HEADER_TAKE_ID, TABLE_HEADER_TAKE_NOTES,
+            TABLE_HEADER_SESSION_LINE, "DAW", "Files", "Tags", "Date"
         ])
         self.commit_table.setSortingEnabled(True)
         self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
@@ -57,7 +62,7 @@ class SnapshotBrowserPage(QWidget):
         self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
 
         # 📦 Status
-        self.status_label = QLabel("📦 Ready")
+        self.status_label = QLabel(STATUS_READY)
         layout.addWidget(self.status_label)
 
         # 📥 Load + Info

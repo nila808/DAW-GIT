@@ -65,9 +65,9 @@ def build_main_ui(app):
     app.status_label.setObjectName("status_label")
     main_layout.addWidget(app.status_label)
 
-    app.snapshot_mode_label = QLabel(SNAPSHOT_MODE_UNKNOWN)
-    app.snapshot_mode_label.setObjectName("snapshot_mode_label")
-    main_layout.addWidget(app.snapshot_mode_label)
+    # app.snapshot_mode_label = QLabel(SNAPSHOT_MODE_UNKNOWN)
+    # app.snapshot_mode_label.setObjectName("snapshot_mode_label")
+    # main_layout.addWidget(app.snapshot_mode_label)
 
     app.status_mode_label = QLabel(STATUS_UNKNOWN)
     app.status_mode_label.setObjectName("status_mode_label")

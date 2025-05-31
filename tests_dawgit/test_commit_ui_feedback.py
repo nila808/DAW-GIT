@@ -4,6 +4,7 @@ import json
 import shutil
 import pytest
 import uuid
+import re
 from pathlib import Path
 from git import Repo
 from daw_git_gui import DAWGitApp
@@ -45,9 +46,14 @@ def test_commit_modal_message_includes_branch_and_sha(qtbot, app, monkeypatch):
     monkeypatch.setattr(QMessageBox, "information", mock_info)
 
     app.commit_changes("Snapshot test")
-    assert "Branch:" in captured["text"]
-    assert "Commit:" in captured["text"]
-    assert len(captured["text"].split("Commit:")[1].strip()) >= 6
+
+    # ✅ Validate message contents
+    assert "Session Line:" in captured["text"]
+    assert "Take ID:" in captured["text"]
+
+    # ✅ Match SHA after "Take ID:"
+    match = re.search(r"Take ID:\s*([a-f0-9]{6,})", captured["text"])
+    assert match, f"Missing or invalid SHA in: {captured['text']}"
 
 
 def test_commit_updates_branch_and_commit_labels(qtbot, app):
@@ -118,5 +124,5 @@ def test_commit_with_no_changes_shows_error(qtbot, tmp_path):
 
     # ✅ Status label should contain error
     msg = app.commit_page.status_label.text().lower()
-    assert "couldn’t save snapshot" in msg or "no changes" in msg
+    assert "couldn’t save take" in msg or "no changes" in msg
     assert app.commit_page.commit_message.toPlainText() == ""
