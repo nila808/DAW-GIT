@@ -6,8 +6,9 @@ if TYPE_CHECKING:
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit,
-    QHBoxLayout, QCheckBox
+    QHBoxLayout, QCheckBox, QMessageBox
 )
+
 from PyQt6.QtCore import Qt
 
 from ui_strings import (
@@ -20,15 +21,25 @@ from ui_strings import (
     BTN_LAUNCH_DAW_FILE,
     COMMIT_REQUIRED_MSG,
     COMMIT_MESSAGE_REQUIRED_STATUS,
+    DETACHED_COMMIT_TITLE, 
+    DETACHED_COMMIT_MSG,
     SNAPSHOT_EDIT_BLOCK_TOOLTIP, 
     SNAPSHOT_PREVIEW_SUMMARY,
     STATUS_READY,
+    SNAPSHOT_SAFETY_COMMIT_TITLE,
+    SNAPSHOT_SAFETY_COMMIT_MSG,
+    SNAPSHOT_BRANCH_MAIN_LABEL,
+    SNAPSHOT_BRANCH_OTHER_LABEL,
+    SNAPSHOT_SAFETY_BTN_START_NEW,
+    SNAPSHOT_SAFETY_BTN_RETURN_LATEST,
+    SNAPSHOT_SAFETY_BTN_CANCEL,
     TOOLTIP_RETURN_TO_LATEST,
     TOOLTIP_LAUNCH_DAW_FILE,  
     TAG_MAIN_MIX_LABEL,
     TAG_CREATIVE_LABEL,
     TAG_ALT_LABEL, 
-    TAKE_LOADED_MSG
+    TAKE_LOADED_MSG,     
+
 )
 
 
@@ -130,6 +141,43 @@ class CommitPage(QWidget):
 
 
     def commit_snapshot(self):
+        # 🎧 Block unsafe commits in detached HEAD state
+        if self.app.repo and self.app.repo.head.is_detached:
+            # Determine which session this take belongs to
+            try:
+                branch = self.app.repo.active_branch.name
+                if branch == "main":
+                    branch_line = SNAPSHOT_BRANCH_MAIN_LABEL
+                else:
+                    branch_line = SNAPSHOT_BRANCH_OTHER_LABEL.format(branch=branch)
+            except Exception:
+                branch = "unknown"
+                branch_line = SNAPSHOT_BRANCH_OTHER_LABEL.format(branch=branch)
+
+            # Format message with dynamic branch_line
+            msg = SNAPSHOT_SAFETY_COMMIT_MSG.format(branch_line=branch_line)
+
+            # 🔳 Custom modal with labeled buttons
+            box = QMessageBox(self)
+            box.setWindowTitle(SNAPSHOT_SAFETY_COMMIT_TITLE)
+            box.setText(msg)
+
+            start_btn = box.addButton("🎼 Start + Alt Session", QMessageBox.ButtonRole.YesRole)
+            return_btn = box.addButton("🚀 Return to Latest", QMessageBox.ButtonRole.NoRole)
+            cancel_btn = box.addButton("❌ Cancel", QMessageBox.ButtonRole.RejectRole)
+
+            box.exec()
+
+            if box.clickedButton() == start_btn:
+                self.app.create_new_version_line()
+                return
+            elif box.clickedButton() == return_btn:
+                self.app.return_to_latest_clicked()
+                return
+            else:
+                return  # Cancel pressed
+
+        # ✅ Continue with normal commit logic
         message = self.commit_message.toPlainText().strip()
         if not message:
             self.status_label.setText(COMMIT_REQUIRED_MSG)
@@ -143,7 +191,8 @@ class CommitPage(QWidget):
         else:
             error_msg = result.get("message", "Unknown error.")
             self.status_label.setText(f"❌ Couldn’t save take:\n{error_msg}")
-            self.commit_message.clear()  # ✅ Always clear after failure
+            self.commit_message.clear()
+
 
 
     def toggle_auto_commit(self, state):

@@ -23,6 +23,18 @@ ALREADY_ON_COMMIT_TITLE = "Already on This Take"
 ALREADY_ON_COMMIT_MESSAGE = "🎿 You’re already on take {sha}."
 COMMIT_MESSAGE_REQUIRED_STATUS = "❗ Please enter a message before saving this take"
 
+DETACHED_COMMIT_TITLE = "🎧 You’re in Snapshot Preview"
+DETACHED_COMMIT_MSG = (
+    "You’re currently previewing an older take.\n\n"
+    "🎼 To save your edits safely, pick an option below:\n\n"
+    "• 🎼 Start New Session Line — create a new version line and commit your changes\n"
+    "• 🚀 Return to Latest — rejoin your main session so you can save safely\n"
+    "• ❌ Cancel — stay in snapshot mode\n\n"
+    "Git won’t allow saving here — let’s keep your session clean!"
+)
+
+SESSION_BRANCH_LABEL = "🎵 Session branch: {branch} — 🎧 Take: {take}"
+
 
 # === Snapshot Controls ===
 # === Commit / Snapshot Titles ===
@@ -56,6 +68,22 @@ SNAPSHOT_CONFIRMATION_MSG = (
     "🎼 To keep working safely, consider clicking '+ Alt Session' first.\n\n"
     "Would you like to launch this version anyway?"
 )
+
+# === Snapshot Safety Commit Block Modal ===
+SNAPSHOT_SAFETY_COMMIT_TITLE = "🎧 You’re previewing an older take"
+
+SNAPSHOT_SAFETY_COMMIT_MSG = (
+    "This take is from an earlier point in your project history.\n"
+    "{branch_line}\n\n"
+    "🎹 Read-only take — edits you make in your DAW won’t be saved to this take.\n"
+    "🎛️ Ready to create? Choose an option below:"
+)
+SNAPSHOT_BRANCH_MAIN_LABEL = "✅ It’s from your main session (main)."
+SNAPSHOT_BRANCH_OTHER_LABEL = "❗ It’s from a different session: {branch}"
+
+SNAPSHOT_SAFETY_BTN_START_NEW = "🎼 Start + Alt Session"
+SNAPSHOT_SAFETY_BTN_RETURN_LATEST = "🚀 Return to Latest"
+SNAPSHOT_SAFETY_BTN_CANCEL = "❌ Cancel"
 
 # === Snapshot Viewing / Feedback ===
 SNAPSHOT_INFO_TITLE = "🎿 Take loaded"
@@ -175,7 +203,7 @@ SETUP_REMOTE_TOOLTIP = "Set up a remote Git URL (e.g. GitHub)"
 # === Branch Manager ===
 BRANCH_MANAGER_TITLE = "🌳 Session Lines"
 SWITCH_BRANCH_BTN = "🔀 Switch Session"
-NO_REPO_LOADED_MSG = "⚠️ No repo loaded."
+NO_REPO_LOADED_MSG = "⚠️ No Session Line loaded."
 
 # === Mix Tags ===
 TAG_MAIN_MIX_LABEL = "Main Mix"

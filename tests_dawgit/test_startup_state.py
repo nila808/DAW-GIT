@@ -134,3 +134,15 @@ def test_startup_in_detached_head_warns_user(tmp_path, qtbot):
 
     # ✅ Confirm we are truly detached
     assert app.repo.head.is_detached, "Repo should be in detached HEAD state"
+
+
+def test_session_label_updates_on_return_to_latest(app):
+    """Session label should update when returning to latest commit."""
+    # Set HEAD to main if not already
+    if not app.repo.head.is_detached:
+        app.repo.git.checkout("main")
+    app.return_to_latest_clicked()
+
+    label_text = app.branch_label.text().lower()
+    assert "session branch" in label_text
+    assert "take" in label_text

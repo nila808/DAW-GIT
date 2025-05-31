@@ -104,6 +104,7 @@ from ui_strings import (
     DETACHED_HEAD_LABEL,
     DETACHED_HEAD_MSG,
     DETACHED_HEAD_LABEL,
+    SESSION_BRANCH_LABEL,
 
     # === Backup ===
     BACKUP_RESTORED_TITLE,
@@ -1051,15 +1052,21 @@ class DAWGitApp(QMainWindow):
                 self.update_role_buttons()
                 self.update_project_label()
 
-                # ✅ Create editable snapshot copy (after switching to HEAD)
-                self.editable_checkout_path = editable_path if editable_path else None
-                print("[INFO] Returned to latest — editable copy ready (not auto-launched)")
+                # ✅ Define editable checkout path
+                editable_path = self.project_path / ".dawgit_checkout_work"
+                self.editable_checkout_path = editable_path
+                print(f"[INFO] Returned to latest — editable copy path: {editable_path}")
 
                 # ✅ Update snapshot UI state
                 self.update_snapshot_status_labels()
 
                 if self.repo.head.is_detached:
-                    self.branch_label.setText(SNAPSHOT_UNKNOWN_STATE)
+                    self.branch_label.setText(
+                        SESSION_BRANCH_LABEL.format(
+                            branch=self.repo.active_branch.name,
+                            take=self.get_current_take_name()
+                        )
+                    )
                 else:
                     self.branch_label.setText(f"Session branch: {self.repo.active_branch.name} • Current take: {self.get_current_take_name()}")
 

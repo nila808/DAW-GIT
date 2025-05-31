@@ -31,12 +31,15 @@ if git rev-parse "$VERSION" >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "✅ Automatically staging all changes with 'git add .'"
-git add .
+# --- Safety check BEFORE staging ---
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "⚠️ Detected unstaged or uncommitted changes."
+  echo "💡 Please run: git add ."
+  echo "Or manually stage only what you want before running push-it."
+  exit 1
+fi
 
-echo ""
-echo "🔍 Git status before tests:"
-git status --short
+echo "✅ Working directory clean — proceeding with tests..."
 
 # --- Run test suite ---
 echo "🧪 Running test suite..."
@@ -51,8 +54,9 @@ pytest -v || {
 }
 echo "✅ All tests passed."
 
-# ✅ All green — now commit and release
-echo "✅ All tests passed — proceeding with commit and release..."
+# --- Stage and update metadata AFTER tests pass ---
+echo "📦 Staging release updates..."
+git add .
 
 # --- Update project status ---
 echo "🔧 Updating PROJECT_STATUS.md..."
@@ -74,8 +78,7 @@ else
   echo "{ \"version\": \"$VERSION\" }" > PROJECT_MARKER.json
 fi
 
-# --- Git Commit + Push + Tag ---
-echo "📦 Staging all changes..."
+# --- Final commit + tag + push ---
 git add -A
 
 echo "📝 Committing..."

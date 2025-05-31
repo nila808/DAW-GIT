@@ -94,7 +94,7 @@ This document is used as a persistent .txt reference. You can update it anytime 
     show dev notes
 
 ------------------------------------------------------------------------------------------------------------------------
-push-it
+push-it         To TEST, run:           pytest tests_dawgit/test_push_it_safety.py -v       
 ------------------------------------------------------------------------------------------------------------------------
 
 It now:
