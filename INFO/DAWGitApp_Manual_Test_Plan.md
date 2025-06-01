@@ -12,7 +12,7 @@ This manual test plan mirrors the functionality verified by automated tests, all
   - [ ] Git repo presence.
   - [ ] Detached HEAD state.
   - [ ] Current branch + commit.
-- [ ] Status label shows “✅ 🎧 On version line — 🎵 Session branch: X — Current take: Y” if on branch with role.
+- [ ] Status label shows “✅ 🎧 On version line — 🎵 Version Line: X — Current take: Y” if on branch with role.
 - [ ] Status label shows “⚠️ Git status error: HEAD is a detached symbolic reference...” if detached.
 - [ ] Status label detects unsaved changes or recently modified `.als`.
 

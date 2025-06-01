@@ -48,7 +48,7 @@ def test_commit_modal_message_includes_branch_and_sha(qtbot, app, monkeypatch):
     app.commit_changes("Snapshot test")
 
     # ✅ Validate message contents
-    assert "Session Line:" in captured["text"]
+    assert "Version Line:" in captured["text"]
     assert "Take ID:" in captured["text"]
 
     # ✅ Match SHA after "Take ID:"
@@ -84,7 +84,7 @@ def test_status_label_reflects_commit_after_snapshot(qtbot, app):
 
     app.commit_changes("Version update")
 
-    assert "Session branch:" in app.status_label.text()  # stripped emoji for test mode
+    assert "Version Line" in app.status_label.text()
 
 
 def test_commit_with_no_changes_shows_error(qtbot, tmp_path):

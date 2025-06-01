@@ -77,7 +77,7 @@ def test_full_user_session_flow(monkeypatch, qtbot):
     print("❌ DEBUG FAIL:", result)
     assert result["status"] == "success"
     qtbot.wait(200)
-    assert "Session branch" in app.status_label.text()
+    assert "Version Line" in app.status_label.text()
 
     # Add snapshot in new branch
     daw_file.write_text("new branch version")
@@ -96,7 +96,8 @@ def test_full_user_session_flow(monkeypatch, qtbot):
     # Switch to main
     app.switch_branch("main")
     qtbot.wait(200)
-    assert "Session branch: main" in app.status_label.text()
+    assert "Version Line: MAIN" in app.status_label.text()
+    
 
     # ✅ Checkout an earlier snapshot to ensure detached HEAD
     commits = list(repo.iter_commits("main", max_count=5))

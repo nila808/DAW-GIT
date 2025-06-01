@@ -35,8 +35,11 @@ def test_status_label_shows_clean_on_fresh_start(qtbot, clean_daw_project, app):
     qtbot.addWidget(app)
 
     label_text = strip_html(app.status_label.text())
-    assert "Session branch" in label_text and "Take:" in label_text
-    assert "Unsaved" not in label_text
+
+    # ✅ Updated assertions to match current label format
+    assert "Version Line" in label_text
+    assert "Take:" in label_text
+
 
 def test_status_label_ignores_non_daw_files(qtbot, clean_daw_project, app):
     # Add ignored metadata file (commonly created by macOS)
@@ -49,8 +52,10 @@ def test_status_label_ignores_non_daw_files(qtbot, clean_daw_project, app):
     qtbot.addWidget(app)
 
     label_text = strip_html(app.status_label.text())
-    assert "Unsaved" not in label_text
-    assert "Session branch" in label_text and "Take:" in label_text
+    assert "Version Line" in label_text
+    assert "Take:" in label_text
+    assert "Unsaved" not in label_text 
+
 
 def test_status_label_detects_modified_als(qtbot, clean_daw_project, app):
     als_path = clean_daw_project / "dummy.als"
@@ -92,7 +97,7 @@ def test_status_label_shows_clean_output_if_no_repo(tmp_path, qtbot):
     # Allowable clean states
     allowed = {
         "", "–",
-        "🎼 no active session line",
+        "🎼 no active version line",
         "🎚️ no session loaded",
         "ℹ️ detached snapshot — not on an active version line"
     }

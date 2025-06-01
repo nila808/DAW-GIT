@@ -16,7 +16,7 @@ System: Check for Git repo
   > 🎉 Welcome to DAW Git — no project folder selected.
 
 - **If Git repo found:**
-  > 🎵 Session branch: main — 🎧 Take: version 4  
+  > 🎵 Version Line: main — 🎧 Take: version 4  
   > ✅ Project loaded successfully
 
 ---
@@ -66,7 +66,7 @@ System: Create new branch at current snapshot, auto-commit marker
 
 - **Message:**
   > 🎼 Start new version line: {branch}  
-  > 🎵 Session branch: {branch} — 🎧 Take: version 1
+  > 🎵 Version Line: {branch} — 🎧 Take: version 1
 
 ---
 
@@ -96,7 +96,7 @@ System: Rejoin HEAD of last known branch
 ```
 
 - **Message:**
-  > ✅ Latest take loaded — you're back on session line: ‘main’
+  > ✅ Latest take loaded — you're back on Version Line: ‘main’
 
 ---
 

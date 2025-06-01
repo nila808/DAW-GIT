@@ -24,6 +24,7 @@ from ui_strings import (
     # === General Status & Info ===
     STATUS_READY,
     STATUS_UNKNOWN,
+    STATUS_BRANCH_TAKE, 
     HEADS_UP_MSG,
     HEADS_UP_TITLE,
     SESSION_SETUP_FAILED_MSG,
@@ -55,6 +56,7 @@ from ui_strings import (
     SNAPSHOT_SAVED_WAITING_TOOLTIP,
     SNAPSHOT_CONFIRMATION_TITLE,
     SNAPSHOT_CONFIRMATION_MSG,
+    SNAPSHOT_DETACHED_WARNING,
 
     # === Commit / Snapshot Status ===
     COMMIT_SUCCESS_TITLE,
@@ -102,6 +104,7 @@ from ui_strings import (
     ALREADY_ON_BRANCH_TITLE,
     ALREADY_ON_BRANCH_MSG,
     DETACHED_HEAD_LABEL,
+    DETACHED_HEAD_TITLE,
     DETACHED_HEAD_MSG,
     DETACHED_HEAD_LABEL,
     SESSION_BRANCH_LABEL,
@@ -151,7 +154,7 @@ from ui_strings import (
     BTN_QUICK_SAVE, 
     SNAPSHOT_MODE_UNKNOWN,
     SNAPSHOT_EDITABLE_TOOLTIP, 
-    STATUS_READY
+    STATUS_SESSION_LABEL
 )
 
 
@@ -565,7 +568,7 @@ class DAWGitApp(QMainWindow):
 
         selected, ok = QInputDialog.getItem(
             self,
-            "🎹 Select a Session Line",
+            "🎹 Select a Version Line",
             "Choose another version line to load:",
             branches,
             editable=False
@@ -1133,25 +1136,34 @@ class DAWGitApp(QMainWindow):
             self._show_error(f"❌ Failed to return to the latest commit:\n\n{e}")
 
    
-
     def update_session_labels(self):
+        if not self.repo:
+            return
+
         try:
-            branch = self.repo.active_branch.name if not self.repo.head.is_detached else "detached"
-            branch = "MAIN" if branch == "main" else branch
-        except Exception:
-            branch = "unknown"
+            is_detached = self.repo.head.is_detached
 
-        take = self.get_current_take_name() or "unknown"
-        sha = self.repo.head.commit.hexsha[:7] if self.repo and self.repo.head else "unknown"
+            if is_detached:
+                branch = "detached"
+            else:
+                branch = self.repo.active_branch.name
 
-        if hasattr(self, "snapshot_page") and hasattr(self.snapshot_page, "version_line_label"):
-            self.snapshot_page.version_line_label.setText(f"🎵 Editing: version on '{branch}'")
+            # ✅ Always define this safely
+            display_branch = self.normalize_branch_name(branch)
 
-        if hasattr(self, "branch_label"):
-            self.branch_label.setText(SESSION_BRANCH_LABEL.format(branch=branch, take=take))
+            take = self.get_current_take_name()
+            label = (
+                STATUS_BRANCH_TAKE.format(branch=display_branch, take=take)
+                if not is_detached
+                else DETACHED_HEAD_LABEL
+            )
 
-        if hasattr(self, "commit_label"):
-            self.commit_label.setText(f"🎶 Commit: {sha}")
+            if hasattr(self, "branch_label"):
+                self.branch_label.setText(label)
+
+        except Exception as e:
+            print(f"[DEBUG] Error updating session labels: {e}")
+
        
 
     def run_setup(self):
@@ -1511,9 +1523,9 @@ class DAWGitApp(QMainWindow):
             commit_count = "?"
 
         label = (
-            f"🎵 Session branch: {branch} — 🎧 Take: version {commit_count}"
+            STATUS_BRANCH_TAKE.format(branch=branch, take=commit_count)
             if not is_detached
-            else "ℹ️ Detached snapshot — not on an active version line"
+            else SNAPSHOT_DETACHED_WARNING
         )
 
         self.status_label.setText(label)
@@ -1729,28 +1741,35 @@ class DAWGitApp(QMainWindow):
             else:
                 branch = self.repo.active_branch.name
 
+            # Always compute display name to avoid unbound errors
+            display_branch = self.normalize_branch_name(branch)
+
             # Commit ID
             sha = self.repo.head.commit.hexsha[:7] if self.repo.head.is_valid() else "unknown"
 
             # Set the UI labels
             if hasattr(self, "branch_label"):
-                display_branch = "MAIN" if branch == "main" else branch
-                self.branch_label.setText(f"🎵 Session branch: {display_branch} • Current take: {self.get_current_take_name()}")
+                self.branch_label.setText(
+                    STATUS_BRANCH_TAKE.format(
+                        branch=display_branch,
+                        take=self.get_current_take_name()
+                    )
+                )
 
             if hasattr(self, "commit_label"):
                 self.commit_label.setText(f"🎶 Commit: {sha}")
-
 
         except Exception as e:
             print(f"[DEBUG] Error updating session display: {e}")
 
 
 
+  
 
     def update_version_line_label(self):
         try:
             branch_name = self.repo.active_branch.name
-            label_text = f"🎚️ You’re working on version line: {branch_name}"
+            label_text = f"🎼 You're working on Version Line: {branch_name.upper()}"
         except Exception:
             label_text = SNAPSHOT_NO_VERSION_LINE
 
@@ -2398,9 +2417,15 @@ class DAWGitApp(QMainWindow):
             )
 
 
+    def normalize_branch_name(self, name: str) -> str:
+        return "MAIN" if name == "main" else name
+
 
     def switch_to_branch_ui(self, branch_name: str):
+        # 👇 Convert display name back to real Git branch name
+        branch_name = self.normalize_branch_name(branch_name)
         result = self.switch_branch(branch_name)
+
         if result.get("status") == "success":
             # Try to get .version_marker or latest commit message
             marker_path = Path(self.repo.working_tree_dir) / ".version_marker"
@@ -2414,7 +2439,7 @@ class DAWGitApp(QMainWindow):
                 except Exception:
                     take_label = "(Unknown)"
 
-            self.branch_label.setText(f"Session branch: {branch_name.upper()} • Current take: {take_label}")
+            self.branch_label.setText(f"Version Line: {branch_name.upper()} • Current take: {take_label}")
 
         else:
             self._show_warning(result.get("message", "Failed to switch session."))
@@ -3552,10 +3577,15 @@ class DAWGitApp(QMainWindow):
 
                 # ✅ Test-safe version of the status label
                 if os.getenv("DAWGIT_TEST_MODE") == "1":
-                    label_text = f"Session branch: {branch} — Take: version {commit_count}"
+                    label_text = STATUS_BRANCH_TAKE.format(
+                        branch=self.normalize_branch_name(branch), 
+                        take=commit_count
+                    )
                 else:
-                    label_text = f"🎵 Session branch: {branch} — 🎧 Take: version {commit_count}"
-
+                    label_text = STATUS_SESSION_LABEL.format(
+                        branch=self.normalize_branch_name(branch),
+                        version=commit_count
+                    )
                 self.snapshot_page.status_label.setText(label_text)
                 print(f"[DEBUG] status label set: {label_text}")
 

@@ -71,7 +71,7 @@ def test_safe_switch_branch_creates_if_missing(app_with_repo, qtbot):
 
     qtbot.wait(100)
     assert "fresh_mix" in app.branch_label.text()
-    assert app.version_line_label.text().startswith("🎚️ You’re working on version line:")
+    assert "Version Line" in app.version_line_label.text()
 
 
 
@@ -86,8 +86,8 @@ def test_update_session_branch_display_reflects_branch_and_commit(app_with_repo)
     print("[TEST DEBUG] Branch Label:", app_with_repo.branch_label.text())
     print("[TEST DEBUG] Commit Label:", app.commit_label.text())
     text = app.branch_label.text()
-    assert "Session branch:" in text
-    assert "Current take:" in text
+    assert "Version Line" in app.branch_label.text()
+    assert "Take: version" in text
 
 def test_switch_branch_with_unsaved_changes_prompts_backup(app_with_repo):
 
