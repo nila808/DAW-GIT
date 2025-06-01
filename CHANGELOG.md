@@ -1,5 +1,14 @@
 
 
+## [v1.1.12] – 2025-06-01
+**Author:** @niccavendish
+- 🔀 Merge: status label cleanup (v1.1.8)
+- 🔧 Finalize status label refactor and pass all 114 tests
+- 🎧 Add snapshot safety modal — commit blocked in read-only takes
+- 🔧 Finalize v1.1.11 changes missed in tag commit
+- 📦 v1.1.11: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.1.11] – 2025-05-31
 **Author:** @niccavendish
 - 🧾 Update changelog for v1.1.10

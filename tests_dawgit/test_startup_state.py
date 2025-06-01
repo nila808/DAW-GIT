@@ -144,5 +144,5 @@ def test_session_label_updates_on_return_to_latest(app):
     app.return_to_latest_clicked()
 
     label_text = app.branch_label.text().lower()
-    assert "session branch" in label_text
+    assert "version line" in label_text
     assert "take" in label_text
