@@ -1,0 +1,12 @@
+# Function to check if all raw strings are replaced
+def test_no_raw_strings_left():
+    raw_strings = get_all_raw_strings()  # Function that returns raw strings
+    for string in raw_strings:
+        assert string in string_to_constant, f"Missing constant for string: {string}"
+
+# Function to verify that all constants are defined in ui_strings
+def test_constants_existence():
+    for constant in string_to_constant.values():
+        assert constant in ui_strings.__dict__, f"Constant {constant} does not exist in ui_strings"
+
+# You can then run these verification tests using pytest
