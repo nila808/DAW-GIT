@@ -1,3 +1,4 @@
+import ui_strings
 import os
 import json
 import shutil
@@ -45,7 +46,7 @@ def working_directory(path):
         os.chdir(previous)
 
 
-def git_add_and_commit(repo, path: Path, filename: str, message="Initial commit"):
+def git_add_and_commit(repo, path: Path, filename: str, message=ui_strings.INITIAL_COMMIT_MESSAGE):
     with working_directory(path):
         repo.index.add([filename])
         repo.index.commit(message)

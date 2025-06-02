@@ -1,3 +1,4 @@
+import ui_strings
 import pytest
 from unittest.mock import patch
 from daw_git_gui import DAWGitApp

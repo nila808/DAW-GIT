@@ -1,3 +1,4 @@
+import ui_strings
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -12,7 +13,7 @@ def test_restore_snapshot(qtbot):
     qtbot.addWidget(app)
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        project_path = Path(tmpdir) / "TestProject"
+        project_path = Path(tmpdir) / ui_strings.TEST_PROJECT_NAME
         project_path.mkdir()
 
         app.project_path = project_path
@@ -22,14 +23,14 @@ def test_restore_snapshot(qtbot):
         backup_folder.mkdir(parents=True)
 
         # Place a dummy backup file inside backup folder
-        backup_file = backup_folder / "dummy.als"
+        backup_file = backup_folder / ui_strings.DUMMY_ALS_FILE
         backup_file.write_text("Ableton snapshot")
 
         # Now call restore (make sure your app looks in this backup folder)
         app.restore_last_backup()
 
         # After restore, file should exist in project folder
-        restored_file = project_path / "dummy.als"
+        restored_file = project_path / ui_strings.DUMMY_ALS_FILE
         assert restored_file.exists()
         assert restored_file.read_text() == "Ableton snapshot"
 

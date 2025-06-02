@@ -1,3 +1,4 @@
+import ui_strings
 import os
 import pytest
 from git import Repo
@@ -23,7 +24,7 @@ def test_placeholder_file_created_on_version_line_start(tmp_path, qtbot):
     als_file = tmp_path / "base.als"
     als_file.write_text("Initial Ableton session")
     repo.index.add(["base.als"])
-    repo.index.commit("Initial commit")
+    repo.index.commit(ui_strings.INITIAL_COMMIT_MESSAGE)
 
     # Step 2: Detach HEAD (simulate user viewing old snapshot)
     repo.git.checkout(repo.head.commit.hexsha)

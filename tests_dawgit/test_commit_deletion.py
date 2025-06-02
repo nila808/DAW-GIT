@@ -1,3 +1,4 @@
+import ui_strings
 import pytest
 from pathlib import Path
 from daw_git_gui import DAWGitApp
@@ -14,7 +15,7 @@ def repo_with_commits(tmp_path):
 
     repo = Repo.init(str(project_dir))
     repo.index.add([str(file.relative_to(project_dir))])
-    repo.index.commit("Initial commit")
+    repo.index.commit(ui_strings.INITIAL_COMMIT_MESSAGE)
 
     # Create a second commit so we aren't deleting the root commit
     second_file = project_dir / "second.als"

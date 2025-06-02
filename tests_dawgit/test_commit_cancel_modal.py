@@ -1,3 +1,4 @@
+import ui_strings
 import pytest
 from daw_git_gui import DAWGitApp
 from pathlib import Path
@@ -5,10 +6,10 @@ from PyQt6.QtWidgets import QInputDialog
 
 @pytest.fixture
 def daw_project_with_als(tmp_path):
-    """Creates a DAW project folder with a valid .als file."""
+    ui_strings.CREATE_DAW_PROJECT_FOLDER_MSG
     project_dir = tmp_path / "CommitCancelTest"
     project_dir.mkdir()
-    (project_dir / "dummy.als").write_text("Ableton content")
+    (project_dir / ui_strings.DUMMY_ALS_FILE).write_text("Ableton content")
     return project_dir
 
 def test_commit_cancel_does_not_change_repo(monkeypatch, qtbot, daw_project_with_als):

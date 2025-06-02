@@ -270,3 +270,40 @@ SESSION_LINES_LOADED_MSG = "✅ {count} Version Lines loaded."
 TABLE_HEADER_TAKE_ID = "Take ID"
 TABLE_HEADER_SESSION_LINE = "Version Line"
 TABLE_HEADER_TAKE_NOTES = "Take Notes"  # optional
+
+
+# === TEST STRINGS ===
+
+INITIAL_COMMIT_MESSAGE = "Initial commit message"
+CREATE_DAW_PROJECT_FOLDER_MSG = "Create a DAW project folder with a valid .als file."
+
+
+
+# Constants for raw strings used in the test
+TEST_PROJECT_NAME = "TestProject"  # Name of the test project
+DUMMY_ALS_FILE = "dummy.als"  # Name of the dummy ALS file
+INITIAL_COMMIT_CONTENT = "Initial commit content"  # Content for the first commit
+INITIAL_COMMIT_MESSAGE = "Initial commit"  # Message for the first commit
+UNSAVED_CHANGES_WARNING = "⚠️ Unstaged or uncommitted changes detected!"  # Warning for unsaved changes
+PUSH_IT_SCRIPT = """#!/bin/bash
+set -e
+cd $(git rev-parse --show-toplevel)
+VERSION="$1"
+MESSAGE="$2"
+
+if [[ -z "$VERSION" ]]; then echo "❌ Usage: push-it <version-tag>"; exit 1; fi
+if ! [[ "$VERSION" =~ ^[a-zA-Z0-9._-]+$ ]]; then echo "❌ Invalid tag."; exit 1; fi
+if git rev-parse "$VERSION" >/dev/null 2>&1; then echo "❌ Tag exists."; exit 1; fi
+
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "⚠️ Unstaged or uncommitted changes detected!"
+  echo "❌ Aborting push-it due to dirty working directory."
+  exit 1
+fi
+
+echo "✅ Would run tests now"
+"""  # Bash script content for the push-it process
+BASH_SCRIPT = "bash"  # Command to run the bash script
+VERSION_NUMBER = "1.0.0"  # Example version number for the push-it script
+
+ABORTING_ACTION = "❌ Aborting push-it due to dirty working directory."  # Message for aborting the push

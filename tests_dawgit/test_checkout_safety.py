@@ -1,3 +1,4 @@
+import ui_strings
 import os
 os.environ["DAWGIT_TEST_MODE"] = "1"
 import daw_git_testing  # patches modals at import
@@ -17,11 +18,11 @@ from git import Repo
 
 @pytest.fixture
 def test_repo(tmp_path):
-    project_path = tmp_path / "TestProject"
+    project_path = tmp_path / ui_strings.TEST_PROJECT_NAME
     os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
 
     project_path.mkdir()
-    (project_path / "dummy.als").write_text("Ableton project v1")
+    (project_path / ui_strings.DUMMY_ALS_FILE).write_text("Ableton project v1")
     return project_path
 
 @pytest.fixture
@@ -34,7 +35,7 @@ def app(test_repo):
 
 def test_backup_folder_created_on_unsaved_changes(tmp_path):
     # Create fake project folder
-    project_path = tmp_path / "TestProject"
+    project_path = tmp_path / ui_strings.TEST_PROJECT_NAME
     project_path.mkdir()
 
     # Create a dummy DAW file so Git init works
@@ -90,7 +91,7 @@ def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_fac
     repo.git.add(all=True)
     repo.git.commit(m="commit als")
 
-    dummy_als = Path(repo_path, "dummy.als")
+    dummy_als = Path(repo_path, ui_strings.DUMMY_ALS_FILE)
     dummy_als.write_text("dummy Ableton session")
     repo.git.add(all=True)
     repo.git.commit(m="Add dummy.als")
@@ -303,7 +304,7 @@ def test_switch_branch_with_uncommitted_changes_warns_or_stashes(temp_repo_facto
     als_file = Path(repo_path) / "track.als"
     als_file.write_text("Initial version")
     repo.git.add(all=True)
-    repo.git.commit(m="Initial commit")
+    repo.git.commit(m=ui_strings.INITIAL_COMMIT_MESSAGE)
 
     repo.git.checkout("-b", "alt_branch")
     als_file.write_text("Alt edit")

@@ -1,3 +1,4 @@
+import ui_strings
 import sys
 import os
 from pathlib import Path
@@ -12,7 +13,7 @@ def test_git_init_creates_repo(tmp_path, qtbot):
     os.chdir(tmp_path)  # Ensure working directory is the project path
 
     # Create a dummy Ableton file so init_git has something to track
-    dummy_file = tmp_path / "dummy.als"
+    dummy_file = tmp_path / ui_strings.DUMMY_ALS_FILE
     dummy_file.write_text("Ableton dummy content")
 
     # Run Git initialization/setup

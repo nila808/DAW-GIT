@@ -1,3 +1,4 @@
+import ui_strings
 import os
 os.environ["DAWGIT_TEST_MODE"] = "1"
 import daw_git_testing  # patches modals at import
@@ -21,7 +22,7 @@ def clean_daw_project(tmp_path):
     """Creates a dummy DAW project folder with a valid .als file and no dirty state."""
     project_dir = tmp_path / f"TestProject_{time.time_ns()}"
     project_dir.mkdir()
-    als_path = project_dir / "dummy.als"
+    als_path = project_dir / ui_strings.DUMMY_ALS_FILE
     als_path.write_text("Ableton data")
 
     past = time.time() - 120
@@ -58,12 +59,12 @@ def test_status_label_ignores_non_daw_files(qtbot, clean_daw_project, app):
 
 
 def test_status_label_detects_modified_als(qtbot, clean_daw_project, app):
-    als_path = clean_daw_project / "dummy.als"
+    als_path = clean_daw_project / ui_strings.DUMMY_ALS_FILE
     als_path.write_text("original")
 
     # 💾 Init repo and commit the file BEFORE app launch
     repo = Repo.init(clean_daw_project)
-    repo.index.add(["dummy.als"])
+    repo.index.add([ui_strings.DUMMY_ALS_FILE])
     repo.index.commit("initial version")
 
     # 🔄 Launch app (clean state expected)

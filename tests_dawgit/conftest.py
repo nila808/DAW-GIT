@@ -1,7 +1,12 @@
-# conftest.py or top of test file
-import os
-from pathlib import Path
 import sys
+import os
+from pathlib import Path  # Add this import
+
+# Add the root folder to Python's path manually
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # Goes up one level to the root
+sys.path.append(root_dir)  # Append the root directory to sys.path
+
+import ui_strings  # Now, ui_strings should be importable from the root folder
 
 # ✅ Ensure DAWGitApp root is in Python path (use only once)
 project_root = Path(__file__).resolve().parents[1]
@@ -52,7 +57,7 @@ def ensure_qapp_exists():
 
 @pytest.fixture
 def app_with_commit(app, qtbot):
-    dummy_file = Path(app.project_path) / "dummy.als"
+    dummy_file = Path(app.project_path) / ui_strings.DUMMY_ALS_FILE
     dummy_file.write_text("This is a test Ableton file.")
     app.repo.git.add(str(dummy_file))
     app.repo.git.commit("-m", "Initial test commit")
@@ -67,7 +72,7 @@ def simple_daw_repo(tmp_path):
     file.write_text("Audio content")
     repo = Repo.init(tmp_path)
     repo.index.add(["init.als"])
-    repo.index.commit("Initial commit")
+    repo.index.commit(ui_strings.INITIAL_COMMIT_MESSAGE)
     repo.git.branch("-M", "main")
     app = DAWGitApp(project_path=tmp_path, build_ui=False)
     app.init_git()
@@ -146,7 +151,7 @@ def auto_patch_dialogs(monkeypatch):
 
 @pytest.fixture
 def temp_project(tmp_path):
-    project_dir = tmp_path / "TestProject"
+    project_dir = tmp_path / ui_strings.TEST_PROJECT_NAME
     project_dir.mkdir()
     return project_dir
 
@@ -162,7 +167,7 @@ def app_with_repo(tmp_path, qtbot):
     dummy_file.write_text("Ableton Project Placeholder")
 
     subprocess.run(["git", "add", "."], cwd=repo_path, check=True)
-    subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=repo_path, check=True)
+    subprocess.run(["git", "commit", "-m", ui_strings.INITIAL_COMMIT_MESSAGE], cwd=repo_path, check=True)
 
     app = DAWGitApp(project_path=repo_path)
     app.init_git()
@@ -170,6 +175,3 @@ def app_with_repo(tmp_path, qtbot):
     app.show()
     yield app
     app.close()
-
-
-

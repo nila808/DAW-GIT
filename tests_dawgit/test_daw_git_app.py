@@ -1,3 +1,4 @@
+import ui_strings
 import pytest
 from unittest.mock import MagicMock, patch
 from PyQt6.QtCore import QSettings  # Correctly import QSettings here

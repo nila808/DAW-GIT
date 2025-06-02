@@ -1,3 +1,4 @@
+import ui_strings
 import re
 import pytest
 from pathlib import Path

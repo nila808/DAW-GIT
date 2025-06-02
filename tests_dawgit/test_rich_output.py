@@ -1,3 +1,4 @@
+import ui_strings
 from rich import print
 
 def test_colored_output():

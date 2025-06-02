@@ -1,3 +1,4 @@
+import ui_strings
 import os
 import shutil
 from pathlib import Path
@@ -6,9 +7,9 @@ from git import Repo
 
 def test_commit_and_return_to_latest(tmp_path, qtbot):
     # Setup: create a fake project directory
-    project_path = tmp_path / "TestProject"
+    project_path = tmp_path / ui_strings.TEST_PROJECT_NAME
     project_path.mkdir()
-    als_file = project_path / "dummy.als"
+    als_file = project_path / ui_strings.DUMMY_ALS_FILE
     als_file.write_text("test content")
 
     # Init Git repo manually
@@ -22,7 +23,7 @@ def test_commit_and_return_to_latest(tmp_path, qtbot):
 
     os.chdir(project_path)  # switch into valid Git repo before GitPython operations
     try:
-        repo.index.add(["dummy.als"])
+        repo.index.add([ui_strings.DUMMY_ALS_FILE])
         repo.index.commit("Initial dummy")
     finally:
         os.chdir(cwd)

@@ -1,3 +1,4 @@
+import ui_strings
 import os
 os.environ["DAWGIT_TEST_MODE"] = "1"
 import daw_git_testing  # patches modals at import
@@ -18,7 +19,7 @@ def test_create_new_branch_from_commit(temp_repo_factory, qtbot):
     als_file = Path(repo_path) / "project.als"
     als_file.write_text("Dummy ALS content")
     repo.git.add(all=True)
-    repo.git.commit(m="Initial commit")
+    repo.git.commit(m=ui_strings.INITIAL_COMMIT_MESSAGE)
 
     # Detach HEAD to current commit (simulate detached HEAD)
     repo.git.checkout(repo.head.commit.hexsha)

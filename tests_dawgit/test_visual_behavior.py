@@ -1,3 +1,4 @@
+import ui_strings
 import os
 os.environ["DAWGIT_TEST_MODE"] = "1"
 import daw_git_testing  # patches modals at import
@@ -9,7 +10,7 @@ from pathlib import Path
 @pytest.fixture
 def app(qtbot, tmp_path):
     # Create fake project with .als file
-    project_path = tmp_path / "TestProject"
+    project_path = tmp_path / ui_strings.TEST_PROJECT_NAME
     project_path.mkdir()
     (project_path / "track.als").write_text("test")
 
