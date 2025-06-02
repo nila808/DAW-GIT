@@ -1,3 +1,4 @@
+import ui_strings
 import os
 os.environ["DAWGIT_TEST_MODE"] = "1"
 

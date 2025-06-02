@@ -1,3 +1,4 @@
+import ui_strings
 import os
 os.environ["DAWGIT_TEST_MODE"] = "1"
 import daw_git_testing  # patches modals at import
@@ -16,10 +17,10 @@ def app_with_repo(temp_project, qtbot):
     qtbot.addWidget(app)
 
     # ✅ Add initial commit so HEAD~1 works later
-    file = Path(app.project_path) / "dummy.als"
+    file = Path(app.project_path) / ui_strings.DUMMY_ALS_FILE
     file.write_text("Ableton placeholder")
     app.repo.index.add([str(file.name)])
-    app.repo.index.commit("Initial commit")
+    app.repo.index.commit(ui_strings.INITIAL_COMMIT_MESSAGE)
 
     # ✅ Add second commit
     file.write_text("Ableton placeholder v2")
@@ -43,7 +44,7 @@ def test_safe_switch_branch_creates_if_missing(app_with_repo, qtbot):
     app = app_with_repo
 
     # Setup: ensure repo has one real commit
-    daw_file = Path(app.project_path) / "dummy.als"
+    daw_file = Path(app.project_path) / ui_strings.DUMMY_ALS_FILE
     daw_file.write_text("Ableton test file")
     app.repo.git.add(str(daw_file.name))
     app.repo.git.commit("-m", "Pre-branch commit")
@@ -93,10 +94,10 @@ def test_switch_branch_with_unsaved_changes_prompts_backup(app_with_repo):
 
     app = app_with_repo
 
-    daw_file = Path(app.project_path) / "dummy.als"
+    daw_file = Path(app.project_path) / ui_strings.DUMMY_ALS_FILE
 
     # ✅ Ensure a dirty diff exists — first commit, then modify
-    daw_file.write_text("initial content")
+    daw_file.write_text(ui_strings.INITIAL_COMMIT_CONTENT)
     app.repo.index.add([str(daw_file.name)])
     app.repo.index.commit("Baseline commit")
 
@@ -135,7 +136,7 @@ def test_load_alternate_session_switches_branch(qtbot, tmp_path, monkeypatch):
     AT-062 / MT-041 – Simulate '🎹 Load Alternate Session' button switching branches
     """
     # 1️⃣ Setup project inside repo folder
-    project_path = tmp_path / "TestProject"
+    project_path = tmp_path / ui_strings.TEST_PROJECT_NAME
     project_path.mkdir()
 
     from daw_git_gui import DAWGitApp
@@ -172,7 +173,7 @@ def test_branch_switch_cancel_does_not_change_branch(qtbot, tmp_path, monkeypatc
     """
     AT-063 – Cancel out of branch selector without switching
     """
-    project_path = tmp_path / "TestProject"
+    project_path = tmp_path / ui_strings.TEST_PROJECT_NAME
     project_path.mkdir()
     (project_path / "track.als").write_text("Base")
 
@@ -197,7 +198,7 @@ def test_branch_switch_to_same_branch_does_nothing(qtbot, tmp_path, monkeypatch)
     """
     AT-064 – Selecting the same branch should not trigger switch
     """
-    project_path = tmp_path / "TestProject"
+    project_path = tmp_path / ui_strings.TEST_PROJECT_NAME
     project_path.mkdir()
     (project_path / "track.als").write_text("Start")
 

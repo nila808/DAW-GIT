@@ -1,3 +1,4 @@
+import ui_strings
 import pytest
 from daw_git_gui import DAWGitApp
 from PyQt6.QtWidgets import QApplication

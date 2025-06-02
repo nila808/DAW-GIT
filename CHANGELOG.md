@@ -1,5 +1,14 @@
 
 
+## [v1.1.13] – 2025-06-02
+**Author:** @niccavendish
+- Refactored string constants and added import updates
+- Backup current state before string-to-constant migration
+- 🧾 Update release.log for v1.1.12
+- 📦 v1.1.12: 📝 updated changelog, 📊 updated project status
+- 🔀 Merge: status label cleanup (v1.1.8)
+
+
 ## [v1.1.12] – 2025-06-01
 **Author:** @niccavendish
 - 🔀 Merge: status label cleanup (v1.1.8)

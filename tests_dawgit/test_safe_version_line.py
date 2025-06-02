@@ -1,3 +1,4 @@
+import ui_strings
 import sys
 import os
 import pytest

@@ -1,3 +1,4 @@
+import ui_strings
 # daw_git_testing.py
 
 import os

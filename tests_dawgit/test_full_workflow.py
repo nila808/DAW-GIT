@@ -1,3 +1,4 @@
+import ui_strings
 import os
 import subprocess
 import tempfile
@@ -8,7 +9,7 @@ import pytest
 
 def test_daw_git_end_to_end( qtbot):
     with tempfile.TemporaryDirectory() as temp_dir:
-        project_path = Path(temp_dir) / "TestProject"
+        project_path = Path(temp_dir) / ui_strings.TEST_PROJECT_NAME
         project_path.mkdir()
 
         logicx_path = project_path / "MyTrack.logicx"
@@ -34,7 +35,7 @@ def test_daw_git_end_to_end( qtbot):
         os.chdir(project_path)
         try:
             repo.index.add([str(gitattributes.relative_to(project_path)), "MyTrack.logicx/ProjectData"])
-            repo.index.commit("Initial commit")
+            repo.index.commit(ui_strings.INITIAL_COMMIT_MESSAGE)
         finally:
             os.chdir(cwd)
 

@@ -1,3 +1,4 @@
+import ui_strings
 from pathlib import Path
 from git import Repo
 from daw_git_gui import DAWGitApp
@@ -68,10 +69,10 @@ def test_placeholder_file_created_if_none_exist(tmp_path, qtbot):
 
     # 🧪 Init repo with one dummy commit (Git requires at least one to detach)
     repo = Repo.init(project_path)
-    dummy = project_path / "dummy.als"
+    dummy = project_path / ui_strings.DUMMY_ALS_FILE
     dummy.write_text("placeholder content")
-    repo.index.add(["dummy.als"])
-    repo.index.commit("Initial commit")
+    repo.index.add([ui_strings.DUMMY_ALS_FILE])
+    repo.index.commit(ui_strings.INITIAL_COMMIT_MESSAGE)
     dummy.unlink()  # Remove it to simulate no DAW files
 
     # 🧪 Detach HEAD (simulate snapshot view)

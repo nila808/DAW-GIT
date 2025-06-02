@@ -1,3 +1,4 @@
+import ui_strings
 import os
 import sys
 import json
@@ -33,7 +34,7 @@ def test_commit_modal_message_includes_branch_and_sha(qtbot, app, monkeypatch):
     app.pages.switch_to("commit")  # optional but good UX simulation
 
     # ✅ Ensure there's something to commit
-    test_file = app.project_path / "dummy.als"
+    test_file = app.project_path / ui_strings.DUMMY_ALS_FILE
     test_file.write_text("test content for snapshot")
     app.repo.git.add(str(test_file))
 
@@ -62,7 +63,7 @@ def test_commit_updates_branch_and_commit_labels(qtbot, app):
     app.pages.switch_to("commit")  # optional but good UX simulation
 
     # ✅ Ensure there's something to commit
-    test_file = app.project_path / "dummy.als"
+    test_file = app.project_path / ui_strings.DUMMY_ALS_FILE
     test_file.write_text("test content for label update")
     app.repo.git.add(str(test_file))
 
@@ -78,7 +79,7 @@ def test_status_label_reflects_commit_after_snapshot(qtbot, app):
     app.pages.switch_to("commit")  # optional but good UX simulation
 
     # ✅ Ensure there's something to commit
-    test_file = app.project_path / "dummy.als"
+    test_file = app.project_path / ui_strings.DUMMY_ALS_FILE
     test_file.write_text("test content for version update")
     app.repo.git.add(str(test_file))
 

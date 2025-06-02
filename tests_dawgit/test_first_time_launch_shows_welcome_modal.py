@@ -1,3 +1,4 @@
+import ui_strings
 import os
 import pytest
 from PyQt6.QtWidgets import QMessageBox

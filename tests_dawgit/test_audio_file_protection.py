@@ -1,3 +1,4 @@
+import ui_strings
 def test_audio_and_midi_files_are_never_deleted(real_test_project):
     assert (real_test_project / "KICK.aif").exists()
     assert (real_test_project / "MIDI_1.mid").exists()

@@ -1,3 +1,4 @@
+import ui_strings
 import os
 import pytest
 from PyQt6.QtCore import Qt
@@ -18,7 +19,7 @@ def select_latest_commit(app, qtbot, wait_ms=250):
     return app.current_commit_id
 
 def ensure_test_commit(app):
-    als_path = app.project_path / "dummy.als"
+    als_path = app.project_path / ui_strings.DUMMY_ALS_FILE
     if not als_path.exists():
         als_path.write_text("🎵 Ableton content")
     app.commit_changes(commit_message="Initial test commit")

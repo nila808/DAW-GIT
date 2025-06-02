@@ -1,3 +1,4 @@
+import ui_strings
 import os
 os.environ["DAWGIT_TEST_MODE"] = "1"  # Must be set early
 from daw_git_gui import DAWGitApp  # now safe to import
@@ -30,7 +31,7 @@ def test_full_user_session_flow(monkeypatch, qtbot):
         Repo.init(project_path)
         repo = Repo(project_path)
         repo.index.add([daw_file.name])
-        repo.index.commit("Initial commit")
+        repo.index.commit(ui_strings.INITIAL_COMMIT_MESSAGE)
     else:
         repo = Repo(project_path)
 

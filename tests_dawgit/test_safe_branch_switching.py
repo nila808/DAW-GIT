@@ -1,3 +1,4 @@
+import ui_strings
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -10,7 +11,7 @@ def test_prevent_branch_switch_with_uncommitted_changes(tmp_path):
     project_file.write_text("Initial version")
     repo = Repo.init(tmp_path)
     repo.index.add(["track.als"])
-    repo.index.commit("Initial commit")
+    repo.index.commit(ui_strings.INITIAL_COMMIT_MESSAGE)
 
     # Create the new branch so switch can happen
     repo.git.branch("new-branch")
