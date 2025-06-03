@@ -376,3 +376,21 @@ ROLE_KEY_MAP = {v: k for k, v in ROLE_LABEL_MAP.items()}
 # Legacy/test compatibility (remove if unused later)
 ROLE_ALT_MIXDOWN = ROLE_LABEL_MAP[ROLE_KEY_ALT_MIXDOWN]
 
+# === Role Tagging ===
+MODAL_CONFIRM_OVERWRITE_TITLE = "⚠️ Overwrite?"
+MODAL_CONFIRM_OVERWRITE_MSG = "You already have a session called ‘{name}’. Do you want to replace it?"
+
+MODAL_CONFIRM_DELETE_ROLE_TITLE = "🗑 Remove Role Tag?"
+MODAL_CONFIRM_DELETE_ROLE_MSG = (
+    "This will remove the role tag from:\n\n"
+    "{sha} — {msg}\n\n"
+    "Are you sure?"
+)
+
+MODAL_ROLE_ASSIGNMENT_TITLE = "✅ Role Tagged"
+MODAL_ROLE_ASSIGNMENT_MSG = "🎧 {role} applied to commit {sha}"
+
+STATUS_ROLE_ALREADY_ASSIGNED = "This commit is already tagged as {role}"
+STATUS_ROLE_UPDATED = "Updated tag: now marked as {role}"
+STATUS_ROLE_REMOVED = "❌ Role tag removed from {sha}"
+STATUS_TAGGED_AS_CUSTOM_LABEL = "🏷️ Tagged as '{label}'"
