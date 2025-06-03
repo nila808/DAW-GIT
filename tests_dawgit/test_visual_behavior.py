@@ -69,4 +69,4 @@ def test_full_snapshot_flow(app, qtbot):
     # Reload history to confirm role appears in table
     app.load_commit_history()
     found_role = app.history_table.item(0, 1).text()
-    assert found_role == ROLE_KEY_MAIN_MIX
+    assert found_role == app.pretty_role(ROLE_KEY_MAIN_MIX)

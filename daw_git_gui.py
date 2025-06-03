@@ -110,6 +110,7 @@ from ui_strings import (
     DETACHED_HEAD_MSG,
     DETACHED_HEAD_LABEL,
     SESSION_BRANCH_LABEL,
+    ROLE_LABEL_MAP,
 
     # === Backup ===
     BACKUP_RESTORED_TITLE,
@@ -375,13 +376,17 @@ class DAWGitApp(QMainWindow):
     def setup_ui(self):
         build_main_ui(self)
 
+    # def pretty_role(self, role_key):
+    #     return {
+    #         "main_mix": ROLE_KEY_MAIN_MIX,
+    #         "creative_take": ROLE_KEY_CREATIVE_TAKE,
+    #         "alt_mixdown": ROLE_KEY_ALT_MIXDOWN,
+    #         "test_custom_tag": ROLE_KEY_CUSTOM
+    #     }.get(role_key, role_key.replace("_", " ").title() if role_key else "")
+
     def pretty_role(self, role_key):
-        return {
-            "main_mix": ROLE_KEY_MAIN_MIX,
-            "creative_take": ROLE_KEY_CREATIVE_TAKE,
-            "alt_mixdown": ROLE_KEY_ALT_MIXDOWN,
-            "test_custom_tag": ROLE_KEY_CUSTOM
-        }.get(role_key, role_key.replace("_", " ").title() if role_key else "")
+        return ROLE_LABEL_MAP.get(role_key, role_key.replace("_", " ").title() if role_key else "")
+
     
 
     def maybe_show_welcome_modal(self):
@@ -2175,6 +2180,7 @@ class DAWGitApp(QMainWindow):
             self.commit_roles = {}
 
 
+    @pyqtSlot()
     def tag_custom_label(self):
         """
         Prompts user for a custom label and assigns it to the selected commit.
@@ -2211,14 +2217,12 @@ class DAWGitApp(QMainWindow):
             QMessageBox.warning(self, INVALID_LABEL_TITLE, INVALID_LABEL_MSG)
             return
 
-        if not ok or not label.strip():
-            return  # cancelled or empty
-
         clean_label = label.strip()
         self.current_commit_id = sha
         self.assign_commit_role(sha, clean_label)
         self.save_commit_roles()
         self.status_message(f"✏️ Commit tagged as '{clean_label}': {sha[:7]}")
+
         if os.getenv("DAWGIT_TEST_MODE") == "1":
             print("[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly")
             self.load_commit_history()
@@ -2226,6 +2230,7 @@ class DAWGitApp(QMainWindow):
             QTimer.singleShot(100, self.load_commit_history)
 
 
+    @pyqtSlot()
     def tag_main_mix(self):
         """
         Assigns the 'ROLE_KEY_MAIN_MIX' role to the currently selected commit.
@@ -2244,7 +2249,7 @@ class DAWGitApp(QMainWindow):
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
-        # Remove existing 'ROLE_KEY_MAIN_MIX' tag from another commit, if needed
+        # 🧼 Remove existing 'main_mix' tag from another commit, if needed
         existing_main = next((k for k, v in self.commit_roles.items() if v == ROLE_KEY_MAIN_MIX and k != sha), None)
 
         if existing_main and os.getenv("DAWGIT_TEST_MODE") != "1":
@@ -2255,7 +2260,7 @@ class DAWGitApp(QMainWindow):
                 self,
                 CONFIRM_REPLACE_MAIN_TITLE,
                 CONFIRM_REPLACE_MAIN_MSG.format(
-                    old_sha=existing_main[:7] if existing_main else "unknown",
+                    old_sha=existing_main[:7],
                     old_msg=old_msg,
                     new_sha=sha[:7],
                     new_msg=new_msg
@@ -2272,30 +2277,33 @@ class DAWGitApp(QMainWindow):
         self.assign_commit_role(sha, ROLE_KEY_MAIN_MIX)
         self.save_commit_roles()
         self.status_message(STATUS_TAGGED_AS_MAIN_MIX.format(sha=sha[:7]))
+
         if os.getenv("DAWGIT_TEST_MODE") == "1":
             print("[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly")
             self.load_commit_history()
         else:
             QTimer.singleShot(100, self.load_commit_history)
 
-    # Used by tag_creative_btn.clicked.connect(...) — do not remove
+
     @pyqtSlot()
-    def tag_creative_take(self): # noqa: F401 (used via Qt slot)
+    def tag_creative_take(self):  
+        print("[DEBUG] 🚨 tag_creative_take() fired")
         """
         Assigns the 'creative_take' role to the currently selected commit.
         """
         self._set_commit_id_from_selected_row()
         row = self.snapshot_page.commit_table.currentRow()
+
         if row < 0:
             self._show_warning(f"Please select a snapshot to tag as '{ROLE_KEY_CREATIVE_TAKE}'.")
-        return
+            return  # ✅ only return inside this block
 
         commit_item = self.snapshot_page.commit_table.item(row, 2)
         sha = commit_item.toolTip() if commit_item else self.current_commit_id
 
         if not sha:
             self._show_warning("Commit SHA missing — can't assign role.")
-        return
+            return  # ✅ needed here too
 
         # ✅ Normalized internal label
         safe_label = "creative_take"
@@ -2304,6 +2312,7 @@ class DAWGitApp(QMainWindow):
         self.assign_commit_role(sha, safe_label)
         self.save_commit_roles()
         self.status_message(f"🎨 Commit tagged as '{safe_label}': {sha[:7]}")
+
         if os.getenv("DAWGIT_TEST_MODE") == "1":
             print("[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly")
             self.load_commit_history()
@@ -2311,6 +2320,7 @@ class DAWGitApp(QMainWindow):
             QTimer.singleShot(100, self.load_commit_history)
 
 
+    @pyqtSlot()
     def tag_alt_mix(self):
         """
         Assigns the 'alt_mixdown' role to the currently selected commit.
@@ -2335,6 +2345,7 @@ class DAWGitApp(QMainWindow):
         self.assign_commit_role(sha, safe_label)
         self.save_commit_roles()
         self.status_message(f"🎛️ Commit tagged as '{safe_label}': {sha[:7]}")
+
         if os.getenv("DAWGIT_TEST_MODE") == "1":
             print("[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly")
             self.load_commit_history()
