@@ -1659,20 +1659,19 @@ class DAWGitApp(QMainWindow):
             if self.repo is None:
                 self.repo = Repo(self.project_path)
 
-            # 🎯 Detach HEAD to snapshot commit
+            # 🎯 Detach HEAD to snapshot commit before creating a new branch
             if not self.repo.head.is_detached:
                 self.repo.git.checkout(self.repo.head.commit.hexsha)
 
-            # ✅ Step 1: Create .version_marker file
+            # ✅ Step 1: Create marker file
             marker_path = Path(self.project_path) / ".version_marker"
             marker_path.write_text("🎼 Auto-created marker")
             files_to_commit = [marker_path.relative_to(self.project_path).as_posix()]
 
-            # ✅ Step 2: Create placeholder .als if needed (before branch checkout)
+            # ✅ Step 2: Create placeholder DAW file if none exist
             daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
             if not daw_files:
                 if self.repo.head.is_detached:
-                    print("[DEBUG] No DAW files found — creating placeholder .als for detached HEAD branching")
                     placeholder_path = Path(self.project_path) / "auto_placeholder.als"
                     placeholder_path.write_text("Temporary placeholder for version line start")
                     files_to_commit.append(placeholder_path.relative_to(self.project_path).as_posix())
@@ -1682,11 +1681,17 @@ class DAWGitApp(QMainWindow):
                         "message": "No DAW files found for new version line, and not in detached state"
                     }
 
-            # ✅ Step 3: Create and checkout the new branch
-            new_branch = self.repo.create_head(branch_name)
-            new_branch.checkout()
+            # ✅ Step 3: Create or switch to branch safely
+            branch = None
+            if branch_name in self.repo.branches:
+                print(f"[DEBUG] Branch '{branch_name}' already exists — switching")
+                branch = self.repo.branches[branch_name]
+            else:
+                branch = self.repo.create_head(branch_name)
 
-            # ✅ Step 4: Commit all new files
+            branch.checkout()
+
+            # ✅ Step 4: Commit marker and placeholder
             try:
                 print(f"[DEBUG] Committing files: {files_to_commit}")
                 self.repo.index.add(files_to_commit)
@@ -1696,7 +1701,7 @@ class DAWGitApp(QMainWindow):
                 print(f"[ERROR] Failed to commit new version line: {e}")
                 return {"status": "error", "message": f"Commit failed: {e}"}
 
-            # ✅ Step 5: Optional push
+            # ✅ Step 5: Optional remote push
             if (
                 hasattr(self, "setup_page") and
                 hasattr(self.setup_page, "remote_checkbox") and
@@ -1718,7 +1723,8 @@ class DAWGitApp(QMainWindow):
                         f"Couldn’t push to remote:\n\n{e}"
                     )
 
-            # ✅ Step 6: Refresh state (safe for test mode)
+            # ✅ Step 6: Refresh UI and status
+            self.current_branch = self.repo.active_branch.name
             if hasattr(self, "update_log"):
                 self.update_log()
             if hasattr(self, "update_status_label"):
@@ -1735,6 +1741,7 @@ class DAWGitApp(QMainWindow):
         except Exception as e:
             print(f"[ERROR] create_new_version_line: {e}")
             return {"status": "error", "message": str(e)}
+
 
 
 

@@ -42,9 +42,9 @@ class SnapshotBrowserPage(QWidget):
         layout.addWidget(self.title_label)
 
         # # 📢 Session Label (shows current branch + version info)
-        # self.version_line_label = QLabel(SESSION_LABEL_UNKNOWN)
-        # self.version_line_label.setObjectName("versionLineLabel")
-        # layout.addWidget(self.version_line_label)
+        self.version_line_label = QLabel(SESSION_LABEL_UNKNOWN)
+        self.version_line_label.setObjectName("versionLineLabel")
+        layout.addWidget(self.version_line_label)
 
         # 📜 Commit History Table
         self.commit_table = QTableWidget()

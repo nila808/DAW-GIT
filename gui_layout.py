@@ -67,6 +67,11 @@ def build_main_ui(app):
     app.status_label.setObjectName("status_label")
     main_layout.addWidget(app.status_label)
 
+    # 🎧 Snapshot Status Label (e.g. Detached / Editing Info)
+    app.snapshot_status = QLabel(STATUS_UNKNOWN)
+    app.snapshot_status.setObjectName("snapshot_status")
+    main_layout.addWidget(app.snapshot_status)
+
     # app.snapshot_mode_label = QLabel(SNAPSHOT_MODE_UNKNOWN)
     # app.snapshot_mode_label.setObjectName("snapshot_mode_label")
     # main_layout.addWidget(app.snapshot_mode_label)

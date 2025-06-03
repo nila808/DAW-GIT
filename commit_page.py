@@ -183,16 +183,22 @@ class CommitPage(QWidget):
         message = self.commit_message.toPlainText().strip()
         if not message:
             self.status_label.setText(COMMIT_REQUIRED_MSG)
-            self.status_label.setText(COMMIT_MESSAGE_REQUIRED_STATUS)
+            if hasattr(self, "snapshot_status"):
+                self.snapshot_status.setText(COMMIT_MESSAGE_REQUIRED_STATUS)
             return
 
         result = self.app.commit_changes(commit_message=message)
         if result["status"] == "success":
-            self.status_label.setText(f"✅ Committed: {result['sha'][:7]}")
+            sha = result["sha"][:7]
+            self.status_label.setText(f"✅ Committed: {sha}")
+            if hasattr(self, "snapshot_status"):
+                self.snapshot_status.setText(f"💾 New take saved: {sha}")
             self.commit_message.clear()
         else:
             error_msg = result.get("message", "Unknown error.")
             self.status_label.setText(f"❌ Couldn’t save take:\n{error_msg}")
+            if hasattr(self, "snapshot_status"):
+                self.snapshot_status.setText("❌ Snapshot failed — check Git log.")
             self.commit_message.clear()
 
 

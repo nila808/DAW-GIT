@@ -43,6 +43,8 @@ class BranchManagerPage(QWidget):
     def populate_branches(self):
         if not self.app or not self.app.repo:
             self.status_label.setText(NO_REPO_LOADED_MSG)
+            if hasattr(self, "snapshot_status"):
+                self.snapshot_status.setText(NO_REPO_LOADED_MSG)  # Set UX status based on context
             return
 
         branches = [head.name for head in self.app.repo.heads]
@@ -60,6 +62,8 @@ class BranchManagerPage(QWidget):
             self.branch_dropdown.setCurrentIndex(-1)
 
         self.status_label.setText(SESSION_LINES_LOADED_MSG.format(count=len(branches)))
+        if hasattr(self, "snapshot_status"):
+            self.snapshot_status.setText(SESSION_LINES_LOADED_MSG)  # Set UX status based on context
 
         
 
@@ -67,5 +71,13 @@ class BranchManagerPage(QWidget):
         branch_name = self.branch_dropdown.currentText()
         if branch_name:
             result = self.app.switch_branch(branch_name)
+
             msg = result.get("message", "Branch switched.") if isinstance(result, dict) else str(result)
             self.status_label.setText(msg)
+
+            # ✅ Update snapshot_status with session-aware UX message
+            if hasattr(self, "snapshot_status"):
+                if result.get("status") == "success":
+                    self.snapshot_status.setText(f"🎼 Editing: version on '{branch_name}'")
+                else:
+                    self.snapshot_status.setText("⚠️ Couldn't switch branch.")
