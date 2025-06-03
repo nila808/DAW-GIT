@@ -5,9 +5,7 @@ import os
 os.environ["DAWGIT_TEST_MODE"] = "1"
 os.environ["DAWGIT_FORCE_INPUT"] = "1"
 
-SNAPSHOT_EDIT_BLOCK_TOOLTIP = (
-    "🎧 Snapshot mode: You’re previewing an old take. Start a new version to edit and save in your DAW."
-)
+from ui_strings import SNAPSHOT_EDIT_BLOCK_TOOLTIP
 
 def test_commit_buttons_disabled_in_snapshot_mode(app_with_repo):
     app = app_with_repo

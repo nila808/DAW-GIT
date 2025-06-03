@@ -154,7 +154,19 @@ from ui_strings import (
     BTN_QUICK_SAVE, 
     SNAPSHOT_MODE_UNKNOWN,
     SNAPSHOT_EDITABLE_TOOLTIP, 
-    STATUS_SESSION_LABEL
+    STATUS_SESSION_LABEL, 
+    # === Role tags ===
+    ROLE_KEY_MAIN_MIX,
+    ROLE_KEY_CREATIVE_TAKE,
+    ROLE_KEY_ALT_MIXDOWN,
+    ROLE_KEY_CUSTOM, 
+    CONFIRM_REPLACE_MAIN_TITLE,
+    CONFIRM_REPLACE_MAIN_MSG, 
+    STATUS_TAGGED_AS_MAIN_MIX, 
+    INVALID_LABEL_TITLE, 
+    INVALID_LABEL_MSG
+
+
 )
 
 
@@ -168,7 +180,8 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem, QInputDialog, QAbstractItemView, 
     QTableWidget
 )
-from PyQt6.QtCore import Qt, QSettings, QTimer
+from PyQt6.QtCore import Qt, QSettings, QTimer, pyqtSlot
+
 
 class NumericItem(QTableWidgetItem):
     def __init__(self, number, text=None):
@@ -354,10 +367,10 @@ class DAWGitApp(QMainWindow):
 
     def pretty_role(self, role_key):
         return {
-            "main_mix": "Main Mix",
-            "creative_take": "Creative Mix",
-            "alt_mixdown": "Alt Mix",
-            "test_custom_tag": "Custom"
+            "main_mix": ROLE_KEY_MAIN_MIX,
+            "creative_take": ROLE_KEY_CREATIVE_TAKE,
+            "alt_mixdown": ROLE_KEY_ALT_MIXDOWN,
+            "test_custom_tag": ROLE_KEY_CUSTOM
         }.get(role_key, role_key.replace("_", " ").title() if role_key else "")
     
 
@@ -890,6 +903,20 @@ class DAWGitApp(QMainWindow):
         return relevant_dirty
 
 
+    def scroll_to_commit_sha(self, sha):
+        """
+        Scrolls to and selects the commit row matching the given SHA.
+        Ensures the tooltip is set correctly for test verification.
+        """
+        for row in range(self.history_table.rowCount()):
+            sha_item = self.history_table.item(row, 2)
+            if sha_item and sha in sha_item.text():
+                self.history_table.selectRow(row)
+                self.history_table.scrollToItem(sha_item, QAbstractItemView.ScrollHint.PositionAtCenter)
+                # 🩹 Patch: Set tooltip manually in case it wasn't applied during update_log
+                sha_item.setToolTip(sha)
+                print(f"[DEBUG] ✅ Delayed scroll and select to HEAD row {row}")
+                break
 
 
     def return_to_latest_clicked(self):
@@ -1079,6 +1106,7 @@ class DAWGitApp(QMainWindow):
                     self.open_in_daw_btn.setVisible(True)
 
                 head_sha = self.repo.head.commit.hexsha[:7]
+                QTimer.singleShot(100, lambda: self.scroll_to_commit_sha(head_sha))
                 selected_row = None
                 for row in range(self.snapshot_page.commit_table.rowCount()):
                     item = self.snapshot_page.commit_table.item(row, 2)
@@ -2195,13 +2223,13 @@ class DAWGitApp(QMainWindow):
 
     def tag_main_mix(self):
         """
-        Assigns the 'Main Mix' role to the currently selected commit.
-        Ensures only one commit can hold the 'Main Mix' tag at a time.
+        Assigns the 'ROLE_KEY_MAIN_MIX' role to the currently selected commit.
+        Ensures only one commit can hold the 'ROLE_KEY_MAIN_MIX' tag at a time.
         """
         self._set_commit_id_from_selected_row()
         row = self.snapshot_page.commit_table.currentRow()
         if row < 0:
-            self._show_warning("Please select a snapshot to tag as 'Main Mix'.")
+            self._show_warning(f"Please select a snapshot to tag as '{ROLE_KEY_MAIN_MIX}'.")
             return
 
         commit_item = self.snapshot_page.commit_table.item(row, 2)
@@ -2211,18 +2239,22 @@ class DAWGitApp(QMainWindow):
             self._show_warning("Commit SHA missing — can't assign role.")
             return
 
-        # Remove existing 'Main Mix' tag from another commit, if needed
-        existing_main = next((k for k, v in self.commit_roles.items() if v == "Main Mix" and k != sha), None)
+        # Remove existing 'ROLE_KEY_MAIN_MIX' tag from another commit, if needed
+        existing_main = next((k for k, v in self.commit_roles.items() if v == ROLE_KEY_MAIN_MIX and k != sha), None)
+
         if existing_main and os.getenv("DAWGIT_TEST_MODE") != "1":
             old_msg = self.repo.commit(existing_main).message.strip().split("\n")[0][:40]
             new_msg = self.repo.commit(sha).message.strip().split("\n")[0][:40]
 
             confirm = QMessageBox.question(
                 self,
-                "Replace Main Mix?",
-                f"Only one Snaphot can be tagged as 'Main Mix'.\n\n"
-                f"This will remove the tag from:\n🗑 {existing_main[:7]} – {old_msg}\n\n"
-                f"And apply it to:\n🌟 {sha[:7]} – {new_msg}\n\nContinue?",
+                CONFIRM_REPLACE_MAIN_TITLE,
+                CONFIRM_REPLACE_MAIN_MSG.format(
+                    old_sha=existing_main[:7] if existing_main else "unknown",
+                    old_msg=old_msg,
+                    new_sha=sha[:7],
+                    new_msg=new_msg
+                ),
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
             )
 
@@ -2232,32 +2264,33 @@ class DAWGitApp(QMainWindow):
             self.commit_roles.pop(existing_main, None)
 
         self.current_commit_id = sha
-        self.assign_commit_role(sha, "Main Mix")
+        self.assign_commit_role(sha, ROLE_KEY_MAIN_MIX)
         self.save_commit_roles()
-        self.status_message(f"🌟 Commit tagged as 'Main Mix': {sha[:7]}")
+        self.status_message(STATUS_TAGGED_AS_MAIN_MIX.format(sha=sha[:7]))
         if os.getenv("DAWGIT_TEST_MODE") == "1":
             print("[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly")
             self.load_commit_history()
         else:
             QTimer.singleShot(100, self.load_commit_history)
 
-
-    def tag_creative_take(self):
+    # Used by tag_creative_btn.clicked.connect(...) — do not remove
+    @pyqtSlot()
+    def tag_creative_take(self): # noqa: F401 (used via Qt slot)
         """
         Assigns the 'creative_take' role to the currently selected commit.
         """
         self._set_commit_id_from_selected_row()
         row = self.snapshot_page.commit_table.currentRow()
         if row < 0:
-            self._show_warning("Please select a snapshot to tag as 'Creative Take'.")
-            return
+            self._show_warning(f"Please select a snapshot to tag as '{ROLE_KEY_CREATIVE_TAKE}'.")
+        return
 
         commit_item = self.snapshot_page.commit_table.item(row, 2)
         sha = commit_item.toolTip() if commit_item else self.current_commit_id
 
         if not sha:
             self._show_warning("Commit SHA missing — can't assign role.")
-            return
+        return
 
         # ✅ Normalized internal label
         safe_label = "creative_take"
@@ -2273,7 +2306,6 @@ class DAWGitApp(QMainWindow):
             QTimer.singleShot(100, self.load_commit_history)
 
 
-
     def tag_alt_mix(self):
         """
         Assigns the 'alt_mixdown' role to the currently selected commit.
@@ -2281,7 +2313,7 @@ class DAWGitApp(QMainWindow):
         self._set_commit_id_from_selected_row()
         row = self.snapshot_page.commit_table.currentRow()
         if row < 0:
-            self._show_warning("Please select a snapshot to tag as 'Alt Mixdown'.")
+            self._show_warning(f"Please select a snapshot to tag as '{ROLE_KEY_ALT_MIXDOWN}'.")
             return
 
         commit_item = self.snapshot_page.commit_table.item(row, 2)

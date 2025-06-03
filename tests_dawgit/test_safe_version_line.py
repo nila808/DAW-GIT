@@ -6,6 +6,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 import pytest
 from git import Repo
 from daw_git_gui import DAWGitApp
+from ui_strings import (
+    START_NEW_VERSION_BTN_LABEL, 
+    PRINT_COMMIT_MESSAGE_LABEL
+)
 
 def test_autocommit_marker_before_version_branch(tmp_path, qtbot):
     # 🗂️ Create dummy Ableton file to satisfy commit rules
@@ -26,7 +30,7 @@ def test_autocommit_marker_before_version_branch(tmp_path, qtbot):
     # 🧪 Call method under test
     result = app.create_new_version_line("MyNewIdea")
     assert result["status"] == "success"
-    assert "🎼 Start New Version Line" in result["commit_message"]
+    assert START_NEW_VERSION_BTN_LABEL in result["commit_message"]
 
     # ✅ Refresh repo after the Git operation
     app.repo = Repo(tmp_path)
@@ -36,5 +40,5 @@ def test_autocommit_marker_before_version_branch(tmp_path, qtbot):
     assert app.repo.active_branch.name == "MyNewIdea"
 
     # ✅ Marker commit should match
-    print("🔖 Commit message:", app.repo.head.commit.message)
-    assert "🎼 Start New Version Line" in app.repo.head.commit.message
+    print(PRINT_COMMIT_MESSAGE_LABEL, app.repo.head.commit.message)
+    assert START_NEW_VERSION_BTN_LABEL in app.repo.head.commit.message

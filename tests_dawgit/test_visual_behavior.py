@@ -6,6 +6,9 @@ import pytest
 from daw_git_gui import DAWGitApp
 from PyQt6.QtWidgets import QApplication
 from pathlib import Path
+from ui_strings import (
+    ROLE_KEY_MAIN_MIX
+)
 
 @pytest.fixture
 def app(qtbot, tmp_path):
@@ -59,11 +62,11 @@ def test_full_snapshot_flow(app, qtbot):
 
 
     # Tag it and ensure the tag shows
-    app.assign_commit_role(app.current_commit_id, "Main Mix")
+    app.assign_commit_role(app.current_commit_id, ROLE_KEY_MAIN_MIX)
     role = app.commit_roles.get(app.current_commit_id)
-    assert role == "Main Mix"
+    assert role == ROLE_KEY_MAIN_MIX
 
     # Reload history to confirm role appears in table
     app.load_commit_history()
     found_role = app.history_table.item(0, 1).text()
-    assert found_role == "Main Mix"
+    assert found_role == ROLE_KEY_MAIN_MIX

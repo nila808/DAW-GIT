@@ -10,7 +10,9 @@ def scan_for_hardcoded_strings():
 
     hardcoded_found = {}
 
-    py_files = project_path.glob('*.py')
+    
+
+    py_files = project_path.rglob('*.py')
     for py_file in py_files:
         if py_file.name == 'ui_strings.py':
             continue

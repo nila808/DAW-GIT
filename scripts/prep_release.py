@@ -5,6 +5,9 @@ import subprocess
 import json
 from pathlib import Path
 from datetime import datetime
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from ui_strings import ROLE_KEY_MAIN_MIX
 
 # Paths
 root = Path(__file__).resolve().parent.parent

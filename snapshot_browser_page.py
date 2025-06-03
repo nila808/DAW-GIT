@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QPushButton, QTableWidget,
     QLineEdit, QHBoxLayout, QTableWidgetItem, QSpacerItem, QSizePolicy,
-    QTextEdit
+    QTextEdit, QAbstractItemView
 )
 from PyQt6.QtCore import Qt
 

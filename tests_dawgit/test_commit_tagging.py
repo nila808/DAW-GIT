@@ -17,7 +17,12 @@ os.environ["DAWGIT_FORCE_INPUT"] = "0"
 patch("PyQt6.QtWidgets.QInputDialog.getText", return_value=("Alt 2", True)).start()
 
 from daw_git_gui import DAWGitApp
-
+from ui_strings import (
+    ROLE_KEY_MAIN_MIX, 
+    ROLE_KEY_CREATIVE_TAKE, 
+    ROLE_KEY_ALT_MIXDOWN, 
+    ROLE_KEY_CUSTOM
+)
 
 from contextlib import contextmanager
 
@@ -53,7 +58,7 @@ def git_add_and_commit(repo, path: Path, filename: str, message=ui_strings.INITI
 
 
 # ✅ Test 1: role variants
-@pytest.mark.parametrize("label", ["Main Mix", "creative_take", "alt_mixdown", "my_custom_tag"])
+@pytest.mark.parametrize("label", [ROLE_KEY_MAIN_MIX, ROLE_KEY_CREATIVE_TAKE, ROLE_KEY_ALT_MIXDOWN, ROLE_KEY_CUSTOM])
 def test_assign_commit_role_variants(monkeypatch, qtbot, label):
     project_path = Path(f"/tmp/test_tagging_{uuid.uuid4().hex}")
     project_path.mkdir(parents=True)

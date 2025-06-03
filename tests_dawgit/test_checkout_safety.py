@@ -12,6 +12,11 @@ from pathlib import Path
 from unittest import mock
 from daw_git_gui import DAWGitApp
 from git import Repo
+from ui_strings import (
+    POPPEN_SKIP_MSG, 
+    ASSERT_CONTAINS_PREFIX, 
+    PRINT_LAUNCHED_PATH_LABEL
+)
 
 
 # ---------------------- FIXTURES ----------------------
@@ -110,15 +115,16 @@ def test_open_latest_daw_project_launches_correct_file(mock_popen, temp_repo_fac
     expected_path = str(dummy_als)
 
     if os.getenv("DAWGIT_TEST_MODE") == "1":
-        print("✅ [TEST MODE] Skipping Popen check — verifying return instead.")
+        print(POPPEN_SKIP_MSG)
         result = app.open_latest_daw_project()
         assert expected_path in result["opened_file"]
     else:
         app.open_latest_daw_project()
         args = mock_popen.call_args[0][0]
         launched_path = " ".join(args)
-        print("📂 Launched path:", launched_path)
-        print("✅ Should contain:", expected_path)
+        print(PRINT_LAUNCHED_PATH_LABEL, launched_path)
+        expected = expected_path
+        print(ASSERT_CONTAINS_PREFIX, expected)
         assert expected_path in launched_path or dummy_als.name in launched_path
 
 

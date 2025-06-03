@@ -25,6 +25,13 @@ import shutil
 from git import Repo
 import subprocess
 from daw_git_gui import DAWGitApp
+from ui_strings import (
+    ROLE_KEY_MAIN_MIX, 
+    ROLE_KEY_ALT_MIXDOWN, 
+    ROLE_KEY_CREATIVE_TAKE, 
+    ROLE_KEY_CUSTOM
+)
+
 
 
 def pytest_configure():

@@ -5,6 +5,10 @@ from PyQt6.QtCore import QSettings  # Correctly import QSettings here
 from pathlib import Path
 from daw_git_gui import DAWGitApp  # Assuming DAWGitApp is the class you're testing
 from git import Repo
+from ui_strings import (
+    NO_REPO_LOADED_ERROR,
+    PROJECT_SETUP_REQUIRED_MSG
+)
 
 # Assuming DAWGitApp is the class you're testing
 @pytest.fixture
@@ -40,5 +44,5 @@ def test_no_path_selection_resets_project(mock_app):
         assert mock_app.repo is None
         
         # Verify that no further actions were taken
-        # assert mock_app.status_label.text() == "❌ No Git repo loaded."
-        assert mock_app.status_label.text() == "Please load or set up a DAW project folder before continuing."
+        # assert mock_app.status_label.text() == NO_REPO_LOADED_ERROR
+        assert mock_app.status_label.text() == PROJECT_SETUP_REQUIRED_MSG
