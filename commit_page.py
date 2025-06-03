@@ -38,6 +38,9 @@ from ui_strings import (
     TAG_CREATIVE_LABEL,
     TAG_ALT_LABEL, 
     TAKE_LOADED_MSG,     
+    MODAL_BTN_START_ALT,
+    MODAL_BTN_RETURN_LATEST,
+    MODAL_BTN_CANCEL
 
 )
 
@@ -161,9 +164,9 @@ class CommitPage(QWidget):
             box.setWindowTitle(SNAPSHOT_SAFETY_COMMIT_TITLE)
             box.setText(msg)
 
-            start_btn = box.addButton("🎼 Start + Alt Session", QMessageBox.ButtonRole.YesRole)
-            return_btn = box.addButton("🚀 Return to Latest", QMessageBox.ButtonRole.NoRole)
-            cancel_btn = box.addButton("❌ Cancel", QMessageBox.ButtonRole.RejectRole)
+            start_btn = box.addButton(MODAL_BTN_START_ALT, QMessageBox.ButtonRole.YesRole)
+            return_btn = box.addButton(MODAL_BTN_RETURN_LATEST, QMessageBox.ButtonRole.NoRole)
+            cancel_btn = box.addButton(MODAL_BTN_CANCEL, QMessageBox.ButtonRole.RejectRole)
 
             box.exec()
 

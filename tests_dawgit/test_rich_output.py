@@ -1,7 +1,13 @@
 import ui_strings
 from rich import print
 
+from ui_strings import (
+    RICH_RED_MSG, 
+    RICH_GREEN_CHECK_MSG,
+    RICH_YELLOW_MSG
+)
+
 def test_colored_output():
-    print("[bold red]🔥 This is red[/bold red]")
-    print("[bold green]✅ This is green[/bold green]")
-    print("[bold yellow]⚠️ This is yellow[/bold yellow]")
+    print(RICH_RED_MSG)
+    print(RICH_GREEN_CHECK_MSG)
+    print(RICH_YELLOW_MSG)

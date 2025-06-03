@@ -1,13 +1,5 @@
 # ui_strings.py
 
-
-# Added for TESTS
-# VERSION_LINE_AUTOCOMMIT_MSG = "🎼 Start New Version Line"
-# VERSION_LINE_LABEL_EMOJI = "🪄 Version Line: {branch} — 🎧 Take: {label}"
-# ROLE_MAIN_MIX = "Main Mix"
-# DROPDOWN_ACTIVE_BRANCH_LABEL = "Branch:"
-# DETACHED_HEAD_WARNING = "ℹ️ Detached snapshot — not on an active Version Line"
-
 # === General App Status ===
 STATUS_READY = "🎚️ Ready to create"
 STATUS_UNKNOWN = "🎼 No active Version Line"
@@ -20,7 +12,7 @@ TAB_SNAPSHOT_BROWSER = "🎧 Takes Browser"
 TAB_COMMIT_PAGE = "💾 Save Take"
 TAB_PROJECT_SETUP = "🎛️ Project Setup"
 # NO_SESSION_LOADED = "🎚️ No session loaded"
-# DETACHED_SNAPSHOT_LABEL = "ℹ️ Detached snapshot — not on an active Version Line"
+DETACHED_SNAPSHOT_LABEL = "ℹ️ Detached snapshot — not on an active Version Line"
 
 # Snapshot Browser Page
 SNAPSHOT_BROWSER_TITLE = "🎧 Takes Browser"
@@ -32,19 +24,17 @@ SNAPSHOT_DETACHED_WARNING = "🔍 Snapshot mode — not on an active Version Lin
 # SWITCH_BRANCH_SUCCESS_MSG = "✅ Switched to branch: {branch}"
 # BRANCH_ALREADY_ACTIVE_MSG = "You’re already on branch: {branch}"
 
-
 # === Snapshot Editing State ===
 SNAPSHOT_MODE_UNKNOWN = "🎧 Snapshot Mode: No take loaded"
 SNAPSHOT_NO_VERSION_LINE = "🎿 Take Preview Mode: Not on a Version Line"
 SNAPSHOT_READONLY_TOOLTIP = "🎧 Snapshot Mode — this take is read-only"
 SNAPSHOT_EDIT_BLOCK_TOOLTIP = "🎧 Snapshot Mode: You’re previewing an old take. Use + Alt Version Line to make edits."
 SNAPSHOT_EDIT_UNKNOWN = "🎧 Editing: No take selected"
-DETACHED_HEAD_LABEL = "🔍 Detached Take • Not on a Version Line"
-DETACHED_HEAD_TITLE = "⚠️ Detached Snapshot"
 
 # === Detached State Messages ===
+DETACHED_HEAD_LABEL = "🔍 Detached Take • Not on a Version Line"
+DETACHED_HEAD_TITLE = "⚠️ Detached Snapshot"
 DETACHED_HEAD_MSG = "🔍 Snapshot Mode — changes won’t be saved"
-
 # DETACHED_COMMIT_TITLE = "🎧 Snapshot Mode"
 DETACHED_COMMIT_MSG = (
     "🎧 You’re previewing an older take.\n\n"
@@ -60,7 +50,6 @@ ALREADY_ON_COMMIT_TITLE = "🎧 Already on This Take"
 ALREADY_ON_COMMIT_MESSAGE = "You’re already on take {sha}"
 COMMIT_MESSAGE_REQUIRED_STATUS = "❗ Add a message before saving this take"
 SESSION_BRANCH_LABEL = "🪄 Version Line: {branch} — 🎧 Take: {take}"
-
 
 # === Commit / Snapshot Titles ===
 COMMIT_SUCCESS_TITLE = "✅ Take Saved"
@@ -307,3 +296,83 @@ BASH_SCRIPT = "bash"  # Command to run the bash script
 VERSION_NUMBER = "1.0.0"  # Example version number for the push-it script
 
 ABORTING_ACTION = "❌ Aborting push-it due to dirty working directory."  # Message for aborting the push
+
+
+# Used in bash test scripts
+PUSH_USAGE_MSG = '❌ Usage: push-it <version-tag>'
+PUSH_INVALID_TAG_MSG = '❌ Invalid tag.'
+PUSH_TAG_EXISTS_MSG = '❌ Tag exists.'
+PUSH_ABORT_DIRTY_MSG = '❌ Aborting push-it due to dirty working directory.'
+PUSH_WILL_RUN_TESTS_MSG = '✅ Would run tests now'
+
+# Commit Role UI Test Messages
+ASSERT_COMMIT_ID_NOT_NONE_MSG = "❌ current_commit_id should not be None after selecting"
+
+# Test Assertion Messages
+NO_REPO_LOADED_ERROR = "❌ No Git repo loaded."
+PROJECT_SETUP_REQUIRED_MSG = "Please load or set up a DAW project folder before continuing."
+
+RICH_RED_MSG = "[bold red]🔥 This is red[/bold red]"
+RICH_GREEN_CHECK_MSG = "[bold green]✅ This is green[/bold green]"
+RICH_YELLOW_MSG = "[bold yellow]⚠️ This is yellow[/bold yellow]"
+SNAPSHOT_EDIT_BLOCK_TOOLTIP = "🎧 Snapshot mode: You’re previewing an old take. Start a new version to edit and save in your DAW."
+# Debugging / Assertion Messages
+DEBUG_FAIL_PREFIX = "❌ DEBUG FAIL:"
+# Test Debug Logs
+POPPEN_SKIP_MSG = "✅ [TEST MODE] Skipping Popen check — verifying return instead."
+ASSERT_CONTAINS_PREFIX = "✅ Should contain:"
+# Debug Print Labels
+PRINT_COMMIT_MESSAGE_LABEL = "🔖 Commit message:"
+# Button Labels
+START_NEW_VERSION_BTN_LABEL = "🎼 Start New Version Line"
+
+PRINT_LAUNCHED_PATH_LABEL = "📂 Launched path:"
+ASSERT_COMMIT_ID_NOT_NONE_MSG = "❌ current_commit_id should not be None after selecting"
+
+# Added for TESTS
+# VERSION_LINE_AUTOCOMMIT_MSG = "🎼 Start New Version Line"
+# VERSION_LINE_LABEL_EMOJI = "🪄 Version Line: {branch} — 🎧 Take: {label}"
+# DROPDOWN_ACTIVE_BRANCH_LABEL = "Branch:"
+# DETACHED_HEAD_WARNING = "ℹ️ Detached snapshot — not on an active Version Line"
+
+
+# === Commit Role Messages ===
+CONFIRM_REPLACE_MAIN_TITLE = "Replace Main Mix?"
+CONFIRM_REPLACE_MAIN_MSG = (
+    "Only one Snapshot can be tagged as 'Main Mix'.\n\n"
+    "This will remove the tag from:\n🗑 {old_sha} – {old_msg}\n\n"
+    "And apply it to:\n🌟 {new_sha} – {new_msg}\n\nContinue?"
+)
+STATUS_TAGGED_AS_MAIN_MIX = "🌟 Commit tagged as 'Main Mix': {sha}"
+ERR_MAIN_MIX_NOT_ASSIGNED = "Expected 'Main Mix' role on commit {sha}, got: {actual}"
+ERR_MAIN_MIX_BUTTON_DISABLED = "Main Mix button should be enabled"
+INVALID_LABEL_TITLE = "🚫 Invalid Label"
+INVALID_LABEL_MSG = "Please select a valid snapshot before tagging it with a role."
+
+
+# === Modal Buttons ===
+MODAL_BTN_START_ALT = "🎼 Start + Alt Session"
+MODAL_BTN_RETURN_LATEST = "🚀 Return to Latest"
+MODAL_BTN_CANCEL = "❌ Cancel"
+
+# === Commit Role Keys and Labels ===
+# Internal keys (used in logic and .json settings)
+ROLE_KEY_MAIN_MIX = "main_mix"
+ROLE_KEY_ALT_MIXDOWN = "alt_mixdown"
+ROLE_KEY_CREATIVE_TAKE = "creative_take"
+ROLE_KEY_CUSTOM = "test_custom_tag"  # Used for custom user tags in tests
+
+# Display labels for UI
+ROLE_LABEL_MAP = {
+    ROLE_KEY_MAIN_MIX: "Main Mix",
+    ROLE_KEY_ALT_MIXDOWN: "Alt Mixdown",
+    ROLE_KEY_CREATIVE_TAKE: "Creative Take",
+    ROLE_KEY_CUSTOM: "Custom",
+}
+
+# Optional reverse map (UI → key) if needed in UI or validation logic
+ROLE_KEY_MAP = {v: k for k, v in ROLE_LABEL_MAP.items()}
+
+# Legacy/test compatibility (remove if unused later)
+ROLE_ALT_MIXDOWN = ROLE_LABEL_MAP[ROLE_KEY_ALT_MIXDOWN]
+

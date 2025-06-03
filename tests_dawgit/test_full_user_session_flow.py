@@ -15,6 +15,13 @@ from git import Repo
 # QMessageBox.warning = lambda *a, **kw: None
 # QMessageBox.critical = lambda *a, **kw: None
 from daw_git_gui import DAWGitApp
+from ui_strings import (
+    DEBUG_FAIL_PREFIX, 
+    ROLE_KEY_MAIN_MIX, 
+    ROLE_KEY_CREATIVE_TAKE, 
+    ROLE_KEY_ALT_MIXDOWN, 
+    ROLE_KEY_CUSTOM
+)
 
 def test_full_user_session_flow(monkeypatch, qtbot):
     test_path = "/tmp/test_daw_project"
@@ -75,7 +82,7 @@ def test_full_user_session_flow(monkeypatch, qtbot):
 
     result = app.create_new_version_line("test_branch_1")
 
-    print("❌ DEBUG FAIL:", result)
+    print(DEBUG_FAIL_PREFIX, result)
     assert result["status"] == "success"
     qtbot.wait(200)
     assert "Version Line" in app.status_label.text()
@@ -135,16 +142,16 @@ def test_full_user_session_flow(monkeypatch, qtbot):
     qtbot.wait(200)
     assert not app.repo.head.is_detached
 
-    # Tag as Main Mix
+    # Tag as MROLE_KEY_MAIN_MIX
     # app.tag_main_mix()
     sha = app.repo.head.commit.hexsha
-    app.assign_commit_role(sha, "Main Mix")
+    app.assign_commit_role(sha, ROLE_KEY_MAIN_MIX)
     app.save_commit_roles()
     qtbot.wait(100)
     roles_path = project_path / ".dawgit_roles.json"
     assert roles_path.exists()
     roles_data = json.loads(roles_path.read_text())
-    assert roles_data.get(app.repo.head.commit.hexsha) == "Main Mix"
+    assert roles_data.get(app.repo.head.commit.hexsha) == ROLE_KEY_MAIN_MIX
 
     # ✅ Cleanup (add this at the very end)
     import shutil

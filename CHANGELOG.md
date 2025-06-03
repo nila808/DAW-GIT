@@ -1,5 +1,14 @@
 
 
+## [v1.1.13] – 2025-06-03
+**Author:** @niccavendish
+- 📦 v1.1.13: 📝 updated changelog, 📊 updated project status
+- Refactored string constants and added import updates
+- Backup current state before string-to-constant migration
+- 🧾 Update release.log for v1.1.12
+- 📦 v1.1.12: 📝 updated changelog, 📊 updated project status
+
+
 ## [v1.1.13] – 2025-06-02
 **Author:** @niccavendish
 - Refactored string constants and added import updates
@@ -391,7 +400,7 @@
 ### ✅ Added
 - AT-050 / MT-029 – Tag commit as "Main Mix"
 - AT-051 / MT-031 – Re-tag commit from one role to another
-- AT-052 / MT-032 – Switch to "Creative Take" commit
+- AT-052 / MT-032 – Switch to ROLE_KEY_CREATIVE_TAKE commit
 - AT-053 / MT-033 – Switch to "Alt Mixdown" commit
 - AT-054 / MT-034 – Tag/untag repeatedly
 - AT-055 / MT-035 – Delete commit with role and verify cleanup

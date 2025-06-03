@@ -1,7 +1,31 @@
 import ui_strings
 import os
+import pytest
+from git import Repo
+from pathlib import Path
 os.environ["DAWGIT_TEST_MODE"] = "1"
 import daw_git_testing  # patches modals at import
+
+
+
+@pytest.fixture
+def repo_with_commits(tmp_path):
+    repo_dir = tmp_path / "TestProject"
+    repo_dir.mkdir()
+
+    # Simulate two commits
+    repo = Repo.init(repo_dir)
+    file1 = repo_dir / "file1.als"
+    file1.write_text("First version")
+    repo.git.add(".")
+    repo.index.commit("Commit 1")
+
+    file2 = repo_dir / "file2.als"
+    file2.write_text("Second version")
+    repo.git.add(".")
+    repo.index.commit("Commit 2")
+
+    return repo
 
 def test_return_to_latest_from_detached_head(qtbot, tmp_path, repo_with_commits):
     from daw_git_gui import DAWGitApp

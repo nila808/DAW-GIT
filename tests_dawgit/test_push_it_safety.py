@@ -3,6 +3,13 @@ import os
 import subprocess
 from pathlib import Path
 from git import Repo
+from ui_strings import (
+    PUSH_USAGE_MSG,
+    PUSH_INVALID_TAG_MSG,
+    PUSH_TAG_EXISTS_MSG,
+    PUSH_ABORT_DIRTY_MSG,
+    PUSH_WILL_RUN_TESTS_MSG
+)
 
 def test_push_it_aborts_on_unstaged_changes(tmp_path):
     # Setup a fake Git repo
@@ -20,23 +27,23 @@ def test_push_it_aborts_on_unstaged_changes(tmp_path):
     file.write_text(ui_strings.UNSAVED_CHANGES_WARNING)
 
     # Define the content of the push-it script
-    PUSH_IT_SCRIPT = """#!/bin/bash
+    PUSH_IT_SCRIPT = f"""#!/bin/bash
         set -e
         cd $(git rev-parse --show-toplevel)
         VERSION="$1"
         MESSAGE="$2"
-    
-        if [[ -z "$VERSION" ]]; then echo "❌ Usage: push-it <version-tag>"; exit 1; fi
-        if ! [[ "$VERSION" =~ ^[a-zA-Z0-9._-]+$ ]]; then echo "❌ Invalid tag."; exit 1; fi
-        if git rev-parse "$VERSION" >/dev/null 2>&1; then echo "❌ Tag exists."; exit 1; fi
-    
+
+        if [[ -z "$VERSION" ]]; then echo "{ui_strings.PUSH_USAGE_MSG}"; exit 1; fi
+        if ! [[ "$VERSION" =~ ^[a-zA-Z0-9._-]+$ ]]; then echo "{ui_strings.PUSH_INVALID_TAG_MSG}"; exit 1; fi
+        if git rev-parse "$VERSION" >/dev/null 2>&1; then echo "{ui_strings.PUSH_TAG_EXISTS_MSG}"; exit 1; fi
+
         if ! git diff --quiet || ! git diff --cached --quiet; then
-          echo "⚠️ Unstaged or uncommitted changes detected!"
-          echo "❌ Aborting push-it due to dirty working directory."
-          exit 1
+        echo "⚠️ Unstaged or uncommitted changes detected!"
+        echo "{ui_strings.PUSH_ABORT_DIRTY_MSG}"
+        exit 1
         fi
-    
-        echo "✅ Would run tests now"
+
+        echo "{ui_strings.PUSH_WILL_RUN_TESTS_MSG}"
     """
 
     # Save the push-it script to the temp dir

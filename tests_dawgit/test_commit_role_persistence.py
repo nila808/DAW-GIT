@@ -3,6 +3,13 @@ import os
 import pytest
 from PyQt6.QtCore import Qt
 from daw_git_gui import DAWGitApp
+from ui_strings import (
+    ROLE_KEY_MAIN_MIX,
+    ROLE_KEY_CREATIVE_TAKE,
+    ROLE_KEY_ALT_MIXDOWN,
+    ROLE_LABEL_MAP,
+    
+)
 
 # --- Utilities ---
 
@@ -45,7 +52,7 @@ def test_tag_role_persists_across_restart(qtbot, app):
     commit_sha = select_latest_commit(app, qtbot)
     assert commit_sha
 
-    app.assign_commit_role(commit_sha, "Main Mix")
+    app.assign_commit_role(commit_sha, ROLE_KEY_MAIN_MIX)
     app.save_settings()
     app.close()
 
@@ -54,7 +61,7 @@ def test_tag_role_persists_across_restart(qtbot, app):
     qtbot.waitUntil(lambda: new_app.repo is not None, timeout=2000)
     new_app.load_commit_roles()
 
-    assert new_app.commit_roles.get(commit_sha) == "Main Mix"
+    assert new_app.commit_roles.get(commit_sha) == ROLE_KEY_MAIN_MIX
 
 
 def test_tag_role_can_be_updated(qtbot, app):
@@ -62,9 +69,9 @@ def test_tag_role_can_be_updated(qtbot, app):
     commit_sha = select_latest_commit(app, qtbot)
     assert commit_sha
 
-    app.assign_commit_role(commit_sha, "Creative Take")
-    app.assign_commit_role(commit_sha, "Alt Mixdown")
-    assert app.commit_roles.get(commit_sha) == "Alt Mixdown"
+    app.assign_commit_role(commit_sha, ROLE_KEY_CREATIVE_TAKE)
+    app.assign_commit_role(commit_sha, ROLE_KEY_ALT_MIXDOWN)
+    assert app.commit_roles.get(commit_sha) == ROLE_KEY_ALT_MIXDOWN
 
 
 def test_multiple_commits_have_distinct_roles(qtbot, app):
@@ -74,65 +81,65 @@ def test_multiple_commits_have_distinct_roles(qtbot, app):
     if app.history_table.rowCount() < 2:
         pytest.skip("Need at least two commits for this test")
 
-    # Tag commit 0 as Main Mix
+    # Tag commit 0 as ROLE_KEY_MAIN_MIX
     app.history_table.selectRow(0)
     qtbot.wait(100)
     app._set_commit_id_from_selected_row()
     sha1 = app.current_commit_id
-    app.assign_commit_role(sha1, "Main Mix")
+    app.assign_commit_role(sha1, ROLE_KEY_MAIN_MIX)
 
-    # Tag commit 1 as Creative Take
+    # Tag commit 1 as ROLE_KEY_CREATIVE_TAKE
     app.history_table.selectRow(1)
     qtbot.wait(100)
     app._set_commit_id_from_selected_row()
     sha2 = app.current_commit_id
-    app.assign_commit_role(sha2, "Creative Take")
+    app.assign_commit_role(sha2, ROLE_KEY_CREATIVE_TAKE)
 
-    assert app.commit_roles.get(sha1) == "Main Mix"
-    assert app.commit_roles.get(sha2) == "Creative Take"
+    assert app.commit_roles.get(sha1) == ROLE_KEY_MAIN_MIX
+    assert app.commit_roles.get(sha2) == ROLE_KEY_CREATIVE_TAKE
 
 
 def test_retag_commit_with_new_role(qtbot, app):
     ensure_test_commit(app)
     commit_sha = select_latest_commit(app, qtbot)
     assert commit_sha
-    app.assign_commit_role(commit_sha, "Alt Mixdown")
-    app.assign_commit_role(commit_sha, "Main Mix")
-    assert app.commit_roles.get(commit_sha) == "Main Mix"
+    app.assign_commit_role(commit_sha, ROLE_KEY_ALT_MIXDOWN)
+    app.assign_commit_role(commit_sha, ROLE_KEY_MAIN_MIX)
+    assert app.commit_roles.get(commit_sha) == ROLE_KEY_MAIN_MIX
 
 
 def test_switch_to_creative_take_commit(qtbot, app):
     ensure_test_commit(app)
     commit_sha = select_latest_commit(app, qtbot)
     assert commit_sha
-    app.assign_commit_role(commit_sha, "Creative Take")
-    assert app.commit_roles.get(commit_sha) == "Creative Take"
+    app.assign_commit_role(commit_sha, ROLE_KEY_CREATIVE_TAKE)
+    assert app.commit_roles.get(commit_sha) == ROLE_KEY_CREATIVE_TAKE
 
 
 def test_switch_to_alt_mixdown_commit(qtbot, app):
     ensure_test_commit(app)
     commit_sha = select_latest_commit(app, qtbot)
     assert commit_sha
-    app.assign_commit_role(commit_sha, "Alt Mixdown")
-    assert app.commit_roles.get(commit_sha) == "Alt Mixdown"
+    app.assign_commit_role(commit_sha, ROLE_KEY_ALT_MIXDOWN)
+    assert app.commit_roles.get(commit_sha) == ROLE_KEY_ALT_MIXDOWN
 
 
 def test_repeated_tag_untag_commit_role(qtbot, app):
     ensure_test_commit(app)
     commit_sha = select_latest_commit(app, qtbot)
     assert commit_sha
-    app.assign_commit_role(commit_sha, "Main Mix")
+    app.assign_commit_role(commit_sha, ROLE_KEY_MAIN_MIX)
     app.assign_commit_role(commit_sha, "")
-    app.assign_commit_role(commit_sha, "Creative Take")
-    assert app.commit_roles.get(commit_sha) == "Creative Take"
+    app.assign_commit_role(commit_sha, ROLE_KEY_CREATIVE_TAKE)
+    assert app.commit_roles.get(commit_sha) == ROLE_KEY_CREATIVE_TAKE
 
 
 def test_delete_commit_with_role_tagged(qtbot, app):
     ensure_test_commit(app)
     commit_sha = select_latest_commit(app, qtbot)
     assert commit_sha
-    app.assign_commit_role(commit_sha, "Alt Mixdown")
-    assert app.commit_roles.get(commit_sha) == "Alt Mixdown"
+    app.assign_commit_role(commit_sha, ROLE_KEY_ALT_MIXDOWN)
+    assert app.commit_roles.get(commit_sha) == ROLE_KEY_ALT_MIXDOWN
 
 
 def test_commit_roles_loaded_on_startup(app):

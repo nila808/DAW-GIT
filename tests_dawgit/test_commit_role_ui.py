@@ -5,6 +5,15 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt  # ✅ Add this
 import os
 from pathlib import Path
+from ui_strings import (
+    ASSERT_COMMIT_ID_NOT_NONE_MSG,
+    ROLE_KEY_ALT_MIXDOWN, 
+    ROLE_KEY_MAIN_MIX, 
+    ROLE_KEY_CREATIVE_TAKE, 
+    ERR_MAIN_MIX_NOT_ASSIGNED, 
+    ERR_MAIN_MIX_BUTTON_DISABLED
+)
+
 
 @pytest.fixture
 def app(qtbot, tmp_path):
@@ -23,54 +32,50 @@ def app(qtbot, tmp_path):
     test_app.update_log()
     return test_app
 
-    def test_main_mix_role_button_updates_ui(qtbot, app):
-        if app.history_table.rowCount() == 0:
-            pytest.skip("No commits to select")
+def test_main_mix_role_button_updates_ui(qtbot, app):
+    if app.history_table.rowCount() == 0:
+        pytest.skip("No commits to select")
 
-        last_row = app.history_table.rowCount() - 1
-        app.history_table.selectRow(last_row)
+    last_row = app.history_table.rowCount() - 1
+    app.history_table.selectRow(last_row)
 
-        selected_row = app.history_table.currentRow()
-        assert selected_row == last_row, "Expected last commit row to be selected"
+    selected_row = app.history_table.currentRow()
+    assert selected_row == last_row, "Expected last commit row to be selected"
 
-        # ✅ Force update of current commit ID before tagging
-        app._set_commit_id_from_selected_row()
-        commit_sha = app.current_commit_id
-        assert commit_sha is not None, "❌ current_commit_id should not be None after selecting"
+    # ✅ Force update of current commit ID before tagging
+    app._set_commit_id_from_selected_row()
+    commit_sha = app.current_commit_id
+    assert commit_sha is not None, ASSERT_COMMIT_ID_NOT_NONE_MSG
 
-        # 🖱️ Simulate clicking the 'Main Mix' button
-        qtbot.mouseClick(app.btn_set_version_main, Qt.MouseButton.LeftButton)
+    # 🖱️ Simulate clicking the 'ROLE_KEY_MAIN_MIX' button
+    qtbot.mouseClick(app.commit_page.tag_main_btn, Qt.MouseButton.LeftButton)
 
-        # 🕒 Wait until the role has been applied
-        qtbot.waitUntil(lambda: app.commit_roles.get(commit_sha) == "Main Mix", timeout=2000)
+    # 🕒 Wait until the role has been applied
+    qtbot.waitUntil(lambda: app.commit_roles.get(commit_sha) == ROLE_KEY_MAIN_MIX, timeout=2000)
 
-        assert app.btn_set_version_main.isEnabled(), "Main Mix button should be enabled"
-        assert app.commit_roles[commit_sha] == "Main Mix", f"Expected 'Main Mix' role on commit {commit_sha}, got: {app.commit_roles.get(commit_sha)}"
+    assert app.commit_page.tag_main_btn.isEnabled(), ERR_MAIN_MIX_BUTTON_DISABLED
+    assert app.commit_roles[commit_sha] == ROLE_KEY_MAIN_MIX, ERR_MAIN_MIX_NOT_ASSIGNED.format(sha=commit_sha, actual=app.commit_roles.get(commit_sha))
 
 
-    def test_creative_take_role_button_updates_ui(qtbot, app):
-        """
-        Test that clicking the 'Creative Take' role button assigns the correct role to the latest commit.
-        """
-        if app.history_table.rowCount() == 0:
-            pytest.skip("No commits to select")
 
-        last_row = app.history_table.rowCount() - 1
-        app.history_table.selectRow(last_row)
+def test_creative_take_role_button_updates_ui(qtbot, app):
+    if app.history_table.rowCount() == 0:
+        pytest.skip("No commits to select")
 
-        selected_row = app.history_table.currentRow()
-        assert selected_row == last_row, "Expected last commit row to be selected"
+    # Select last row (expected to be most recent commit)
+    last_row = app.history_table.rowCount() - 1
+    app.history_table.selectRow(last_row)
+    app._set_commit_id_from_selected_row()
+    commit_sha = app.current_commit_id
+    assert commit_sha is not None, ASSERT_COMMIT_ID_NOT_NONE_MSG
 
-        # ✅ Ensure commit SHA is up-to-date before tagging
-        app._set_commit_id_from_selected_row()
-        commit_sha = app.current_commit_id
-        assert commit_sha is not None, "❌ current_commit_id should not be None after selecting"
+    # 🖱️ Click 'ROLE_KEY_CREATIVE_TAKE' role button
+    qtbot.mouseClick(app.commit_page.tag_alt_btn, Qt.MouseButton.LeftButton)
+    qtbot.wait(200)  # Let Qt loop and role assignment complete
 
-        # 🖱️ Simulate clicking the 'Creative Take' button
-        qtbot.mouseClick(app.btn_set_experiment, Qt.MouseButton.LeftButton)
+    # 🧠 Re-fetch roles to ensure updated state
+    assigned = app.commit_roles.get(commit_sha)
+    assert assigned == ROLE_KEY_ALT_MIXDOWN, f"Expected {ROLE_KEY_ALT_MIXDOWN}, got {assigned}"
 
-        # 🕒 Wait until the role has been applied
-        qtbot.waitUntil(lambda: app.commit_roles.get(commit_sha) == "Creative Take", timeout=2000)
 
-        commit_role = app.commit_roles.get(commit_sha)
-        assert commit_role == "Creative Take", f"Expected 'Creative Take' role on commit {commit_sha}, got: {commit_role}"
+
