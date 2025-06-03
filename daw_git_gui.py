@@ -57,6 +57,8 @@ from ui_strings import (
     SNAPSHOT_CONFIRMATION_TITLE,
     SNAPSHOT_CONFIRMATION_MSG,
     SNAPSHOT_DETACHED_WARNING,
+    DELETE_SNAPSHOT_TITLE,
+    DELETE_SNAPSHOT_MSG,
 
     # === Commit / Snapshot Status ===
     COMMIT_SUCCESS_TITLE,
@@ -123,6 +125,7 @@ from ui_strings import (
 
     # === Warnings & Safety ===
     UNSAVED_CHANGES_TITLE,
+    UNSAVED_CHANGES_MSG,
     UNSAVED_CHANGES_WARNING,
     UNSAFE_DIRTY_EDITS_TITLE,
     UNSAFE_DIRTY_EDITS_MSG,
@@ -155,6 +158,9 @@ from ui_strings import (
     SNAPSHOT_MODE_UNKNOWN,
     SNAPSHOT_EDITABLE_TOOLTIP, 
     STATUS_SESSION_LABEL, 
+    SNAPSHOT_SWITCH_WARNING_TITLE,
+    SNAPSHOT_SWITCH_WARNING_MSG,
+
     # === Role tags ===
     ROLE_KEY_MAIN_MIX,
     ROLE_KEY_CREATIVE_TAKE,
@@ -164,7 +170,11 @@ from ui_strings import (
     CONFIRM_REPLACE_MAIN_MSG, 
     STATUS_TAGGED_AS_MAIN_MIX, 
     INVALID_LABEL_TITLE, 
-    INVALID_LABEL_MSG
+    INVALID_LABEL_MSG, 
+    CREATE_VERSION_LINE_TITLE,
+    CREATE_VERSION_LINE_MSG, 
+    ABLETON_MAY_BE_OPEN_TITLE,
+    ABLETON_MAY_BE_OPEN_MSG
 
 
 )
@@ -1382,9 +1392,8 @@ class DAWGitApp(QMainWindow):
             if target_branch not in existing_branches:
                 confirm = QMessageBox.question(
                     self,
-                    "Create New Version Line?",
-                    f"The version line '{target_branch}' doesn't exist yet.\n\n"
-                    f"Would you like to create it now from your current snapshot?",
+                    CREATE_VERSION_LINE_TITLE,
+                    CREATE_VERSION_LINE_MSG.format(branch=target_branch),
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
                 )
                 if confirm != QMessageBox.StandardButton.Yes:
@@ -1830,10 +1839,8 @@ class DAWGitApp(QMainWindow):
         commit_msg = table.item(row, 2).text()
         confirm = QMessageBox.question(
             self,
-            "Delete Snapshot?",
-            f"🗑️ Are you sure you want to delete this snapshot?\n\n"
-            f"Message: “{commit_msg[:60]}”\n\n"
-            "This action is permanent and cannot be undone.",
+            DELETE_SNAPSHOT_TITLE,
+            DELETE_SNAPSHOT_MSG.format(msg=commit_msg[:60]),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
         )
 
@@ -1928,10 +1935,8 @@ class DAWGitApp(QMainWindow):
         if self.als_recently_modified() and os.getenv("DAWGIT_TEST_MODE") != "1":
             confirm = QMessageBox.question(
                 self,
-                "Ableton Might Be Open",
-                "🎛️ This project was modified just now.\n\n"
-                "Ableton may ask to 'Save As' or overwrite your changes.\n\n"
-                "Open this version anyway?",
+                ABLETON_MAY_BE_OPEN_TITLE,
+                ABLETON_MAY_BE_OPEN_MSG,
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
             )
             if confirm != QMessageBox.StandardButton.Yes:
@@ -2695,9 +2700,8 @@ class DAWGitApp(QMainWindow):
             if self.repo.head.is_detached:
                 confirm = QMessageBox.question(
                     self,
-                    "Currently in Snapshot View",
-                    "🎧 You’re currently exploring a snapshot of your project.\n\n"
-                    "Switching versions now will load the selected version line.\n\nContinue?",
+                    SNAPSHOT_SWITCH_WARNING_TITLE,
+                    SNAPSHOT_SWITCH_WARNING_MSG,
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
                 )
                 if confirm != QMessageBox.StandardButton.Yes:
@@ -2714,11 +2718,10 @@ class DAWGitApp(QMainWindow):
                 if self.has_unsaved_changes():
                     if QMessageBox.question(
                         self,
-                        "Unsaved Changes Detected",
-                        "🎵 You’ve made changes that aren’t saved to a version yet.\n\nWould you like to back them up before switching?",
+                        UNSAVED_CHANGES_TITLE,
+                        UNSAVED_CHANGES_MSG,
                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                    ) == QMessageBox.StandardButton.Yes:
-                        self.backup_unsaved_changes()
+                    ) == QMessageBox.StandardButton.Yes:                        self.backup_unsaved_changes()
                     subprocess.run(
                         ["git", "stash", "push", "-u", "-m", "DAWGitApp auto-stash"],
                         cwd=self.project_path,
@@ -2960,10 +2963,8 @@ class DAWGitApp(QMainWindow):
         # Otherwise, warn user
         confirm = QMessageBox.question(
             self,
-            "Open in Ableton",
-            "📁 This project was modified just now.\n\n"
-            "Ableton may ask to 'Save As' or overwrite your changes.\n\n"
-            "Open this version anyway?",
+            ABLETON_MAY_BE_OPEN_TITLE,
+            ABLETON_MAY_BE_OPEN_MSG,
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
         )
 
@@ -3365,9 +3366,8 @@ class DAWGitApp(QMainWindow):
             if self.repo.head.is_detached:
                 choice = QMessageBox.question(
                     self,
-                    "Currently Viewing Snapshot",
-                    "🎧 You’re currently exploring a snapshot.\n\n"
-                    "Switching now will move you to a saved version line.\n\nContinue?",
+                    SNAPSHOT_SWITCH_WARNING_TITLE,
+                    SNAPSHOT_SWITCH_WARNING_MSG,
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
                 )
                 if choice != QMessageBox.StandardButton.Yes:

@@ -2,6 +2,8 @@ from ui_strings import ROLE_LABEL_MAP
 from pathlib import Path
 import pytest
 
+from ui_strings import FORBIDDEN_ROLE_LABEL_WARNING
+
 FORBIDDEN_UI_STRINGS = list(ROLE_LABEL_MAP.values())
 
 def test_no_hardcoded_role_labels():
@@ -24,13 +26,13 @@ def test_no_hardcoded_role_labels():
         cleaned_content = "\n".join(non_comment_lines)
         found = [s for s in FORBIDDEN_UI_STRINGS if s in cleaned_content]
 
-
         if found:
             offending[str(py_file)] = found
 
     if offending:
         msg = "\n".join(f"{file}: {', '.join(strings)}" for file, strings in offending.items())
-        pytest.fail(f"❌ Forbidden hardcoded role labels found:\n{msg}")
+        from ui_strings import FORBIDDEN_ROLE_LABEL_WARNING
+        assert not offending, FORBIDDEN_ROLE_LABEL_WARNING.format(msg=msg)
 
 
 # to run use:             tests_dawgit/test_forbidden_hardcoded_labels.py

@@ -6,6 +6,7 @@ import pytest
 from pathlib import Path
 from daw_git_gui import DAWGitApp
 from git import Repo
+from ui_strings import UNSAVED_CHANGES_WARNING
 
 @pytest.mark.parametrize("temp_repo_factory", [True], indirect=True)
 def test_commit_requires_als_file(temp_repo_factory, qtbot):

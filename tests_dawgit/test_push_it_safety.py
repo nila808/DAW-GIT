@@ -28,22 +28,22 @@ def test_push_it_aborts_on_unstaged_changes(tmp_path):
 
     # Define the content of the push-it script
     PUSH_IT_SCRIPT = f"""#!/bin/bash
-        set -e
-        cd $(git rev-parse --show-toplevel)
-        VERSION="$1"
-        MESSAGE="$2"
+    set -e
+    cd $(git rev-parse --show-toplevel)
+    VERSION="$1"
+    MESSAGE="$2"
 
-        if [[ -z "$VERSION" ]]; then echo "{ui_strings.PUSH_USAGE_MSG}"; exit 1; fi
-        if ! [[ "$VERSION" =~ ^[a-zA-Z0-9._-]+$ ]]; then echo "{ui_strings.PUSH_INVALID_TAG_MSG}"; exit 1; fi
-        if git rev-parse "$VERSION" >/dev/null 2>&1; then echo "{ui_strings.PUSH_TAG_EXISTS_MSG}"; exit 1; fi
+    if [[ -z "$VERSION" ]]; then echo "{ui_strings.PUSH_USAGE_MSG}"; exit 1; fi
+    if ! [[ "$VERSION" =~ ^[a-zA-Z0-9._-]+$ ]]; then echo "{ui_strings.PUSH_INVALID_TAG_MSG}"; exit 1; fi
+    if git rev-parse "$VERSION" >/dev/null 2>&1; then echo "{ui_strings.PUSH_TAG_EXISTS_MSG}"; exit 1; fi
 
-        if ! git diff --quiet || ! git diff --cached --quiet; then
-        echo "⚠️ Unstaged or uncommitted changes detected!"
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo "{ui_strings.UNSAVED_CHANGES_WARNING}"
         echo "{ui_strings.PUSH_ABORT_DIRTY_MSG}"
         exit 1
-        fi
+    fi
 
-        echo "{ui_strings.PUSH_WILL_RUN_TESTS_MSG}"
+    echo "{ui_strings.PUSH_WILL_RUN_TESTS_MSG}"
     """
 
     # Save the push-it script to the temp dir

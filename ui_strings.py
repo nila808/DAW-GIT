@@ -120,12 +120,27 @@ DIRTY_EDIT_WARNING = (
     "Please save this take before switching."
 )
 
+# === Snapshot Deletion ===
+DELETE_SNAPSHOT_TITLE = "🗑️ Delete Snapshot?"
+DELETE_SNAPSHOT_MSG = (
+    "🗑️ Are you sure you want to delete this snapshot?\n\n"
+    "Message: “{msg}”\n\n"
+    "This action is permanent and cannot be undone."
+)
+
 # === Snapshot Selection / Errors ===
 NO_SNAPSHOT_SELECTED_TITLE = "No Take Selected"
 NO_SNAPSHOT_SELECTED_MSG = "Please select a take row to load."
 NO_VERSION_SELECTED_MSG = "Please select a take to continue."
 NO_SELECTION_TITLE = "No Selection"
 NO_SELECTION_MSG = "Please select a Take to delete."
+
+# === Snapshot Switch Warning ===
+SNAPSHOT_SWITCH_WARNING_TITLE = "Currently Viewing Snapshot"
+SNAPSHOT_SWITCH_WARNING_MSG = (
+    "🎧 You’re currently exploring a snapshot.\n\n"
+    "Switching now will move you to a saved version line.\n\nContinue?"
+)
 
 # === Commit Errors ===
 COMMIT_NOT_FOUND_TITLE = "Take Not Found"
@@ -224,18 +239,36 @@ TAG_CREATIVE_LABEL = "Creative"
 TAG_ALT_LABEL = "Alt Mix"
 
 # === Warnings ===
+# Modal asking: “Backup before switching?”
 UNSAVED_CHANGES_TITLE = "Unsaved Changes Detected"
 UNSAVED_CHANGES_WARNING = (
     "🎿 Your latest take has unsaved edits.\n\n"
     "To keep your progress safe, please **Save This Take** "
     "or **+ Alt Session** before switching."
 )
+
+# === Unsaved Changes Warning ===
+UNSAVED_CHANGES_TITLE = "Unsaved Changes Detected"
+# Modal asking: “Backup before switching?”
+UNSAVED_CHANGES_MSG = (
+    "🎵 You’ve made changes that aren’t saved to a version yet.\n\n"
+    "Would you like to back them up before switching?"
+)
+
 UNSAFE_DIRTY_EDITS_TITLE = "🎚️ Unsaved Session Changes Detected"
 UNSAFE_DIRTY_EDITS_MSG = (
     "🎹 You’ve made changes in your DAW.\n"
     "SAVE your project in Ableton or Logic before continuing.\n\n"
     "Then click + Alt Session to capture this version.\n\n"
     "{file_list}"
+)
+
+# === Ableton Open Warning ===
+ABLETON_MAY_BE_OPEN_TITLE = "Ableton Might Be Open"
+ABLETON_MAY_BE_OPEN_MSG = (
+    "🎛️ This project was modified just now.\n\n"
+    "Ableton may ask to 'Save As' or overwrite your changes.\n\n"
+    "Open this version anyway?"
 )
 
 # === Misc ===
@@ -273,25 +306,22 @@ TEST_PROJECT_NAME = "TestProject"  # Name of the test project
 DUMMY_ALS_FILE = "dummy.als"  # Name of the dummy ALS file
 INITIAL_COMMIT_CONTENT = "Initial commit content"  # Content for the first commit
 INITIAL_COMMIT_MESSAGE = "Initial commit"  # Message for the first commit
-UNSAVED_CHANGES_WARNING = "⚠️ Unstaged or uncommitted changes detected!"  # Warning for unsaved changes
-PUSH_IT_SCRIPT = """#!/bin/bash
-set -e
-cd $(git rev-parse --show-toplevel)
-VERSION="$1"
-MESSAGE="$2"
 
-if [[ -z "$VERSION" ]]; then echo "❌ Usage: push-it <version-tag>"; exit 1; fi
-if ! [[ "$VERSION" =~ ^[a-zA-Z0-9._-]+$ ]]; then echo "❌ Invalid tag."; exit 1; fi
-if git rev-parse "$VERSION" >/dev/null 2>&1; then echo "❌ Tag exists."; exit 1; fi
+# === Push-It Script Strings ===
+PUSH_USAGE_MSG = "Usage: push-it <version_tag> \"<commit_message>\""
+PUSH_INVALID_TAG_MSG = "❌ Invalid version tag. Only letters, numbers, '.', '-' and '_' are allowed."
+PUSH_TAG_EXISTS_MSG = "⚠️ Tag already exists. Skipping tag."
+PUSH_ABORT_DIRTY_MSG = "❌ Please commit or stash your changes before running push-it."
+PUSH_WILL_RUN_TESTS_MSG = "🧪 Running full test suite before tagging..."
+UNSAVED_CHANGES_WARNING = (
+    "🎿 Your latest take has unsaved edits.\n\n"
+    "To keep your progress safe, please **Save This Take** "
+    "or **+ Alt Session** before switching."
+)
 
-if ! git diff --quiet || ! git diff --cached --quiet; then
-  echo "⚠️ Unstaged or uncommitted changes detected!"
-  echo "❌ Aborting push-it due to dirty working directory."
-  exit 1
-fi
 
-echo "✅ Would run tests now"
-"""  # Bash script content for the push-it process
+
+
 BASH_SCRIPT = "bash"  # Command to run the bash script
 VERSION_NUMBER = "1.0.0"  # Example version number for the push-it script
 
@@ -350,6 +380,13 @@ INVALID_LABEL_TITLE = "🚫 Invalid Label"
 INVALID_LABEL_MSG = "Please select a valid snapshot before tagging it with a role."
 
 
+# === Version Line Creation ===
+CREATE_VERSION_LINE_TITLE = "🎼 Create New Version Line?"
+CREATE_VERSION_LINE_MSG = (
+    "The version line '{branch}' doesn't exist yet.\n\n"
+    "Would you like to create it now from your current snapshot?"
+)
+
 # === Modal Buttons ===
 MODAL_BTN_START_ALT = "🎼 Start + Alt Session"
 MODAL_BTN_RETURN_LATEST = "🚀 Return to Latest"
@@ -394,3 +431,5 @@ STATUS_ROLE_ALREADY_ASSIGNED = "This commit is already tagged as {role}"
 STATUS_ROLE_UPDATED = "Updated tag: now marked as {role}"
 STATUS_ROLE_REMOVED = "❌ Role tag removed from {sha}"
 STATUS_TAGGED_AS_CUSTOM_LABEL = "🏷️ Tagged as '{label}'"
+
+FORBIDDEN_ROLE_LABEL_WARNING = "❌ Forbidden hardcoded role labels found:\n\n{msg}"
