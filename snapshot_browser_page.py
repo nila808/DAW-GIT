@@ -96,28 +96,24 @@ class SnapshotBrowserPage(QWidget):
 
         self.quick_commit_btn = QPushButton(BTN_QUICK_SAVE)
         self.quick_commit_btn.setToolTip(TOOLTIP_SAVE_WITH_LAST_MESSAGE)
-        if self.app and hasattr(self.app, "quick_commit"):
-            self.quick_commit_btn.clicked.connect(self.app.quick_commit)
+        self.quick_commit_btn.clicked.connect(lambda: self.app.quick_commit())
 
         self.quick_tag_main_btn = QPushButton(BTN_MAIN_MIX)
         self.quick_tag_main_btn.setToolTip(TOOLTIP_TAG_MAIN_MIX)
-        if self.app and hasattr(self.app, "tag_main_mix"):
-            self.quick_tag_main_btn.clicked.connect(self.app.tag_main_mix)
+        self.quick_tag_main_btn.clicked.connect(lambda: self.app.tag_main_mix())
 
         self.quick_tag_creative_btn = QPushButton(BTN_CREATIVE_TAKE)
         self.quick_tag_creative_btn.setToolTip(TOOLTIP_TAG_CREATIVE)
-        if self.app and hasattr(self.app, "tag_creative_take"):
-            self.quick_tag_creative_btn.clicked.connect(self.app.tag_creative_take)
+        self.quick_tag_creative_btn.clicked.connect(lambda: self.app.tag_creative_take())
 
         self.quick_tag_alt_btn = QPushButton(BTN_ALT_MIX)
         self.quick_tag_alt_btn.setToolTip(TOOLTIP_TAG_ALT_MIX)
-        if self.app and hasattr(self.app, "tag_alt_mix"):
-            self.quick_tag_alt_btn.clicked.connect(self.app.tag_alt_mix)
+        self.quick_tag_alt_btn.clicked.connect(lambda: self.app.tag_alt_mix())
 
         self.open_commit_page_btn = QPushButton(BTN_OPEN_COMMIT_PANEL)
         self.open_commit_page_btn.setToolTip(TOOLTIP_OPEN_COMMIT_PANEL)
-        if self.app and hasattr(self.app, "pages"):
-            self.open_commit_page_btn.clicked.connect(lambda: self.app.pages.switch_to("commit"))
+        self.open_commit_page_btn.clicked.connect(lambda: self.app.pages.switch_to("commit"))
+
 
         for btn in [
             self.quick_commit_btn,

@@ -1,5 +1,14 @@
 
 
+## [v1.1.15] – 2025-06-03
+**Author:** @niccavendish
+- adding updated release log
+- 📦 v1.1.14-dev: 📝 updated changelog, 📊 updated project status
+- 🧾 Update release log for v1.1.14-dev — UI string refactor complete
+- 📦 v1.1.14-dev: 📝 updated changelog, 📊 updated project status
+- 🧾 Add modal and status strings for role tagging (prep for next UX cycle)
+
+
 ## [v1.1.14-dev] – 2025-06-03
 **Author:** @niccavendish
 - 🧾 Update release log for v1.1.14-dev — UI string refactor complete
