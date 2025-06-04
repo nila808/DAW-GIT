@@ -24,6 +24,12 @@ SNAPSHOT_DETACHED_WARNING = "🔍 Snapshot mode — not on an active Version Lin
 # SWITCH_BRANCH_SUCCESS_MSG = "✅ Switched to branch: {branch}"
 # BRANCH_ALREADY_ACTIVE_MSG = "You’re already on branch: {branch}"
 
+# === Branch Manager Page ===
+BRANCH_NO_SELECTION = "📍 No branch selected"
+BRANCH_SWITCH_FAILED_MSG = "⚠️ Couldn't switch branch."
+BRANCH_SWITCH_SUCCESS_MSG = "Branch switched."
+
+
 # === Snapshot Editing State ===
 SNAPSHOT_MODE_UNKNOWN = "🎧 Snapshot Mode: No take loaded"
 SNAPSHOT_NO_VERSION_LINE = "🎿 Take Preview Mode: Not on a Version Line"

@@ -1,5 +1,14 @@
 
 
+## [v0.0.97] – 2025-06-05
+**Author:** @niccavendish
+- 📦 v0.0.96: 📝 updated changelog, 📊 updated project status
+- 🔄 Sync master with latest dev (role tag button fixes and tests)
+- 📦 v1.1.15: 📝 updated changelog, 📊 updated project status
+- 📦 Merge v1.1.14-dev into master
+- adding updated release log
+
+
 ## [v0.0.96] – 2025-06-03
 **Author:** @niccavendish
 - 🔄 Sync master with latest dev (role tag button fixes and tests)

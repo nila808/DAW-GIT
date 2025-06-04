@@ -5,7 +5,10 @@ from ui_strings import (
     SWITCH_BRANCH_BTN,
     START_NEW_VERSION_BTN,
     NO_REPO_LOADED_MSG, 
-    SESSION_LINES_LOADED_MSG
+    SESSION_LINES_LOADED_MSG,
+    BRANCH_NO_SELECTION,
+    BRANCH_SWITCH_FAILED_MSG, 
+    BRANCH_SWITCH_SUCCESS_MSG
 )
 
 class BranchManagerPage(QWidget):
@@ -36,7 +39,7 @@ class BranchManagerPage(QWidget):
         self.start_new_branch_btn.clicked.connect(self.app.start_new_version_line)
 
         # Status label
-        self.status_label = QLabel("\ud83d\udccd No branch selected")
+        self.status_label = QLabel(BRANCH_NO_SELECTION)
         layout.addWidget(self.status_label)
 
 
@@ -72,7 +75,7 @@ class BranchManagerPage(QWidget):
         if branch_name:
             result = self.app.switch_branch(branch_name)
 
-            msg = result.get("message", "Branch switched.") if isinstance(result, dict) else str(result)
+            msg = result.get("message", BRANCH_SWITCH_SUCCESS_MSG) if isinstance(result, dict) else str(result)
             self.status_label.setText(msg)
 
             # ✅ Update snapshot_status with session-aware UX message
@@ -80,4 +83,4 @@ class BranchManagerPage(QWidget):
                 if result.get("status") == "success":
                     self.snapshot_status.setText(f"🎼 Editing: version on '{branch_name}'")
                 else:
-                    self.snapshot_status.setText("⚠️ Couldn't switch branch.")
+                    self.snapshot_status.setText(BRANCH_SWITCH_FAILED_MSG)

@@ -165,7 +165,7 @@ def test_load_alternate_session_switches_branch(qtbot, tmp_path, monkeypatch):
     # 4️⃣ Trigger the button logic
     app.show_branch_selector()
 
-    # ✅ Assert branch switched
+    # ✅ Assert 
     assert repo.active_branch.name == "radio_edit"
     assert "Switched to branch" in app.status_label.text()
     assert "Switched to branch" in app.status_label.text()

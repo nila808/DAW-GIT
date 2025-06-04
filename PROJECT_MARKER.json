@@ -1,6 +1,6 @@
 {
   "project_name": "TEST 1 Project",
-  "project_version": "v0.0.96",
+  "project_version": "v0.0.97",
   "creator": "Niccavendish",
   "repository_info": {
     "current_branch": "main",
@@ -26,7 +26,7 @@
   },
   "metadata": {
     "tags": {
-      "version_marker": "v0.0.96"
+      "version_marker": "v0.0.97"
     },
     "qa": {
       "qa_started": true

@@ -111,6 +111,7 @@ from ui_strings import (
     DETACHED_HEAD_LABEL,
     SESSION_BRANCH_LABEL,
     ROLE_LABEL_MAP,
+    BRANCH_NO_SELECTION,
 
     # === Backup ===
     BACKUP_RESTORED_TITLE,
@@ -3400,7 +3401,7 @@ class DAWGitApp(QMainWindow):
                     editable=False
                 )
                 if not ok or not selected_branch:
-                    return {"status": "cancelled", "message": "No branch selected."}
+                    return {"status": "cancelled", "message": BRANCH_NO_SELECTION}
             else:
                 selected_branch = branch_name
 
