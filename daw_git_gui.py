@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 import traceback
+import tempfile
 
 # --- App Modules ---
 from gui_layout import build_main_ui
@@ -53,6 +54,7 @@ from ui_strings import (
     SNAPSHOT_LOAD_FAILED,
     SNAPSHOT_SAVED_AUTODISABLED,
     SNAPSHOT_SAVED_WAITING,
+    SNAPSHOT_UNKNOWN_STATE,
     SNAPSHOT_SAVED_WAITING_TOOLTIP,
     SNAPSHOT_CONFIRMATION_TITLE,
     SNAPSHOT_CONFIRMATION_MSG,
@@ -176,9 +178,18 @@ from ui_strings import (
     CREATE_VERSION_LINE_TITLE,
     CREATE_VERSION_LINE_MSG, 
     ABLETON_MAY_BE_OPEN_TITLE,
-    ABLETON_MAY_BE_OPEN_MSG
-
-
+    ABLETON_MAY_BE_OPEN_MSG, 
+    NEW_PROJECT_SELECTED_MSG, 
+    LAUNCH_FAILED_TITLE, 
+    LAUNCH_FAILED_MSG, 
+    SAVING_SNAPSHOT_LABEL, 
+    AUTO_SAVE_TITLE, 
+    WELCOME_TITLE, 
+    WELCOME_MSG, 
+    SELECT_VERSION_LINE_TITLE, 
+    SELECT_VERSION_LINE_MSG,
+    SNAPSHOT_EDITING_LABEL,
+    STATUS_EDITING_MODE_LABEL
 )
 
 
@@ -190,7 +201,7 @@ from git.exc import GitCommandError
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QFileDialog, QMessageBox, 
     QTableWidgetItem, QInputDialog, QAbstractItemView, 
-    QTableWidget
+    QTableWidget, QMenu
 )
 from PyQt6.QtCore import Qt, QSettings, QTimer, pyqtSlot
 
@@ -399,8 +410,8 @@ class DAWGitApp(QMainWindow):
 
             choice = QMessageBox.warning(
                 self,
-                "🎉 Welcome to DAW Git",
-                "No project folder selected. Would you like to open a project now?",
+                WELCOME_TITLE,
+                WELCOME_MSG,
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
             )
 
@@ -597,8 +608,8 @@ class DAWGitApp(QMainWindow):
 
         selected, ok = QInputDialog.getItem(
             self,
-            "🎹 Select a Version Line",
-            "Choose another version line to load:",
+            SELECT_VERSION_LINE_TITLE,
+            SELECT_VERSION_LINE_MSG,
             branches,
             editable=False
         )
@@ -823,7 +834,7 @@ class DAWGitApp(QMainWindow):
             try:
                 branch = self.repo.active_branch.name
                 sha = self.repo.head.commit.hexsha[:7]
-                self.snapshot_mode_label.setText(f"🎧 Editing: {sha} on {branch}")
+                self.snapshot_mode_label.setText(SNAPSHOT_EDITING_LABEL)
             except Exception:
                 self.snapshot_mode_label.setText(SNAPSHOT_EDIT_UNKNOWN)
 
@@ -841,7 +852,7 @@ class DAWGitApp(QMainWindow):
             self.status_mode_label.setToolTip(SNAPSHOT_EDIT_BLOCK_TOOLTIP)
         else:
             branch = self.repo.active_branch.name if not is_detached else "detached"
-            self.status_mode_label.setText(f"🎚️ Editing: version on '{branch}'")
+            self.status_mode_label.setText(STATUS_EDITING_MODE_LABEL)
             self.status_mode_label.setToolTip(SNAPSHOT_EDITABLE_TOOLTIP)
 
 

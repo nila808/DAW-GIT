@@ -29,6 +29,9 @@ BRANCH_NO_SELECTION = "📍 No branch selected"
 BRANCH_SWITCH_FAILED_MSG = "⚠️ Couldn't switch branch."
 BRANCH_SWITCH_SUCCESS_MSG = "Branch switched."
 
+# === Branch Selector Modal ===
+SELECT_VERSION_LINE_TITLE = "🎹 Select a Version Line"
+SELECT_VERSION_LINE_MSG = "Choose another version line to load:"
 
 # === Snapshot Editing State ===
 SNAPSHOT_MODE_UNKNOWN = "🎧 Snapshot Mode: No take loaded"
@@ -36,6 +39,12 @@ SNAPSHOT_NO_VERSION_LINE = "🎿 Take Preview Mode: Not on a Version Line"
 SNAPSHOT_READONLY_TOOLTIP = "🎧 Snapshot Mode — this take is read-only"
 SNAPSHOT_EDIT_BLOCK_TOOLTIP = "🎧 Snapshot Mode: You’re previewing an old take. Use + Alt Version Line to make edits."
 SNAPSHOT_EDIT_UNKNOWN = "🎧 Editing: No take selected"
+SNAPSHOT_UNKNOWN_STATE = "🎧 Snapshot Mode: Unknown state — no take selected."
+
+
+# === Editing Status Labels ===
+SNAPSHOT_EDITING_LABEL = "🎧 Editing: {sha} on {branch}"
+STATUS_EDITING_MODE_LABEL = "🎚️ Editing: version on '{branch}'"
 
 # === Detached State Messages ===
 DETACHED_HEAD_LABEL = "🔍 Detached Take • Not on a Version Line"
@@ -125,6 +134,7 @@ DIRTY_EDIT_WARNING = (
     "🎿 Your current editing session hasn’t been saved.\n\n"
     "Please save this take before switching."
 )
+SAVING_SNAPSHOT_LABEL = "💾 Saving snapshot..."
 
 # === Snapshot Deletion ===
 DELETE_SNAPSHOT_TITLE = "🗑️ Delete Snapshot?"
@@ -290,6 +300,14 @@ REMOTE_SETUP_FAILED_TITLE = "Remote Setup Failed"
 REMOTE_SETUP_FAILED_MSG = "❌ Could not set up remote:\n\n{error}"
 CLICK_TO_OPEN_IN_FINDER_TOOLTIP = "Click to open in Finder"
 
+# === DAW Launch Failures ===
+LAUNCH_FAILED_TITLE = "❌ Launch Failed"
+LAUNCH_FAILED_MSG = (
+    "StudioGit was unable to launch this take in your DAW.\n\n"
+    "Please verify that your DAW is installed and the file still exists:\n\n"
+    "📂 {path}"
+)
+
 # === Status & Info ===
 TAKE_LOADED_MSG = "📦 Take loaded — read-only mode"
 SESSION_LINES_LOADED_MSG = "✅ {count} Version Lines loaded."
@@ -311,7 +329,6 @@ CREATE_DAW_PROJECT_FOLDER_MSG = "Create a DAW project folder with a valid .als f
 TEST_PROJECT_NAME = "TestProject"  # Name of the test project
 DUMMY_ALS_FILE = "dummy.als"  # Name of the dummy ALS file
 INITIAL_COMMIT_CONTENT = "Initial commit content"  # Content for the first commit
-INITIAL_COMMIT_MESSAGE = "Initial commit"  # Message for the first commit
 
 # === Push-It Script Strings ===
 PUSH_USAGE_MSG = "Usage: push-it <version_tag> \"<commit_message>\""
@@ -392,6 +409,11 @@ CREATE_VERSION_LINE_MSG = (
     "The version line '{branch}' doesn't exist yet.\n\n"
     "Would you like to create it now from your current snapshot?"
 )
+
+# === Welcome Modal ===
+WELCOME_TITLE = "🎉 Welcome to DAW Git"
+WELCOME_MSG = "No project folder selected. Would you like to open a project now?"
+
 
 # === Modal Buttons ===
 MODAL_BTN_START_ALT = "🎼 Start + Alt Session"
