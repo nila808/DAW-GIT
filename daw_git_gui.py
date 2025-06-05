@@ -238,6 +238,7 @@ class DAWGitApp(QMainWindow):
 
         self.settings_path = Path.home() / ".dawgit_settings"
         self.repo = None
+
         self.current_commit_id = None
         self.settings = QSettings("DAWGitApp", "DAWGit")
         # 🧪 Test mode: auto-close all modals safely
@@ -294,7 +295,9 @@ class DAWGitApp(QMainWindow):
 
         # ✅ Show the welcome modal if no project path is set (First-time launch scenario)
         if self.project_path is None:
-            self.maybe_show_welcome_modal()  # This should trigger the modal when no path is set
+            print("[UX] No project path — routing to Setup page")
+            self.pages.switch_to("setup")
+            return
 
         # 1. Load saved path if not already set
         if self.project_path is None:
@@ -401,66 +404,66 @@ class DAWGitApp(QMainWindow):
 
     
 
-    def maybe_show_welcome_modal(self):
-        print("[DEBUG] Entering maybe_show_welcome_modal()")  # Debug entry point
+    # def maybe_show_welcome_modal(self):
+    #     print("[DEBUG] Entering maybe_show_welcome_modal()")  # Debug entry point
 
-        # Show the modal only if no project path is set
-        if not self.project_path:
-            print("[DEBUG] No project path set, showing modal...")
+    #     # Show the modal only if no project path is set
+    #     if not self.project_path:
+    #         print("[DEBUG] No project path set, showing modal...")
 
-            choice = QMessageBox.warning(
-                self,
-                WELCOME_TITLE,
-                WELCOME_MSG,
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-            )
+    #         choice = QMessageBox.warning(
+    #             self,
+    #             WELCOME_TITLE,
+    #             WELCOME_MSG,
+    #             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+    #         )
 
-            if choice == QMessageBox.StandardButton.Yes:
-                print("[DEBUG] User chose 'Yes'")
-                selected = QFileDialog.getExistingDirectory(self, "Select Your Project Folder")
-                print(f"[DEBUG] User selected folder: {selected}")
-                if selected:
-                    self.project_path = Path(selected)
-                    self.init_git()
-                    self.load_commit_history()
-                    return
-                else:
-                    print("[DEBUG] No folder selected, exiting setup.")
-                    self.close()
-            elif choice == QMessageBox.StandardButton.No:
-                print("[DEBUG] User chose 'No'")
-                self.close()
-                self.project_path = None
-                self.clear_last_project_path()
-                print("[DEBUG] Last path reset after 'No' selected.")
+    #         if choice == QMessageBox.StandardButton.Yes:
+    #             print("[DEBUG] User chose 'Yes'")
+    #             selected = QFileDialog.getExistingDirectory(self, "Select Your Project Folder")
+    #             print(f"[DEBUG] User selected folder: {selected}")
+    #             if selected:
+    #                 self.project_path = Path(selected)
+    #                 self.init_git()
+    #                 self.load_commit_history()
+    #                 return
+    #             else:
+    #                 print("[DEBUG] No folder selected, exiting setup.")
+    #                 self.close()
+    #         elif choice == QMessageBox.StandardButton.No:
+    #             print("[DEBUG] User chose 'No'")
+    #             self.close()
+    #             self.project_path = None
+    #             self.clear_last_project_path()
+    #             print("[DEBUG] Last path reset after 'No' selected.")
 
-            # ✅ Only access snapshot_page if it exists
-            if hasattr(self, "snapshot_page"):
-                self.snapshot_page.status_label.setText(NO_REPO_MSG)
-                self.status_label = self.snapshot_page.status_label
-                self.update()
-            return
+    #         # ✅ Only access snapshot_page if it exists
+    #         if hasattr(self, "snapshot_page"):
+    #             self.snapshot_page.status_label.setText(NO_REPO_MSG)
+    #             self.status_label = self.snapshot_page.status_label
+    #             self.update()
+    #         return
 
-        # After "No" selected or if path is invalid
-        print("[DEBUG] Skipping last path loading and repo setup after 'No' selected.")
-        self.clear_last_project_path()
-        self.project_path = None
-        if hasattr(self, "snapshot_page"):
-            self.snapshot_page.status_label.setText(NO_REPO_MSG)
-            self.update()
-        return
+    #     # After "No" selected or if path is invalid
+    #     print("[DEBUG] Skipping last path loading and repo setup after 'No' selected.")
+    #     self.clear_last_project_path()
+    #     self.project_path = None
+    #     if hasattr(self, "snapshot_page"):
+    #         self.snapshot_page.status_label.setText(NO_REPO_MSG)
+    #         self.update()
+    #     return
 
-        # After "No" was selected, skip all path loading and repo initialization:
-        print("[DEBUG] Skipping last path loading and repo setup after 'No' selected.")  # Debug message confirming skipping
+    #     # After "No" was selected, skip all path loading and repo initialization:
+    #     print("[DEBUG] Skipping last path loading and repo setup after 'No' selected.")  # Debug message confirming skipping
         
-        # **Explicitly clear settings and last path**
-        self.clear_last_project_path()  # Ensure settings don't hold the last invalid path
-        self.project_path = None  # Explicitly clear the project path to prevent any further operations
+    #     # **Explicitly clear settings and last path**
+    #     self.clear_last_project_path()  # Ensure settings don't hold the last invalid path
+    #     self.project_path = None  # Explicitly clear the project path to prevent any further operations
 
-        # Update status label to reflect no repo loaded
-        self.snapshot_page.status_label.setText(NO_REPO_MSG) # Set the status label text
-        self.update()  # Force the UI to refresh and update with new status
-        return  # End method flow after "No"
+    #     # Update status label to reflect no repo loaded
+    #     self.snapshot_page.status_label.setText(NO_REPO_MSG) # Set the status label text
+    #     self.update()  # Force the UI to refresh and update with new status
+    #     return  # End method flow after "No"
 
 
     def run_backup(self):

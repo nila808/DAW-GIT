@@ -147,3 +147,20 @@ def test_session_label_updates_on_return_to_latest(app):
     label_text = app.branch_label.text().lower()
     assert "version line" in label_text
     assert "take" in label_text
+
+
+def test_startup_routes_to_setup_if_no_project_path(qtbot):
+    import os
+    from daw_git_gui import DAWGitApp
+
+    # Force blank state
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = ""
+
+    app = DAWGitApp(build_ui=True)
+    qtbot.addWidget(app)
+
+    current_widget = app.pages.currentWidget()
+    assert current_widget.objectName() == "ProjectSetupPage" or "setup" in app.pages.pages
+
+    assert app.project_path is None
+    assert app.repo is None
