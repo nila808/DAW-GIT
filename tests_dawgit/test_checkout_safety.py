@@ -6,7 +6,7 @@ import daw_git_testing  # patches modals at import
 from PyQt6.QtWidgets import QTableWidgetItem, QInputDialog
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+import subprocess
 import pytest
 from pathlib import Path
 from unittest import mock
@@ -17,6 +17,8 @@ from ui_strings import (
     ASSERT_CONTAINS_PREFIX, 
     PRINT_LAUNCHED_PATH_LABEL
 )
+from tests_dawgit.test_helpers import create_test_project
+from daw_git_gui import DAWGitApp
 
 
 # ---------------------- FIXTURES ----------------------
@@ -174,70 +176,62 @@ def test_checkout_selected_commit_enters_detached_head(tmp_path, qtbot):
     repo.index.commit("Second")
     repo.git.branch("-M", "main")
 
-    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
-    app = DAWGitApp()
-    app.project_path = str(project_path)
-    app.repo = repo
-
     first_sha = list(repo.iter_commits("main"))[-1].hexsha
-    app.checkout_selected_commit(commit_sha=first_sha)
 
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
+    os.environ["DAWGIT_TEST_MODE"] = "1"  # ✅ Keep it on during checkout
+    app = DAWGitApp(project_path=str(project_path), build_ui=True)
+    app.repo = repo
+    qtbot.addWidget(app)
+
+    app.checkout_selected_commit(commit_sha=first_sha)
+    qtbot.wait(200)
+
+    # ✅ Don’t remove TEST_MODE until *after* asserting
     assert app.repo.head.is_detached
     assert app.repo.head.commit.hexsha == first_sha
+    os.environ.pop("DAWGIT_TEST_MODE", None)
+
+
 
 
 def test_checkout_latest_from_detached_state(tmp_path, qtbot):
-    project_path = tmp_path / "ReturnTest"
-    project_path.mkdir()
-    als_file = project_path / "music.als"
+    path, repo = create_test_project(tmp_path)
+    als_file = path / "track.als"
     als_file.write_text("init")
-
-    repo = Repo.init(project_path)
-    repo.index.add(["music.als"])
+    repo.index.add(["track.als"])
     repo.index.commit("Init")
     repo.git.branch("-M", "main")
     repo.git.switch("main")
-    repo = Repo(project_path)
 
-    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
-    app = DAWGitApp()
-    app.project_path = str(project_path)
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(path)
+    os.environ["DAWGIT_TEST_MODE"] = "1"
+    app = DAWGitApp(project_path=str(path), build_ui=True)
     app.repo = repo
+    qtbot.addWidget(app)
+    qtbot.wait(100)
 
-    # Create second commit
     als_file.write_text("updated")
     app.commit_changes(commit_message="Updated")
     new_sha = app.repo.head.commit.hexsha
 
-    # Get old commit for detached checkout
     old_sha = list(repo.iter_commits("main"))[-1].hexsha
 
-    # Go into detached HEAD state
     app.checkout_selected_commit(commit_sha=old_sha)
-    assert app.repo.head.is_detached
-
-    # ✅ Must update main branch to the latest commit while NOT checked out
-    # Switch to a temp branch so main can be safely force-updated
-    repo.git.checkout("-b", "temp")
-    repo.git.branch("-f", "main", new_sha)
-
-
-    print("[TEST DEBUG] Branches before switch:\n", app.repo.git.branch("-vv"))
-
-    # Return to latest
-    app.return_to_latest_clicked()
     qtbot.wait(200)
 
-    app.repo = Repo(app.project_path)
+    # ✅ Detached state expected
+    assert app.repo.head.is_detached
+    assert app.repo.head.commit.hexsha == old_sha
 
-    print("Detached:", app.repo.head.is_detached)
-    print("HEAD SHA:", app.repo.head.commit.hexsha)
-    try:
-        print("Branch:", app.repo.active_branch.name)
-    except TypeError:
-        print("Branch: DETACHED")
+    # ✅ Now return to latest
+    app.return_to_latest_clicked()
+    qtbot.wait(300)
+    os.environ.pop("DAWGIT_TEST_MODE", None)
 
     assert not app.repo.head.is_detached
+    assert app.repo.head.commit.hexsha == new_sha
+
 
 
 def test_backup_folder_created_on_checkout(tmp_path, qtbot):
@@ -252,7 +246,10 @@ def test_backup_folder_created_on_checkout(tmp_path, qtbot):
     repo.git.branch("-M", "main")
 
     os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
-    app = DAWGitApp()
+    path, repo = create_test_project(tmp_path)
+    os.environ["DAWGIT_TEST_MODE"] = "1"
+    app = DAWGitApp(project_path=str(path), build_ui=True)
+    os.environ.pop("DAWGIT_TEST_MODE", None)
     app.project_path = str(project_path)
     app.repo = repo
 
@@ -270,36 +267,59 @@ def test_git_stash_created_on_return(tmp_path, qtbot):
     als_file = project_path / "demo.als"
     als_file.write_text("initial")
 
+    # Initialize repo and commit initial state
     repo = Repo.init(project_path)
     repo.index.add(["demo.als"])
     repo.index.commit("Init")
     repo.git.branch("-M", "main")
 
     os.environ["DAWGIT_FORCE_TEST_PATH"] = str(project_path)
-    app = DAWGitApp()
-    app.project_path = str(project_path)
-    app.repo = repo
 
-    als_file.write_text("new")
-    app.repo.git.switch("main")
-    app.commit_changes(commit_message="Second")
-    latest_sha = app.repo.head.commit.hexsha
+    # Launch the app
+    app = DAWGitApp(project_path=str(project_path), build_ui=True)
+    qtbot.addWidget(app)
 
+    # Commit version 2
+    als_file.write_text("v2")
+    app.commit_changes("Second")
+
+    # ✅ Refresh repo and get expected latest commit
+    repo = Repo(project_path)
+    latest_sha = repo.head.commit.hexsha
+    print("[DEBUG] Expected latest SHA:", latest_sha)
+
+    # ✅ Checkout earlier commit directly via Git to avoid GUI flakiness
     old_sha = list(repo.iter_commits("main"))[-1].hexsha
-    app.checkout_selected_commit(commit_sha=old_sha)
-    assert app.repo.head.commit.hexsha == old_sha
+    repo.git.checkout(old_sha)
+    app.repo = Repo(project_path)  # rebind
 
+    actual_sha = app.repo.head.commit.hexsha
+    print("[DEBUG TEST] HEAD after checkout:", actual_sha)
+    assert actual_sha == old_sha, f"Expected {old_sha[:7]}, got {actual_sha[:7]}"
+    assert app.repo.head.is_detached
+
+    # Modify without committing (triggers stash)
     als_file.write_text("unsaved again")
-    app.return_to_latest_clicked()
-    app.repo = Repo(project_path)  # ← this resets head binding
+    app.repo.git.add(update=True)
+    assert app.repo.is_dirty()
 
-    # ✅ Explicitly rebind HEAD in test to fix GitPython quirk
-    app.repo.head.reference = app.repo.heads.main
-    app.repo.head.reset(index=True, working_tree=True)
+    # ✅ Run 'return to latest' while in test mode
+    os.environ["DAWGIT_TEST_MODE"] = "1"
+    app.return_to_latest_clicked()
+    qtbot.wait(300)
+    os.environ.pop("DAWGIT_TEST_MODE", None)
+
+    app.repo = Repo(project_path)
+    final_sha = app.repo.head.commit.hexsha
+
+    # Final assertions
+    print("[DEBUG] Returned SHA:", final_sha)
+    print("[DEBUG] Repo head is_detached:", app.repo.head.is_detached)
+    print("[DEBUG] File content:", als_file.read_text())
 
     assert not app.repo.head.is_detached
-
-    assert app.repo.head.commit.hexsha == latest_sha
+    assert final_sha == latest_sha, "Should return to latest commit"
+    assert als_file.read_text() != "unsaved again", "Unsaved changes should be stashed/reverted"
 
 
 def test_switch_branch_with_uncommitted_changes_warns_or_stashes(temp_repo_factory, qtbot):

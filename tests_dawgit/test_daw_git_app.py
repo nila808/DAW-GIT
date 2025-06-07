@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 from PyQt6.QtCore import QSettings  # Correctly import QSettings here
 from pathlib import Path
 from daw_git_gui import DAWGitApp  # Assuming DAWGitApp is the class you're testing
+from tests_dawgit.test_helpers import create_test_project
 from git import Repo
 from ui_strings import (
     NO_REPO_LOADED_ERROR,
@@ -12,8 +13,9 @@ from ui_strings import (
 
 # Assuming DAWGitApp is the class you're testing
 @pytest.fixture
-def mock_app():
-    app = DAWGitApp()  # Initialize the app
+def mock_app(tmp_path):
+    path, repo = create_test_project(tmp_path)
+    app = DAWGitApp(project_path=str(path), build_ui=True)
     app.project_path = None  # No project path initially
     return app
 
