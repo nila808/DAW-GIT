@@ -4,7 +4,10 @@ os.environ["DAWGIT_TEST_MODE"] = "1"
 import shutil
 from pathlib import Path
 from git import Repo
+
 from daw_git_gui import DAWGitApp
+from tests_dawgit.test_helpers import create_test_project
+
 from unittest.mock import patch
 from PyQt6.QtWidgets import QMessageBox
 
@@ -30,11 +33,12 @@ def test_snapshot_backup_created_on_checkout(tmp_path, qtbot):
     repo.index.add(["snare.wav"])
     repo.index.commit("Second snapshot")
 
-    # Launch app
-    app = DAWGitApp()
+    # Launch app (use project_path from earlier setup — not create_test_project)
+    app = DAWGitApp(project_path=str(project_path), build_ui=True)
     qtbot.addWidget(app)
-    app.project_path = project_path
-    app.repo = repo
+    app.init_git()
+    app.bind_repo()
+
     app.custom_env = lambda: {}  # No-op
 
     # Monkeypatch dialogs

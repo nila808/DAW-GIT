@@ -52,6 +52,9 @@ from ui_strings import (
     SNAPSHOT_SAVED_AUTODISABLED,
     SNAPSHOT_SAVED_WAITING,
     SNAPSHOT_SAVED_WAITING_TOOLTIP,
+    SNAPSHOT_UNKNOWN_STATE,
+    LAUNCH_FAILED_TITLE, 
+    LAUNCH_FAILED_MSG,
 
     # === Commit / Snapshot Status ===
     COMMIT_SUCCESS_TITLE,
@@ -291,6 +294,9 @@ class DAWGitApp(QMainWindow):
                 if hasattr(self, "status_label"):
                     self.snapshot_page.status_label.setText(INVALID_REPO_MSG)
 
+            self.repo_mgr = GitProjectManager(project_path)  # always available
+            self.repo_mgr.init_repo()  # ✅ ensure repo is initialized for tests
+
         elif build_ui:
             folder = QFileDialog.getExistingDirectory(self, "🎵 Select Your DAW Project Folder")
             if folder:
@@ -344,6 +350,9 @@ class DAWGitApp(QMainWindow):
         if hasattr(self, "status_label"):
             self.update_status_label()
 
+
+    def get_branch_name(self):
+        return self.repo_mgr.get_branch_name()
 
     def setup_ui(self):
         build_main_ui(self)
@@ -883,6 +892,15 @@ class DAWGitApp(QMainWindow):
         return relevant_dirty
 
 
+    def has_dirty_daw_files(self) -> bool:
+        """
+        Checks if relevant DAW files are modified (e.g., .als, .logicx).
+        Used to decide whether to stash before switching.
+        """
+        dirty = self.repo.git.status("--porcelain").splitlines()
+        relevant = [line.split()[-1] for line in dirty if line.endswith(".als") or line.endswith(".logicx")]
+        print("[DEBUG] Filtered relevant_dirty files:", relevant)
+        return bool(relevant)
 
 
     def return_to_latest_clicked(self):
@@ -894,6 +912,15 @@ class DAWGitApp(QMainWindow):
             # 🎯 If in detached HEAD, switch back to 'main'
             if self.repo.head.is_detached:
                 print("[DEBUG] Repo is in detached HEAD. Attempting to switch to 'main'")
+                try:
+                    self.repo.git.checkout("main", force=True)
+                    print("[DEBUG] ✅ Checked out 'main' successfully via GitPython.")
+                except GitCommandError as e:
+                    print("[ERROR] GitPython failed to checkout 'main':", e)
+                    self._show_error(f"❌ GitPython failed to checkout 'main':\n{e}")
+                    return
+                if not self.git_mgr.safe_to_switch():
+                    return  # blocked
 
                 relevant_dirty = []  # ✅ Always declare this early
 
@@ -920,13 +947,22 @@ class DAWGitApp(QMainWindow):
 
                 relevant_dirty = self.get_relevant_dirty_files()
                 if relevant_dirty:
-                    print(f"[BLOCK] Dirty files detected that are not safe to discard: {relevant_dirty}")
-                    QMessageBox.warning(
-                        self,
-                        UNSAFE_DIRTY_EDITS_TITLE,
-                        UNSAFE_DIRTY_EDITS_MSG.format(file_list="\n".join(f"• {f}" for f in relevant_dirty))
-                    )
-                    return
+                    print(f"[DEBUG] Dirty files detected: {relevant_dirty}")
+                    try:
+                        subprocess.run(
+                            ["git", "stash", "push", "-u", "-m", "Auto-stash before returning to main"],
+                            cwd=self.project_path,
+                            env=self.custom_env(),
+                            check=True,
+                        )
+                        print("[DEBUG] Auto-stash successful.")
+                        if os.getenv("DAWGIT_TEST_MODE") == "1":
+                            stash_list = subprocess.run(["git", "stash", "list"], cwd=self.project_path, capture_output=True, text=True)
+                            print("[DEBUG] Stash list after push:\n", stash_list.stdout)
+                    except subprocess.CalledProcessError as e:
+                        print("[ERROR] Failed to stash dirty changes before switch:", e)
+                        self._show_error("❌ Failed to stash unsaved changes before switching.")
+                        return
 
                 # 🩹 PATCH: Clean tracked and untracked noise files to prevent checkout conflicts
                 safe_noise_files = {
@@ -1004,26 +1040,29 @@ class DAWGitApp(QMainWindow):
 
                 # ✅ Attempt to switch to main
                 try:
-                    print("[DEBUG] Running: git switch main")
-                    result = subprocess.run(
-                        ["git", "switch", "main"],
-                        cwd=self.project_path,
-                        env=self.custom_env(),
-                        capture_output=True,
-                        text=True,
-                        check=True,
-                    )
-                    print("[DEBUG] git switch stdout:\n", result.stdout)
-                    print("[DEBUG] git switch stderr:\n", result.stderr)
+                    # ✅ Attempt to checkout main explicitly
+                    try:
+                        self.repo.git.checkout("main", force=True)
+                        print("[DEBUG] Successfully checked out 'main' via GitPython.")
+                    except GitCommandError as e:
+                        print("[ERROR] GitPython checkout main failed:", e)
+                        self._show_error(f"❌ Git checkout 'main' failed:\n{str(e)}")
+                        return
 
-                    status = subprocess.run(
-                        ["git", "status"],
-                        cwd=self.project_path,
-                        env=self.custom_env(),
-                        capture_output=True,
-                        text=True,
-                    )
-                    print("[DEBUG] git status:\n", status.stdout)
+                    self.repo = Repo(self.project_path)
+                    if self.repo.head.is_detached:
+                        print("[ERROR] Repo is still detached after checkout.")
+                        self._show_error("❌ Repo is still detached after checkout.")
+                        return
+
+                    # ✅ Immediately verify HEAD is not detached
+                    self.repo = Repo(self.project_path)
+                    if self.repo.head.is_detached:
+                        print("[ERROR] Repo is still detached after checkout.")
+                        self._show_error("❌ Repo is still detached after checkout.")
+                        return
+
+
 
                 except subprocess.CalledProcessError as e:
                     print("[ERROR] git switch failed:", e)
@@ -1381,6 +1420,37 @@ class DAWGitApp(QMainWindow):
 
 
     def commit_changes(self, commit_message=None):
+        # 🔒 Normalize and validate project_path early
+        if isinstance(self.project_path, str):
+            self.project_path = Path(self.project_path)
+
+        if not isinstance(self.project_path, Path) or not self.repo or not self.git or not self.git.repo:
+            print("[DEBUG] Aborting commit — missing or invalid project path or repo")
+            return {
+                "status": "error",
+                "message": "Cannot commit — no project or Git repo loaded."
+            }  
+
+        # ✅ Full safety check for test and GUI use
+        if not self.project_path or not isinstance(self.project_path, (str, os.PathLike)) or not self.repo or not self.git or not self.git.repo:
+            print("[DEBUG] Aborting commit — missing or invalid project path or repo")
+            return {
+                "status": "error",
+                "message": "Cannot commit — no project or Git repo loaded."
+            }
+
+        # ✅ Normalize string path into Path object if needed
+        if isinstance(self.project_path, str):
+            self.project_path = Path(self.project_path)
+        
+        """
+        High-level wrapper for committing project changes from the GUI.
+        Handles test mode, user input, validation, and UI updates.
+        Delegates to `self.git.commit_changes()` for actual Git logic.
+        """
+        # ✅ Fallback to test message if not passed explicitly
+        commit_message = os.getenv("DAWGIT_TEST_COMMIT_MSG", commit_message)
+        
         if not self.project_path or not self.git or not self.git.repo:
             print("[DEBUG] Skipping commit — no project or Git repo loaded")
             return {
@@ -1425,23 +1495,24 @@ class DAWGitApp(QMainWindow):
 
         # ✅ Push to remote if enabled
         if hasattr(self.setup_page, "remote_checkbox") and self.setup_page.remote_checkbox.isChecked():
-            try:
-                print("[DEBUG] Attempting to push to remote...")
-                subprocess.run(
-                    # ["git", "push", "origin", self.get_current_branch()],
-                    ["git", "push", "origin", self.get_default_branch()],
-
-                    cwd=self.project_path,
-                    env=self.custom_env(),
-                    check=True
-                )
-            except subprocess.CalledProcessError as e:
-                print(f"[DEBUG] Remote push failed: {e}")
-                QMessageBox.critical(
-                    self,
-                    "Push Failed",
-                    f"Couldn’t push to remote:\n\n{e}"
-                )
+            if not self.project_path:
+                print("[DEBUG] Skipping remote push — project_path is None")
+            else:
+                try:
+                    print("[DEBUG] Attempting to push to remote...")
+                    subprocess.run(
+                        ["git", "push", "origin", self.get_default_branch()],
+                        cwd=self.project_path,
+                        env=self.custom_env(),
+                        check=True
+                    )
+                except subprocess.CalledProcessError as e:
+                    print(f"[DEBUG] Remote push failed: {e}")
+                    QMessageBox.critical(
+                        self,
+                        "Push Failed",
+                        f"Couldn’t push to remote:\n\n{e}"
+                    )
 
         if hasattr(self, "commit_message"):
             self.commit_message.setPlainText("")

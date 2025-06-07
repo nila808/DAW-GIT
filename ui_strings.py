@@ -22,9 +22,14 @@ SNAPSHOT_EDITABLE_TOOLTIP = "🎚️ You’re editing this take — changes will
 ALREADY_ON_COMMIT_TITLE = "Already on This Snapshot"
 ALREADY_ON_COMMIT_MESSAGE = "🎧 You’re already on snapshot {sha}."
 
+SNAPSHOT_UNKNOWN_STATE = "ℹ️ Detached snapshot — not on an active version line"
+LAUNCH_FAILED_TITLE = "❌ Launch Failed"
+LAUNCH_FAILED_MSG = "❌ Oops! Couldn't open your project. Please check your DAW setup and try again."
+
 
 # === Snapshot Controls ===
 # === Commit / Snapshot Titles ===
+COMMIT_MESSAGE_REQUIRED_STATUS = "📝 Please enter a snapshot name before saving."
 COMMIT_SUCCESS_TITLE = "✅ Snapshot Saved"
 COMMIT_SUCCESS_MSG = "Branch: {branch}\nCommit: {sha}"
 CURRENT_COMMIT_TITLE = "Current Snapshot"

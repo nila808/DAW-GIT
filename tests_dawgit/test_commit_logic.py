@@ -1,6 +1,7 @@
 from pathlib import Path
 from git import Repo
 from daw_git_gui import DAWGitApp
+from tests_dawgit.test_helpers import create_test_project
 
 
 def test_commit_requires_daw_file(tmp_path, qtbot):
@@ -12,7 +13,8 @@ def test_commit_requires_daw_file(tmp_path, qtbot):
     repo.index.add(["notes.txt"])
     repo.index.commit("init")
 
-    app = DAWGitApp()
+    path, repo = create_test_project(tmp_path)
+    app = DAWGitApp(project_path=str(path), build_ui=True)
     app.project_path = str(project_path)
     app.repo = repo
 
@@ -22,18 +24,16 @@ def test_commit_requires_daw_file(tmp_path, qtbot):
 
 
 def test_commit_with_als_file(tmp_path, qtbot):
-    project_path = tmp_path / "WithALS"
-    project_path.mkdir()
-    (project_path / "song.als").write_text("test")
+    path, repo = create_test_project(tmp_path)
+    (path / "song.als").write_text("test")  # Overwrite with test content
 
-    repo = Repo.init(project_path)
-    repo.index.add(["song.als"])
-    repo.index.commit("Initial")
+    app = DAWGitApp(project_path=str(path), build_ui=True)
+    qtbot.addWidget(app)
+    qtbot.wait(200)
 
-    app = DAWGitApp(project_path=project_path)  # ✅ FIXED: Pass it in here
-    app.repo = repo
-
-    (project_path / "song.als").write_text("v2")
+    # ✅ Make a real change to ensure commit is needed
+    (path / "song.als").write_text("v2")
+    app.repo.git.add("song.als")
     app.commit_changes(commit_message="Updated .als")
 
     assert app.repo.head.commit.message.strip() == "Updated .als"
@@ -41,25 +41,26 @@ def test_commit_with_als_file(tmp_path, qtbot):
 
 
 def test_commit_with_logicx_file(tmp_path, qtbot):
-    project_path = tmp_path / "WithLogic"
-    project_path.mkdir()
-    (project_path / "beat.logicx").write_text("xml")
+    path = tmp_path / "WithLogic"
+    path.mkdir()
+    (path / "beat.logicx").write_text("xml")
 
-    repo = Repo.init(project_path)
+    repo = Repo.init(path)
     repo.index.add(["beat.logicx"])
     repo.index.commit("Initial")
 
-    app = DAWGitApp(project_path=project_path)  # ✅ FIXED: Pass it in here
+    app = DAWGitApp(project_path=str(path), build_ui=True)
     app.repo = repo
+    qtbot.addWidget(app)
+    qtbot.wait(200)
 
-    (project_path / "beat.logicx").write_text("v2")
+    (path / "beat.logicx").write_text("v2")
+    app.repo.git.add("beat.logicx")
     app.commit_changes(commit_message="Logic update")
 
-    # ✅ Confirm commit message, safely ignoring trailing newline
     assert app.repo.head.commit.message.strip() == "Logic update"
-
-    # ✅ Confirm the file was actually committed
     assert "beat.logicx" in app.repo.git.show("--name-only")
+
 
 
 def test_placeholder_file_created_if_none_exist(tmp_path, qtbot):
