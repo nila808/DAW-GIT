@@ -58,6 +58,7 @@ COMMIT_MESSAGE_REQUIRED_STATUS = "❗ Add a message before saving this take"
 SESSION_BRANCH_LABEL = "🪄 Version Line: {branch} — 🎧 Take: {take}"
 
 # === Commit / Snapshot Titles ===
+COMMIT_MESSAGE_REQUIRED_STATUS = "📝 Please enter a snapshot name before saving."
 COMMIT_SUCCESS_TITLE = "✅ Take Saved"
 COMMIT_SUCCESS_MSG = "Version Line: {branch}\nTake ID: {sha}"
 CURRENT_COMMIT_TITLE = "Current Take"
@@ -125,6 +126,11 @@ DIRTY_EDIT_WARNING = (
     "🎿 Your current editing session hasn’t been saved.\n\n"
     "Please save this take before switching."
 )
+SNAPSHOT_UNKNOWN_STATE = "🎵 Snapshot mode: unknown"
+LAUNCH_FAILED_TITLE = "🚫 Launch Failed"
+LAUNCH_FAILED_MSG = "Oops! Couldn’t open your project. Make sure your DAW is installed and the file still exists."
+
+
 
 # === Snapshot Deletion ===
 DELETE_SNAPSHOT_TITLE = "🗑️ Delete Snapshot?"

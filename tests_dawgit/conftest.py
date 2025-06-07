@@ -40,9 +40,12 @@ def pytest_configure():
 
 @pytest.fixture
 def real_test_project(tmp_path):
-    """Returns a copy of a real DAW project with audio and MIDI files."""
     src = Path(__file__).parent.parent / "test_assets" / "TestProjectReal"
     dst = tmp_path / "RealTestProject"
+
+    if not src.exists():
+        raise FileNotFoundError(f"[TEST ERROR] Required test asset missing: {src}")
+
     shutil.copytree(src, dst)
     return dst.resolve()
 
