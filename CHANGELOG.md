@@ -1,5 +1,14 @@
 
 
+## [v0.0.100] – 2025-06-08
+**Author:** @niccavendish
+- 📦 v0.0.99: 📝 updated changelog, 📊 updated project status
+- 📦 Finalize v0.0.98 changes (release.log sync)
+- ✅ v0.0.99: All 167 tests passing after merge, UI strings patched, full workflow confirmed
+- 📦 v0.0.97: 📝 updated changelog, 📊 updated project status
+- 📦 v0.0.96: 📝 updated changelog, 📊 updated project status
+
+
 ## [v0.0.99] – 2025-06-08
 **Author:** @niccavendish
 - 📦 Finalize v0.0.98 changes (release.log sync)
