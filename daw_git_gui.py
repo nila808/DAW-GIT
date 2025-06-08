@@ -179,9 +179,8 @@ from ui_strings import (
     CREATE_VERSION_LINE_TITLE,
     CREATE_VERSION_LINE_MSG, 
     ABLETON_MAY_BE_OPEN_TITLE,
-    ABLETON_MAY_BE_OPEN_MSG
-
-
+    ABLETON_MAY_BE_OPEN_MSG, 
+    NEW_PROJECT_SELECTED_MSG
 )
 
 
@@ -193,10 +192,12 @@ from git.exc import GitCommandError
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QFileDialog, QMessageBox, 
     QTableWidgetItem, QInputDialog, QAbstractItemView, 
-    QTableWidget
+    QTableWidget, QMenu, QWidget, QVBoxLayout, QLabel, 
+    QStackedWidget
 )
+from PyQt6.QtGui import QAction  # ✅ Add this
 from PyQt6.QtCore import Qt, QSettings, QTimer, pyqtSlot
-
+from PyQt6.QtGui import QAction
 
 class NumericItem(QTableWidgetItem):
     def __init__(self, number, text=None):
@@ -1848,6 +1849,43 @@ class DAWGitApp(QMainWindow):
         delete_action.triggered.connect(self.delete_selected_commit)
         menu.addAction(delete_action)
         menu.exec(self.snapshot_page.commit_table.viewport().mapToGlobal(position))
+
+
+    def cleanup_workspace(self):
+        """Remove .dawgit_backups, placeholder files, orphan branches, and temp tags."""
+        from git import GitCommandError
+
+        # 1. Delete .dawgit_backups/
+        backups_path = self.project_path / ".dawgit_backups"
+        if backups_path.exists():
+            shutil.rmtree(backups_path, ignore_errors=True)
+
+        # 2. Delete auto_placeholder.als
+        placeholder_path = self.project_path / "auto_placeholder.als"
+        if placeholder_path.exists():
+            placeholder_path.unlink()
+
+        # 3. Delete orphan branches (not reachable from main)
+        try:
+            main_sha = self.repo.commit("main").hexsha
+            for branch in list(self.repo.branches):
+                if branch.name != "main":
+                    branch_sha = self.repo.commit(branch.name).hexsha
+                    # Skip if main and branch share no common ancestor (i.e., orphan)
+                    try:
+                        self.repo.git.merge_base(main_sha, branch_sha)
+                    except GitCommandError:
+                        self.repo.git.branch("-D", branch.name)
+        except GitCommandError:
+            pass  # skip if main doesn't exist yet
+
+        # 4. Delete temp tags (e.g., temp-* or test tags)
+        for tag in self.repo.tags:
+            if tag.name.startswith("temp") or "test" in tag.name:
+                self.repo.delete_tag(tag)
+        
+        # Force GitPython to refresh heads and tags after cleanup
+        self.repo = self.repo.__class__(self.repo.working_tree_dir)
 
 
     def update_session_branch_display(self):
