@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtCore import QSettings
 from daw_git_gui import DAWGitApp
 
+
 def test_first_time_launch_shows_welcome_modal(monkeypatch, qtbot):
     """
     AT-060 / MT-031 – If no folder is selected on first launch, show welcome modal.
