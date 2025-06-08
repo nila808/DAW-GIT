@@ -7,61 +7,56 @@ from daw_git_gui import DAWGitApp
 
 @pytest.fixture
 def app(tmp_path):
-    # Use a clean temp path for project simulation
     project_path = tmp_path / ui_strings.TEST_PROJECT_NAME
     project_path.mkdir(parents=True, exist_ok=True)
     return DAWGitApp(project_path=str(project_path), build_ui=True)
 
 def test_repo_no_changes(app):
-    """
-    Test when repo is loaded but no unsaved changes.
-    Expected behavior: Status label should show 'Version Line'
-    """
-    (app.project_path / ui_strings.DUMMY_ALS_FILE).touch()  # Simulate DAW file
+    (app.project_path / ui_strings.DUMMY_ALS_FILE).touch()
     app.repo = MagicMock()
     app.repo.active_branch.name = "main"
     app.repo.head = MagicMock()
-    app.repo.git.status = MagicMock(return_value="")  # Clean repo
-    app.has_unsaved_changes = lambda: False
+    app.repo.git.status = MagicMock(return_value="")
     app.repo.head.is_detached = False
+    app.repo.head.commit.hexsha = "abc123"
+    app.repo.commit = lambda ref: MagicMock(hexsha="abc123")
+    app.has_unsaved_changes = lambda: False
+
     app.update_status_label()
+    text = app.status_label.text()
 
-    assert "Version Line" in app.status_label.text()
-    assert "version" in app.status_label.text()
-
+    assert "Version Line" in text
+    assert "Take" in text
 
 def test_repo_unsaved_changes(app):
-    """
-    Test when repo is loaded and there are unsaved changes.
-    Expected behavior: Status label should show 'Version Line' and 'version'
-    """
     (app.project_path / ui_strings.DUMMY_ALS_FILE).touch()
     app.repo = MagicMock()
     app.repo.active_branch.name = "main"
     app.repo.head = MagicMock()
-    app.has_unsaved_changes = lambda: True
     app.repo.head.is_detached = False
+    app.repo.head.commit.hexsha = "abc123"
+    app.repo.commit = lambda ref: MagicMock(hexsha="abc123")
+    app.has_unsaved_changes = lambda: True
 
     app.update_status_label()
+    text = app.status_label.text()
 
-    assert "Version Line" in app.status_label.text()
-    assert "version" in app.status_label.text()
-
+    assert "Version Line" in text
+    assert "Take" in text
 
 def test_repo_with_branch_and_commit(app):
-    """
-    Test when repo is loaded with branch and commits.
-    Expected behavior: Status label shows active version line.
-    """
     (app.project_path / ui_strings.DUMMY_ALS_FILE).touch()
     app.repo = MagicMock()
     app.repo.head = MagicMock()
     app.repo.active_branch.name = "main"
-    app.repo.iter_commits = lambda x: [1, 2, 3]
-    app.has_unsaved_changes = lambda: False
+    app.repo.iter_commits = lambda branch: [1, 2, 3]
     app.repo.head.is_detached = False
+    app.repo.head.commit.hexsha = "abc123"
+    app.repo.commit = lambda ref: MagicMock(hexsha="abc123")
+    app.has_unsaved_changes = lambda: False
 
     app.update_status_label()
+    text = app.status_label.text()
 
-    assert "Version Line" in app.status_label.text()
-    assert "version" in app.status_label.text()
+    assert "Version Line" in text
+    assert "Take" in text

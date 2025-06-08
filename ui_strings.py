@@ -3,8 +3,8 @@
 # === General App Status ===
 STATUS_READY = "🎚️ Ready to create"
 STATUS_UNKNOWN = "🎼 No active Version Line"
-STATUS_SESSION_LABEL = "🪄 Version Line: {branch} — 🎧 Take: version {version}"
-STATUS_BRANCH_TAKE = "🪄 Version Line: {branch} — 🎧 Take: version {take}"
+STATUS_SESSION_LABEL = "🪄 Version Line: {branch} — 🎧 Take: {version}"
+STATUS_BRANCH_TAKE = "🪄 Version Line: {branch} — 🎧 Take: {take}"
 
 # === Tab Labels ===
 TAB_BRANCH_MANAGER = "🪄 Version Lines"
@@ -115,8 +115,17 @@ SNAPSHOT_INFO_MSG = (
 )
 SNAPSHOT_LOAD_SUCCESS = "📦 Take loaded — read-only mode"
 SNAPSHOT_LOAD_FAILED = "❌ Could not load take."
+
+
+# === modal title === 
 SNAPSHOT_ALREADY_VIEWING_TITLE = "Already Viewing Take"
+# === modal body === 
 SNAPSHOT_ALREADY_VIEWING_MSG = "🎿 You're already previewing this take.\n\nTake ID: {sha}"
+
+
+# === status bar === 
+STATUS_ON_LATEST_VERSION = "✅ You're already on the latest version line."
+
 SNAPSHOT_HISTORY_LOADING = "⏳ Loading take history..."
 SNAPSHOT_HISTORY_LOADED = "✅ Take history loaded."
 SNAPSHOT_SAVED_AUTODISABLED = "✅ Take saved. Auto-commit disabled until further changes."

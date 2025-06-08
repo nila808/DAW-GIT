@@ -180,7 +180,8 @@ from ui_strings import (
     CREATE_VERSION_LINE_MSG, 
     ABLETON_MAY_BE_OPEN_TITLE,
     ABLETON_MAY_BE_OPEN_MSG, 
-    NEW_PROJECT_SELECTED_MSG
+    NEW_PROJECT_SELECTED_MSG, 
+    STATUS_ON_LATEST_VERSION
 )
 
 
@@ -3724,7 +3725,19 @@ class DAWGitApp(QMainWindow):
 
         try:
             if self.repo.head.is_detached:
-                self.snapshot_page.status_label.setText(SNAPSHOT_LOAD_SUCCESS)
+                try:
+                    # Check if HEAD SHA == latest commit SHA on main
+                    main_sha = self.repo.commit("main").hexsha
+                    head_sha = self.repo.head.commit.hexsha
+                    if head_sha == main_sha:
+                        self.snapshot_page.status_label.setText(STATUS_ON_LATEST_VERSION)
+                    else:
+                        self.snapshot_page.status_label.setText(SNAPSHOT_LOAD_SUCCESS)  # Read-only mode
+                except Exception as e:
+                    print(f"[DEBUG] Could not resolve main SHA: {e}")
+                    self.snapshot_page.status_label.setText(SNAPSHOT_LOAD_SUCCESS)
+            
+
                 print("[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line")
 
             else:

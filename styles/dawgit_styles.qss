@@ -67,3 +67,14 @@ QPushButton#setAltMixBtn {
     padding: 4px;
     margin-bottom: 4px;
 }
+
+
+
+QTableWidget::item:selected {
+    background-color: #cceedd;   /* Pale soft green */
+    color: #000000;              /* Black text for readability */
+}
+
+QTableWidget::item:selected:active {
+    background-color: #b2dbcc;   /* Slightly darker on active selection */
+}

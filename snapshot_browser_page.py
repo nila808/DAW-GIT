@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import (
     QTextEdit, QAbstractItemView
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPalette, QColor
+
 
 from ui_strings import (
     RETURN_TO_LATEST_BTN, 
@@ -61,11 +63,11 @@ class SnapshotBrowserPage(QWidget):
         self.commit_table.sortItems(0, Qt.SortOrder.AscendingOrder)
 
         self.commit_table.setAlternatingRowColors(True)
-        self.commit_table.setStyleSheet("""
-            QTableWidget::item:selected {
-                background-color: #b3d9ff;  /* light blue highlight */
-            }
-        """)
+        # self.commit_table.setStyleSheet("""
+        #     QTableWidget::item:selected {
+        #         background-color: #b3d9ff;  /* light blue highlight */
+        #     }
+        # """)
         self.commit_table.sortItems(8, Qt.SortOrder.DescendingOrder)
 
         # 📦 Status
@@ -129,6 +131,13 @@ class SnapshotBrowserPage(QWidget):
         # Spacer
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
+        # Fix table highlight colors for better contrast
+        
+        # palette = self.commit_table.palette()
+        # palette.setColor(QPalette.ColorRole.Highlight, QColor("#cceedd"))           # pale soft green
+        # palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#000000"))     # dark text for contrast
+        # self.commit_table.setPalette(palette)
+
 
     def update_return_to_latest_visibility(self):
         if self.app and self.app.repo:
@@ -144,11 +153,12 @@ class SnapshotBrowserPage(QWidget):
             if item and item.toolTip() == sha:
                 self.commit_table.selectRow(row)
                 self.commit_table.scrollToItem(item, QTableWidget.ScrollHint.PositionAtCenter)
-                for col in range(self.commit_table.columnCount()):
-                    cell = self.commit_table.item(row, col)
-                    if cell:
-                        cell.setBackground(Qt.GlobalColor.green)
-                break
+                # ==== Inline Python styling ========
+                # for col in range(self.commit_table.columnCount()):
+                #     cell = self.commit_table.item(row, col)
+                #     if cell:
+                #         cell.setBackground(Qt.GlobalColor.green)
+                # break
 
 
     def clear_table(self):

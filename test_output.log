@@ -13260,3 +13260,491 @@ tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2 [DEBUG] 
 PASSED
 
 ============================== 5 passed in 7.71s ===============================
+============================= test session starts ==============================
+platform darwin -- Python 3.12.3, pytest-8.3.5, pluggy-1.5.0 -- /Users/niccavendish/.pyenv/versions/3.12.3/bin/python3.12
+cachedir: .pytest_cache
+PyQt6 6.9.0 -- Qt runtime 6.9.0 -- Qt compiled 6.9.0
+rootdir: /Users/niccavendish/Projects/DAWGitApp
+configfile: pytest.ini
+plugins: qt-4.4.0, env-1.1.5, timeout-2.4.0, rich-0.2.0
+timeout: 10.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 5 items
+
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[main_mix] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[DEBUG] Loaded project path: /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301
+✅ Saved last project path: /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301
+[DEBUG] No commit role file found at /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: fae722ff5d6a9b1572d6bdc90b019274e90a4f47
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = fae722ff5d6a9b1572d6bdc90b019274e90a4f47
+[DEBUG] ✅ SHA set from selected row: fae722ff5d6a9b1572d6bdc90b019274e90a4f47
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: fae722ff5d6a9b1572d6bdc90b019274e90a4f47
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = fae722ff5d6a9b1572d6bdc90b019274e90a4f47
+[DEBUG] ✅ SHA set from selected row: fae722ff5d6a9b1572d6bdc90b019274e90a4f47
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Role 'main_mix' assigned to commit fae722ff5d6a9b1572d6bdc90b019274e90a4f47
+[DEBUG] Saved commit roles to /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/.dawgit_roles.json
+[DEBUG] Assigned role 'main_mix' to commit fae722ff5d6a9b1572d6bdc90b019274e90a4f47
+[DEBUG] Saved PROJECT_MARKER.json to /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /tmp/test_tagging_2221f8735e1043d0bb1c2af5df46a301/.dawgit_roles.json
+PASSED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[creative_take] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8
+✅ Saved last project path: /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8
+[DEBUG] No commit role file found at /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 2a945fe140ac2e48263cfa4fb418327e378ff168
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 2a945fe140ac2e48263cfa4fb418327e378ff168
+[DEBUG] ✅ SHA set from selected row: 2a945fe140ac2e48263cfa4fb418327e378ff168
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 2a945fe140ac2e48263cfa4fb418327e378ff168
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 2a945fe140ac2e48263cfa4fb418327e378ff168
+[DEBUG] ✅ SHA set from selected row: 2a945fe140ac2e48263cfa4fb418327e378ff168
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Role 'creative_take' assigned to commit 2a945fe140ac2e48263cfa4fb418327e378ff168
+[DEBUG] Saved commit roles to /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/.dawgit_roles.json
+[DEBUG] Assigned role 'creative_take' to commit 2a945fe140ac2e48263cfa4fb418327e378ff168
+[DEBUG] Saved PROJECT_MARKER.json to /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /tmp/test_tagging_4f29a36497494f09abb2452cac5cd7c8/.dawgit_roles.json
+PASSED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[alt_mixdown] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b
+✅ Saved last project path: /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b
+[DEBUG] No commit role file found at /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: cd4cb909b7bf57908070de206dfee655f7b1717b
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = cd4cb909b7bf57908070de206dfee655f7b1717b
+[DEBUG] ✅ SHA set from selected row: cd4cb909b7bf57908070de206dfee655f7b1717b
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: cd4cb909b7bf57908070de206dfee655f7b1717b
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = cd4cb909b7bf57908070de206dfee655f7b1717b
+[DEBUG] ✅ SHA set from selected row: cd4cb909b7bf57908070de206dfee655f7b1717b
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Role 'alt_mixdown' assigned to commit cd4cb909b7bf57908070de206dfee655f7b1717b
+[DEBUG] Saved commit roles to /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/.dawgit_roles.json
+[DEBUG] Assigned role 'alt_mixdown' to commit cd4cb909b7bf57908070de206dfee655f7b1717b
+[DEBUG] Saved PROJECT_MARKER.json to /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /tmp/test_tagging_2e8f827115cf494da6e6f8f98c10123b/.dawgit_roles.json
+PASSED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[test_custom_tag] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2
+✅ Saved last project path: /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2
+[DEBUG] No commit role file found at /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: d24893d0ccbb63d23a9b7bd1125dbd370053ded1
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = d24893d0ccbb63d23a9b7bd1125dbd370053ded1
+[DEBUG] ✅ SHA set from selected row: d24893d0ccbb63d23a9b7bd1125dbd370053ded1
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: d24893d0ccbb63d23a9b7bd1125dbd370053ded1
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = d24893d0ccbb63d23a9b7bd1125dbd370053ded1
+[DEBUG] ✅ SHA set from selected row: d24893d0ccbb63d23a9b7bd1125dbd370053ded1
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Role 'test_custom_tag' assigned to commit d24893d0ccbb63d23a9b7bd1125dbd370053ded1
+[DEBUG] Saved commit roles to /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/.dawgit_roles.json
+[DEBUG] Assigned role 'test_custom_tag' to commit d24893d0ccbb63d23a9b7bd1125dbd370053ded1
+[DEBUG] Saved PROJECT_MARKER.json to /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /tmp/test_tagging_b8d5c9ddbc014709966692e2bf39c0c2/.dawgit_roles.json
+PASSED
+tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2 [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] ✅ SHA set from selected row: 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] ✅ SHA set from selected row: 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Selected row = 0, SHA = 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] ✅ SHA set from selected row: 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] Role 'alt_2' assigned to commit 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Assigned role 'alt_2' to commit 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] Saved PROJECT_MARKER.json to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[STATUS] ✏️ Commit tagged as 'alt_2': 26fcba6
+[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] Total commits: 1
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-0/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] ✅ SHA set from selected row: 26fcba6011f8282eaaddda613dfe2cf8ff0805dc
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+PASSED
+
+============================== 5 passed in 9.55s ===============================
+============================= test session starts ==============================
+platform darwin -- Python 3.12.3, pytest-8.3.5, pluggy-1.5.0 -- /Users/niccavendish/.pyenv/versions/3.12.3/bin/python3.12
+cachedir: .pytest_cache
+PyQt6 6.9.0 -- Qt runtime 6.9.0 -- Qt compiled 6.9.0
+rootdir: /Users/niccavendish/Projects/DAWGitApp
+configfile: pytest.ini
+plugins: qt-4.4.0, env-1.1.5, timeout-2.4.0, rich-0.2.0
+timeout: 10.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 5 items
+
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[main_mix] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_8b482997680a4060817e44df99c0f021/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[DEBUG] Loaded project path: /tmp/test_tagging_8b482997680a4060817e44df99c0f021
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_8b482997680a4060817e44df99c0f021/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_8b482997680a4060817e44df99c0f021
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_8b482997680a4060817e44df99c0f021/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_8b482997680a4060817e44df99c0f021
+✅ Saved last project path: /tmp/test_tagging_8b482997680a4060817e44df99c0f021
+[DEBUG] No commit role file found at /tmp/test_tagging_8b482997680a4060817e44df99c0f021/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 615707170db655a0e7a3ca9258850f7b68cc647d
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_8b482997680a4060817e44df99c0f021/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 615707170db655a0e7a3ca9258850f7b68cc647d
+[DEBUG] ✅ SHA set from selected row: 615707170db655a0e7a3ca9258850f7b68cc647d
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_8b482997680a4060817e44df99c0f021/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 615707170db655a0e7a3ca9258850f7b68cc647d
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_8b482997680a4060817e44df99c0f021/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 615707170db655a0e7a3ca9258850f7b68cc647d
+[DEBUG] ✅ SHA set from selected row: 615707170db655a0e7a3ca9258850f7b68cc647d
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_8b482997680a4060817e44df99c0f021/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_8b482997680a4060817e44df99c0f021
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_8b482997680a4060817e44df99c0f021/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_8b482997680a4060817e44df99c0f021
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Role 'main_mix' assigned to commit 615707170db655a0e7a3ca9258850f7b68cc647d
+[DEBUG] Saved commit roles to /tmp/test_tagging_8b482997680a4060817e44df99c0f021/.dawgit_roles.json
+[DEBUG] Assigned role 'main_mix' to commit 615707170db655a0e7a3ca9258850f7b68cc647d
+[DEBUG] Saved PROJECT_MARKER.json to /tmp/test_tagging_8b482997680a4060817e44df99c0f021/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /tmp/test_tagging_8b482997680a4060817e44df99c0f021/.dawgit_roles.json
+PASSED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[creative_take] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7
+✅ Saved last project path: /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7
+[DEBUG] No commit role file found at /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: eb12e823e08d5542c4575b278e299bd3b99ad3dc
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = eb12e823e08d5542c4575b278e299bd3b99ad3dc
+[DEBUG] ✅ SHA set from selected row: eb12e823e08d5542c4575b278e299bd3b99ad3dc
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: eb12e823e08d5542c4575b278e299bd3b99ad3dc
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = eb12e823e08d5542c4575b278e299bd3b99ad3dc
+[DEBUG] ✅ SHA set from selected row: eb12e823e08d5542c4575b278e299bd3b99ad3dc
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Role 'creative_take' assigned to commit eb12e823e08d5542c4575b278e299bd3b99ad3dc
+[DEBUG] Saved commit roles to /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/.dawgit_roles.json
+[DEBUG] Assigned role 'creative_take' to commit eb12e823e08d5542c4575b278e299bd3b99ad3dc
+[DEBUG] Saved PROJECT_MARKER.json to /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /tmp/test_tagging_18ab151cfcd546249afe9c9bc501f7d7/.dawgit_roles.json
+PASSED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[alt_mixdown] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412
+✅ Saved last project path: /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412
+[DEBUG] No commit role file found at /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 91295a187c663e4b1bb06d39ec56f6d8ed5ab95d
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 91295a187c663e4b1bb06d39ec56f6d8ed5ab95d
+[DEBUG] ✅ SHA set from selected row: 91295a187c663e4b1bb06d39ec56f6d8ed5ab95d
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 91295a187c663e4b1bb06d39ec56f6d8ed5ab95d
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 91295a187c663e4b1bb06d39ec56f6d8ed5ab95d
+[DEBUG] ✅ SHA set from selected row: 91295a187c663e4b1bb06d39ec56f6d8ed5ab95d
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Role 'alt_mixdown' assigned to commit 91295a187c663e4b1bb06d39ec56f6d8ed5ab95d
+[DEBUG] Saved commit roles to /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/.dawgit_roles.json
+[DEBUG] Assigned role 'alt_mixdown' to commit 91295a187c663e4b1bb06d39ec56f6d8ed5ab95d
+[DEBUG] Saved PROJECT_MARKER.json to /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /tmp/test_tagging_21b1f5a0bdcb4f5285b34e8be5dcf412/.dawgit_roles.json
+PASSED
+tests_dawgit/test_commit_tagging.py::test_assign_commit_role_variants[test_custom_tag] [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948
+✅ Saved last project path: /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948
+[DEBUG] No commit role file found at /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: bae7f9677285b0e809001fd5519efd6685e1315d
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = bae7f9677285b0e809001fd5519efd6685e1315d
+[DEBUG] ✅ SHA set from selected row: bae7f9677285b0e809001fd5519efd6685e1315d
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: bae7f9677285b0e809001fd5519efd6685e1315d
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = bae7f9677285b0e809001fd5519efd6685e1315d
+[DEBUG] ✅ SHA set from selected row: bae7f9677285b0e809001fd5519efd6685e1315d
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/track.als')]
+[DEBUG] Found existing Git repo at /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Role 'test_custom_tag' assigned to commit bae7f9677285b0e809001fd5519efd6685e1315d
+[DEBUG] Saved commit roles to /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/.dawgit_roles.json
+[DEBUG] Assigned role 'test_custom_tag' to commit bae7f9677285b0e809001fd5519efd6685e1315d
+[DEBUG] Saved PROJECT_MARKER.json to /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /tmp/test_tagging_f20a47eaafd84ca9b5e98c2cce051948/.dawgit_roles.json
+PASSED
+tests_dawgit/test_commit_tagging.py::test_tag_custom_label_assigns_alt2 [DEBUG] No PROJECT_MARKER.json found — using defaults
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/.dawgit_roles.json
+❌ No Git repo loaded.
+[DEBUG] Skipping QTimer.singleShot — parent not visible.
+[WARNING] Stylesheet not loaded: [Errno 2] No such file or directory: 'styles/dawgit_styles.qss'
+[DEBUG] Loaded project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0
+[DEBUG] Calling GitProjectManager.init_repo()
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0
+✅ Saved last project path: /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] ✅ SHA set from selected row: 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] Total commits: 1
+[DEBUG] No commit role file found at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] ✅ SHA set from selected row: 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0
+[DEBUG] Initializing Git...
+[DEBUG] Found DAW files: [PosixPath('/private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/track.als')]
+[DEBUG] Found existing Git repo at /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+[DEBUG] Selected row = 0, SHA = 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] ✅ SHA set from selected row: 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] Role 'alt_2' assigned to commit 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Assigned role 'alt_2' to commit 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] Saved PROJECT_MARKER.json to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/PROJECT_MARKER.json
+[DEBUG] Saved commit roles to /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[STATUS] ✏️ Commit tagged as 'alt_2': 6a0bc35
+[DEBUG] DAWGIT_TEST_MODE active — running load_commit_history directly
+[DEBUG] Repo valid: True
+[DEBUG] HEAD SHA: 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] Total commits: 1
+[DEBUG] Loaded commit roles from /private/var/folders/yx/c_cp834d18v7ptq75l5x7twm0000gn/T/pytest-of-niccavendish/pytest-2/test_tag_custom_label_assigns_0/.dawgit_roles.json
+[DEBUG] Selected row = 0, SHA = 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] ✅ SHA set from selected row: 6a0bc3530f8e46e5400378fc6adafeb3f59b58e1
+[DEBUG] status label set: 🪄 Version Line: MAIN — 🎧 Take: 1
+PASSED
+
+============================== 5 passed in 11.18s ==============================
