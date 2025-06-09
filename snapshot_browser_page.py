@@ -27,9 +27,10 @@ from ui_strings import (
     TABLE_HEADER_TAKE_ID,
     TABLE_HEADER_TAKE_NOTES,
     TABLE_HEADER_SESSION_LINE, 
-    STATUS_READY
+    STATUS_READY, 
+    BTN_TAG_CUSTOM_LABEL, 
+    ROLE_CUSTOM_TAG_TOOLTIP
 )
-
 
 class SnapshotBrowserPage(QWidget):
     def __init__(self, parent=None):
@@ -110,6 +111,11 @@ class SnapshotBrowserPage(QWidget):
         self.quick_tag_alt_btn.setToolTip(TOOLTIP_TAG_ALT_MIX)
         self.quick_tag_alt_btn.clicked.connect(lambda: self.app.tag_alt_mix())
 
+        self.tag_custom_btn = QPushButton(BTN_TAG_CUSTOM_LABEL)
+        self.tag_custom_btn.setToolTip(ROLE_CUSTOM_TAG_TOOLTIP)
+        self.tag_custom_btn.clicked.connect(self.app.tag_custom_label)
+    
+
         self.open_commit_page_btn = QPushButton(BTN_OPEN_COMMIT_PANEL)
         self.open_commit_page_btn.setToolTip(TOOLTIP_OPEN_COMMIT_PANEL)
         self.open_commit_page_btn.clicked.connect(lambda: self.app.pages.switch_to("commit"))
@@ -120,6 +126,7 @@ class SnapshotBrowserPage(QWidget):
             self.quick_tag_main_btn,
             self.quick_tag_creative_btn,
             self.quick_tag_alt_btn,
+            self.tag_custom_btn,
             self.open_commit_page_btn
         ]:
             action_row.addWidget(btn)

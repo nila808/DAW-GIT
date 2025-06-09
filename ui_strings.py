@@ -16,7 +16,14 @@ DETACHED_SNAPSHOT_LABEL = "ℹ️ Detached snapshot — not on an active Version
 
 # Snapshot Browser Page
 SNAPSHOT_BROWSER_TITLE = "🎧 Takes Browser"
-ROLE_MAIN_MIX_TOOLTIP = "Main Mix"
+
+ROLE_MAIN_MIX_TOOLTIP = "🌟 Mark this take as the Main Mix"
+ROLE_CREATIVE_TOOLTIP = "🎨 Mark this take as a Creative version"
+ROLE_ALT_TOOLTIP = "🎛️ Mark this take as an Alternate Mix"
+ROLE_CUSTOM_TAG_TOOLTIP = "🧪 Apply a custom tag to this take"
+
+
+
 SESSION_LABEL_UNKNOWN = "🪄 Version Line: unknown • 🎧 Take: unknown"
 SNAPSHOT_DETACHED_WARNING = "🔍 Snapshot mode — not on an active Version Line"
 
