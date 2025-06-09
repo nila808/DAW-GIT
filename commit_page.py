@@ -42,7 +42,10 @@ from ui_strings import (
     MODAL_BTN_START_ALT,
     MODAL_BTN_RETURN_LATEST,
     MODAL_BTN_CANCEL, 
-    ROLE_MAIN_MIX_TOOLTIP
+    ROLE_MAIN_MIX_TOOLTIP, 
+    ROLE_CREATIVE_TOOLTIP, 
+    ROLE_ALT_TOOLTIP, 
+    ROLE_CUSTOM_TAG_TOOLTIP
 
 )
 
@@ -93,14 +96,21 @@ class CommitPage(QWidget):
         self.btn_version_creative = QPushButton(TAG_CREATIVE_LABEL)
         self.btn_version_alt = QPushButton(TAG_ALT_LABEL)
 
-
         # 🏷️ Tagging Buttons
         tag_layout = QHBoxLayout()
+
         self.tag_main_btn = QPushButton(BTN_TAG_MAIN_MIX)
         self.tag_main_btn.setToolTip(ROLE_MAIN_MIX_TOOLTIP)
+
         self.tag_creative_btn = QPushButton(BTN_TAG_CREATIVE_TAKE)
+        self.tag_creative_btn.setToolTip(ROLE_CREATIVE_TOOLTIP)
+
         self.tag_alt_btn = QPushButton(BTN_TAG_ALT_MIX)
+        self.tag_alt_btn.setToolTip(ROLE_ALT_TOOLTIP)
+
         self.tag_custom_btn = QPushButton(BTN_TAG_CUSTOM_LABEL)
+        self.tag_custom_btn.setToolTip(ROLE_CUSTOM_TAG_TOOLTIP)
+
         tag_layout.addWidget(self.tag_main_btn)
         tag_layout.addWidget(self.tag_creative_btn)
         tag_layout.addWidget(self.tag_alt_btn)

@@ -619,10 +619,13 @@ class DAWGitApp(QMainWindow):
 
     def load_snapshot_clicked(self):
         selected_row = self.snapshot_page.commit_table.currentRow()
+
         if selected_row < 0:
             QMessageBox.warning(self, NO_SNAPSHOT_SELECTED_TITLE, NO_SNAPSHOT_SELECTED_MSG)
             return
-        self.checkout_selected_commit()
+
+        self.checkout_selected_commit()  # this may trigger a branch rebind or HEAD change
+        self.refresh_session_labels()    # ✅ Refresh *after* the checkout and any rebinding
 
 
     def clean_blocking_files(self, filenames={".DS_Store"}):
