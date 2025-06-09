@@ -33,3 +33,7 @@ def create_test_project(tmp_path=None):
         repo.index.commit("init")
 
     return project_path, repo
+
+
+def write_daw_file(path: Path, content: str = "dummy"):
+    path.write_text(content)
