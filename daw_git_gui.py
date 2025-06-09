@@ -3668,6 +3668,11 @@ class DAWGitApp(QMainWindow):
     
 
     def update_log(self):
+
+        print("[DEBUG] HEAD:", self.repo.head.commit.hexsha)
+        print("[DEBUG] HEAD name:", self.repo.head.ref.name if not self.repo.head.is_detached else "DETACHED")
+        print("[DEBUG] Total commits:", len(list(self.repo.iter_commits())))
+
         if not hasattr(self, "history_table"):
             print("[DEBUG] Skipping update_log(): no history_table in test mode.")
             return

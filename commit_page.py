@@ -41,7 +41,8 @@ from ui_strings import (
     TAKE_LOADED_MSG,     
     MODAL_BTN_START_ALT,
     MODAL_BTN_RETURN_LATEST,
-    MODAL_BTN_CANCEL
+    MODAL_BTN_CANCEL, 
+    ROLE_MAIN_MIX_TOOLTIP
 
 )
 
@@ -96,6 +97,7 @@ class CommitPage(QWidget):
         # 🏷️ Tagging Buttons
         tag_layout = QHBoxLayout()
         self.tag_main_btn = QPushButton(BTN_TAG_MAIN_MIX)
+        self.tag_main_btn.setToolTip(ROLE_MAIN_MIX_TOOLTIP)
         self.tag_creative_btn = QPushButton(BTN_TAG_CREATIVE_TAKE)
         self.tag_alt_btn = QPushButton(BTN_TAG_ALT_MIX)
         self.tag_custom_btn = QPushButton(BTN_TAG_CUSTOM_LABEL)
