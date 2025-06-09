@@ -1,9 +1,11 @@
-import ui_strings
 import os
+os.environ["DAWGIT_TEST_MODE"] = "1"
 import pytest
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtCore import QSettings
 from daw_git_gui import DAWGitApp
+import ui_strings
+
 
 def test_first_time_launch_shows_welcome_modal(monkeypatch, qtbot):
     """

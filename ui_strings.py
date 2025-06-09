@@ -16,6 +16,7 @@ DETACHED_SNAPSHOT_LABEL = "ℹ️ Detached snapshot — not on an active Version
 
 # Snapshot Browser Page
 SNAPSHOT_BROWSER_TITLE = "🎧 Takes Browser"
+ROLE_MAIN_MIX_TOOLTIP = "Main Mix"
 SESSION_LABEL_UNKNOWN = "🪄 Version Line: unknown • 🎧 Take: unknown"
 SNAPSHOT_DETACHED_WARNING = "🔍 Snapshot mode — not on an active Version Line"
 
@@ -316,10 +317,10 @@ TABLE_HEADER_TAKE_NOTES = "Take Notes"  # optional
 
 
 # === TEST STRINGS ===
-
 INITIAL_COMMIT_MESSAGE = "Initial commit message"
 CREATE_DAW_PROJECT_FOLDER_MSG = "Create a DAW project folder with a valid .als file."
-
+TEST_MSG_MAIN_NOT_FOUND = "❌ Main idea not found"
+TEST_MSG_ALT_NOT_FOUND = "❌ Alt idea not found"
 
 
 # Constants for raw strings used in the test
