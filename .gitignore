@@ -30,3 +30,5 @@ test_output.log
 # === StudioGit App-Specific ===
 .dawgit_backups/
 auto_placeholder.als
+__pycache__/
+tests_dawgit/__pycache__/
