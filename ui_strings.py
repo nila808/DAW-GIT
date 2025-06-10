@@ -468,3 +468,6 @@ ASSERT_UI_STATE_AFTER_RESTART = "❌ Repo did not reload correctly after app res
 ASSERT_MULTIPLE_WINDOWS_CLOSED = "❌ App window is not visible after multiple open/close cycles."
 ASSERT_BACK_TO_BACK_COMMITS_OK = "❌ Back-to-back commits did not result in 10+ commits."
 ASSERT_MASS_BRANCHING_SURVIVES = "❌ Branch switching failed after mass creation."
+
+
+DEBUG_PAGE_SWITCH_FAILED = "Tried to switch to unknown page key: '{key}'"
