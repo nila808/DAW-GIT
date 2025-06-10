@@ -273,7 +273,6 @@ class DAWGitApp(QMainWindow):
             self.project_path = Path(project_path) if project_path else self.load_last_path()
 
 
-
         # ✅ Load metadata and roles
         self.load_project_marker()
         self.commit_roles = {}
@@ -412,7 +411,11 @@ class DAWGitApp(QMainWindow):
     def pretty_role(self, role_key):
         return ROLE_LABEL_MAP.get(role_key, role_key.replace("_", " ").title() if role_key else "")
 
-    
+
+    def load_last_path(self):
+        settings = QSettings("StudioGit", "StudioGitApp")
+        return settings.value("last_project_path", "")
+        
 
     def maybe_show_welcome_modal(self):
         print("[DEBUG] Entering maybe_show_welcome_modal()")  # Debug entry point
@@ -1377,6 +1380,9 @@ class DAWGitApp(QMainWindow):
 
             # ✅ Always call init_git afterward to sync state/UI
             self.init_git()
+            self.update_log()
+            self.update_ui_status_labels()
+            self.snapshot_page.update_return_to_latest_visibility()
             self.open_in_daw_btn.setVisible(False)
 
         except subprocess.CalledProcessError as e:
@@ -3921,6 +3927,9 @@ class DAWGitApp(QMainWindow):
         selected = QFileDialog.getExistingDirectory(self, "Select DAW Project Folder")
         if selected:
             self.load_project(selected)
+            self.update_log()
+            self.update_ui_status_labels()
+            self.snapshot_page.update_return_to_latest_visibility()
 
 
     def is_valid_daw_folder(self, path):

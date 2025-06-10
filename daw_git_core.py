@@ -144,6 +144,25 @@ class GitProjectManager:
             return {"status": "error", "message": msg}
         
 
+    def get_current_branch(self):
+        try:
+            return self.repo.active_branch.name
+        except TypeError:
+            # Detached HEAD fallback
+            if self.repo.head.is_detached:
+                return None
+            raise
+        except Exception as e:
+            print(f"[DEBUG] ❌ Error getting current branch: {e}")
+            return None
+
+
+    def is_detached_head(self):
+        try:
+            return self.repo.head.is_detached
+        except Exception:
+            return False
+
 
     # These 2 methods are for test_commit_then_switch_branch_then_return (refresh_status and get_branch_name) 
     def refresh_status(self):

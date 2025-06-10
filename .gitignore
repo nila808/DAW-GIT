@@ -1,21 +1,32 @@
-# Ignore Python bytecode
-__pycache__/
-*.pyc
-
-# macOS system files
+# === macOS System Files ===
 .DS_Store
 
-# PyInstaller or build artifacts
+# === PyInstaller / Build Artifacts ===
 *.spec
 dist/
 build/
 
-# VSCode and JetBrains IDE configs
+# === IDE Configs ===
 .vscode/
 .idea/
 
-# Local virtual environment
+# === Local Virtual Environments ===
 daw-git-env/
-.DS_Store
 
+# === Test + Debug Output ===
 test_output.log
+*.log
+.pytest_cache/
+*.pytest_cache/
+
+# === Temporary + Backup Files ===
+*.tmp
+*.bak
+*.swp
+*.autosave
+*.backup
+*.temp
+
+# === StudioGit App-Specific ===
+.dawgit_backups/
+auto_placeholder.als
