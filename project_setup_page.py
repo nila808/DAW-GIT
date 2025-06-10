@@ -15,13 +15,20 @@ from ui_strings import (
     SETUP_REMOTE_TOOLTIP
 )
 
-
-
 class ProjectSetupPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.app = parent
         layout = QVBoxLayout(self)
+
+        # 🎛 Onboarding Header (new)
+        welcome = QLabel("🎛 Welcome to StudioGit")
+        welcome.setStyleSheet("font-size: 20px; font-weight: bold;")
+        layout.addWidget(welcome)
+
+        subtext = QLabel("Let’s get your session ready to save and version your music projects.")
+        subtext.setStyleSheet("font-size: 14px; margin-bottom: 20px;")
+        layout.addWidget(subtext)
 
         # 🎵 Project Setup Header
         self.title_label = QLabel("🎵 Project Setup")
@@ -39,7 +46,7 @@ class ProjectSetupPage(QWidget):
         self.app.project_label.setWordWrap(True)
         layout.addWidget(self.app.project_label)
 
-        # 🔍 Hidden Path Label (used in test assertions or debug)
+        # 🔍 Hidden Path Label
         self.app.path_label = QLabel(str(self.app.project_path))
         self.app.path_label.setVisible(False)
         layout.addWidget(self.app.path_label)
@@ -77,15 +84,21 @@ class ProjectSetupPage(QWidget):
         snapshot_controls.addWidget(self.restore_btn)
         layout.addLayout(snapshot_controls)
 
+        self.export_btn.clicked.connect(self.app.export_snapshot)
+        self.import_btn.clicked.connect(self.app.import_snapshot)
+        self.restore_btn.clicked.connect(self.app.restore_last_backup)
+
+        # 📡 Remote controls
         self.remote_checkbox = QCheckBox("Push to remote after snapshot")
         layout.addWidget(self.remote_checkbox)
 
         self.connect_remote_btn = QPushButton(BTN_CONNECT_REMOTE_REPO)
         self.connect_remote_btn.setToolTip(SETUP_REMOTE_TOOLTIP)
         self.connect_remote_btn.clicked.connect(self.app.connect_to_remote_repo)
-
         layout.addWidget(self.connect_remote_btn)
 
-        self.export_btn.clicked.connect(self.app.export_snapshot)
-        self.import_btn.clicked.connect(self.app.import_snapshot)
-        self.restore_btn.clicked.connect(self.app.restore_last_backup)
+        # 🧠 Status (optional dynamic label, can update later)
+        self.status_label = QLabel("✅ Git Ready: No  |  Project Selected: No")
+        layout.addWidget(self.status_label)
+
+        self.setLayout(layout)

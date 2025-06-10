@@ -33,9 +33,13 @@ from ui_strings import (
 )
 
 
-
-def pytest_configure():
+@pytest.fixture(autouse=True)
+def enforce_test_mode(tmp_path):
     os.environ["DAWGIT_TEST_MODE"] = "1"
+    os.environ["DAWGIT_FORCE_TEST_PATH"] = str(tmp_path / "test_project")
+
+# def pytest_configure():
+#     os.environ["DAWGIT_TEST_MODE"] = "1"
 
 
 @pytest.fixture

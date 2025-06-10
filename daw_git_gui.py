@@ -252,13 +252,25 @@ class DAWGitApp(QMainWindow):
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
 
         # ✅ Set project path before loading anything project-specific
-        if project_path is not None:
-            self.project_path = Path(project_path)
-        elif os.environ.get("DAWGIT_FORCE_TEST_PATH"):
-            self.project_path = Path(os.environ["DAWGIT_FORCE_TEST_PATH"])
-            print(f"[TEST MODE] Forced project path via env var: {self.project_path}")
+        if os.environ.get("DAWGIT_TEST_MODE") == "1":
+            force_path = os.environ.get("DAWGIT_FORCE_TEST_PATH", "").strip()
+
+            if project_path is not None:
+                print("➡️ Case: Explicit project_path provided")
+                self.project_path = Path(project_path)
+            elif force_path != "":
+                print("➡️ Case: Forced path from env used")
+                self.project_path = Path(force_path)
+                print(f"[TEST MODE] Forced project path via env var: {self.project_path}")
+            else:
+                print("➡️ Case: No path — setup mode")
+                self.project_path = None
+                print("[TEST MODE] No project path set — entering first-launch mode")
         else:
-            self.project_path = None
+            print("➡️ Case: Outside test mode")
+            self.project_path = Path(project_path) if project_path else self.load_last_path()
+
+
 
         # ✅ Load metadata and roles
         self.load_project_marker()
