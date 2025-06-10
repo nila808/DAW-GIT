@@ -57,7 +57,10 @@ def build_main_ui(app):
     app.setup_page = ProjectSetupPage(app)
     app.pages.add_page("setup", app.setup_page)
 
-    app.pages.switch_to("snapshots")
+    if app.project_path:
+        app.pages.switch_to("snapshots")
+    else:
+        app.pages.switch_to("setup")
 
     app.load_commit_history()
     app.history_table = app.snapshot_page.commit_table
