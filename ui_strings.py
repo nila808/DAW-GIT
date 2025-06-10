@@ -462,3 +462,18 @@ STATUS_ROLE_REMOVED = "❌ Role tag removed from {sha}"
 STATUS_TAGGED_AS_CUSTOM_LABEL = "🏷️ Tagged as '{label}'"
 
 FORBIDDEN_ROLE_LABEL_WARNING = "❌ Forbidden hardcoded role labels found:\n\n{msg}"
+
+
+# === Stress Test Constants ===
+TEST_BRANCH_PREFIX = "stress-branch-"
+TEST_TAKE_NOTE_PREFIX = "Stress Test Take"
+
+ASSERT_BRANCH_SWITCH_SUCCESS = "❌ Branch did not switch back to 'main' as expected."
+ASSERT_COMMITS_CREATED = "❌ Expected at least 5 commits after quick commit test."
+TEST_BRANCH_DELETED_ASSERTION = "❌ Branch 2 was not found after deleting other temp branches."
+
+# === Additional UI Stress Test Constants ===
+ASSERT_UI_STATE_AFTER_RESTART = "❌ Repo did not reload correctly after app restart."
+ASSERT_MULTIPLE_WINDOWS_CLOSED = "❌ App window is not visible after multiple open/close cycles."
+ASSERT_BACK_TO_BACK_COMMITS_OK = "❌ Back-to-back commits did not result in 10+ commits."
+ASSERT_MASS_BRANCHING_SURVIVES = "❌ Branch switching failed after mass creation."

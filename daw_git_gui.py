@@ -180,8 +180,9 @@ from ui_strings import (
     CREATE_VERSION_LINE_MSG, 
     ABLETON_MAY_BE_OPEN_TITLE,
     ABLETON_MAY_BE_OPEN_MSG, 
-    NEW_PROJECT_SELECTED_MSG, 
-    STATUS_ON_LATEST_VERSION
+    NEW_PROJECT_SELECTED_MSG
+
+
 )
 
 
@@ -306,7 +307,7 @@ class DAWGitApp(QMainWindow):
             if self.repo:
                 self.load_commit_roles()
 
-                if self.repo.head.is_detached:
+                if self.is_snapshot_mode():
                     print("[DEBUG] Repo is in detached HEAD state")
                     self._show_warning(
                         "🎛️ You're browsing a past version of your session.\n\n"
@@ -348,7 +349,7 @@ class DAWGitApp(QMainWindow):
                 if self.repo:
                     self.load_commit_roles()
 
-                    if self.repo.head.is_detached:
+                    if self.is_snapshot_mode():
                         print("[DEBUG] Repo is in detached HEAD state (user-selected project)")
                         self._show_warning(
                             "🎛️ You're browsing a past version of your session.\n\n"
@@ -565,6 +566,29 @@ class DAWGitApp(QMainWindow):
             self.load_commit_history()
             self.update_project_label()
             self.status_message(f"🎵 Changed project folder to: {self.project_path}")
+
+
+    def is_snapshot_mode(self) -> bool:
+        if not self.repo or not self.project_path:
+            return True  # No project = no editing
+
+        try:
+            # HEAD may not exist in early states
+            head_commit = self.repo.commit("HEAD")
+
+            # No branches at all
+            if not self.repo.branches:
+                return True
+
+            # Detached HEAD = snapshot
+            if self.repo.head.is_detached:
+                return True
+
+            return head_commit != self.repo.active_branch.commit
+
+        except Exception as e:
+            print(f"[WARN] Snapshot mode check failed: {e}")
+            return True
 
 
     def clear_last_project_path(self):
@@ -830,7 +854,7 @@ class DAWGitApp(QMainWindow):
             self.snapshot_mode_label.setText(SNAPSHOT_NO_VERSION_LINE)
             return
 
-        if self.repo.head.is_detached:
+        if self.is_snapshot_mode():
             self.snapshot_mode_label.setText(SNAPSHOT_UNKNOWN_STATE)
 
         else:
@@ -965,7 +989,7 @@ class DAWGitApp(QMainWindow):
                 return
 
             # 🎯 If in detached HEAD, switch back to 'main'
-            if self.repo.head.is_detached:
+            if self.is_snapshot_mode():
                 print("[DEBUG] Repo is in detached HEAD. Attempting to switch to 'main'")
                 try:
                     self.repo.git.checkout("main", force=True)
@@ -1105,14 +1129,14 @@ class DAWGitApp(QMainWindow):
                         return
 
                     self.repo = Repo(self.project_path)
-                    if self.repo.head.is_detached:
+                    if self.is_snapshot_mode():
                         print("[ERROR] Repo is still detached after checkout.")
                         self._show_error("❌ Repo is still detached after checkout.")
                         return
 
                     # ✅ Immediately verify HEAD is not detached
                     self.repo = Repo(self.project_path)
-                    if self.repo.head.is_detached:
+                    if self.is_snapshot_mode():
                         print("[ERROR] Repo is still detached after checkout.")
                         self._show_error("❌ Repo is still detached after checkout.")
                         return
@@ -1153,7 +1177,7 @@ class DAWGitApp(QMainWindow):
                 # ✅ Update snapshot UI state
                 self.update_snapshot_status_labels()
 
-                if self.repo.head.is_detached:
+                if self.is_snapshot_mode():
                     self.branch_label.setText(
                         SESSION_BRANCH_LABEL.format(
                             branch=self.repo.active_branch.name,
@@ -1748,7 +1772,7 @@ class DAWGitApp(QMainWindow):
             # ✅ Step 2: Create placeholder DAW file if none exist
             daw_files = list(Path(self.project_path).glob("*.als")) + list(Path(self.project_path).glob("*.logicx"))
             if not daw_files:
-                if self.repo.head.is_detached:
+                if self.is_snapshot_mode():
                     placeholder_path = Path(self.project_path) / "auto_placeholder.als"
                     placeholder_path.write_text("Temporary placeholder for version line start")
                     files_to_commit.append(placeholder_path.relative_to(self.project_path).as_posix())
@@ -1899,7 +1923,7 @@ class DAWGitApp(QMainWindow):
 
         try:
             # Branch name
-            if self.repo.head.is_detached:
+            if self.is_snapshot_mode():
                 branch = "(detached)"
             else:
                 branch = self.repo.active_branch.name
@@ -2492,7 +2516,7 @@ class DAWGitApp(QMainWindow):
 
         body = f"{label}\n\n" + ("-" * 40) + f"\n\nCommitted: {timestamp}"
 
-        if self.repo.head.is_detached:
+        if self.is_snapshot_mode():
             body += (
                 "\n\n📦 Snapshot loaded — read-only mode.\n"
                 "You can explore safely.\n\n"
@@ -2829,7 +2853,7 @@ class DAWGitApp(QMainWindow):
                 )
                 return
 
-            if self.repo.head.is_detached:
+            if self.is_snapshot_mode():
                 confirm = QMessageBox.question(
                     self,
                     SNAPSHOT_SWITCH_WARNING_TITLE,
@@ -3495,7 +3519,7 @@ class DAWGitApp(QMainWindow):
                 )
                 return {"status": "error", "message": "No branches available."}
 
-            if self.repo.head.is_detached:
+            if self.is_snapshot_mode():
                 choice = QMessageBox.question(
                     self,
                     SNAPSHOT_SWITCH_WARNING_TITLE,
@@ -3732,20 +3756,8 @@ class DAWGitApp(QMainWindow):
             return
 
         try:
-            if self.repo.head.is_detached:
-                try:
-                    # Check if HEAD SHA == latest commit SHA on main
-                    main_sha = self.repo.commit("main").hexsha
-                    head_sha = self.repo.head.commit.hexsha
-                    if head_sha == main_sha:
-                        self.snapshot_page.status_label.setText(STATUS_ON_LATEST_VERSION)
-                    else:
-                        self.snapshot_page.status_label.setText(SNAPSHOT_LOAD_SUCCESS)  # Read-only mode
-                except Exception as e:
-                    print(f"[DEBUG] Could not resolve main SHA: {e}")
-                    self.snapshot_page.status_label.setText(SNAPSHOT_LOAD_SUCCESS)
-            
-
+            if self.is_snapshot_mode():
+                self.snapshot_page.status_label.setText(SNAPSHOT_LOAD_SUCCESS)
                 print("[DEBUG] status label set: ℹ️ Detached snapshot — not on an active version line")
 
             else:
@@ -3785,7 +3797,7 @@ class DAWGitApp(QMainWindow):
                             "❌ Tagging is only available on active version lines."
                             if self.repo.head.is_detached else ""
                         )
-                        if self.repo.head.is_detached:
+                        if self.is_snapshot_mode():
                             btn.hide()
                         else:
                             btn.show()
