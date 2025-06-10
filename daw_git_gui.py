@@ -19,6 +19,7 @@ import traceback
 # --- App Modules ---
 from gui_layout import build_main_ui
 from daw_git_core import GitProjectManager
+from pages_controller import PagesController
 from daw_git_core import sanitize_git_input
 from ui_strings import (
     # === General Status & Info ===
@@ -38,6 +39,7 @@ from ui_strings import (
     ALREADY_ON_COMMIT_MESSAGE,
 
     # === Snapshot View / State ===
+    AUTO_SAVE_TITLE,
     SNAPSHOT_INFO_TITLE,
     SNAPSHOT_INFO_MSG,
     SNAPSHOT_ALREADY_VIEWING_TITLE,
@@ -2626,6 +2628,18 @@ class DAWGitApp(QMainWindow):
                 "Auto Commit Failed",
                 f"⚠️ Unexpected error while saving your session:\n\n{e}"
             )
+
+    def goto_commit_page(self):
+        self.pages.switch_to("commit")
+
+    def goto_snapshot_browser(self):
+        self.pages.switch_to("snapshots")
+
+    def goto_branch_page(self):
+        self.pages.switch_to("branch")
+
+    def goto_setup_page(self):
+        self.pages.switch_to("setup")
 
 
     def normalize_branch_name(self, name: str) -> str:
