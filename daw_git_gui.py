@@ -343,6 +343,8 @@ class DAWGitApp(QMainWindow):
             self.repo_mgr.init_repo()  # ✅ ensure repo is initialized for tests
 
         elif build_ui:
+            from PyQt6.QtWidgets import QMessageBox  # ✅ FIX: ensures warning resolves in method scope
+           
             folder = QFileDialog.getExistingDirectory(self, "🎵 Select Your DAW Project Folder")
             if folder:
                 selected_path = Path(folder)

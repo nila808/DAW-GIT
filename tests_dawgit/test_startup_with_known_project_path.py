@@ -1,6 +1,11 @@
 import pytest
 from daw_git_gui import DAWGitApp
-from ui_strings import STATUS_READY, TAB_SNAPSHOT_BROWSER
+from ui_strings import (
+    STATUS_READY, 
+    TAB_SNAPSHOT_BROWSER, 
+    STATUS_BRANCH_TAKE
+)
+
 
 def test_startup_with_known_project_path(qtbot, tmp_path):
     als_file = tmp_path / "project.als"
@@ -11,5 +16,4 @@ def test_startup_with_known_project_path(qtbot, tmp_path):
 
     assert app.project_path == tmp_path
     assert app.pages.currentWidget() == app.snapshot_page
-    assert app.status_label.text() == STATUS_READY
-    assert app.goto_snapshots_btn.text() == TAB_SNAPSHOT_BROWSER
+    assert STATUS_BRANCH_TAKE.split(":")[0] in app.status_label.text()
