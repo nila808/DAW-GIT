@@ -2,25 +2,39 @@ import ui_strings
 import pytest
 from unittest.mock import patch
 from daw_git_gui import DAWGitApp
+from git import Repo
 
 def test_remote_connect_push(monkeypatch, tmp_path):
-    from daw_git_gui import DAWGitApp
-    import subprocess
-
-    repo = subprocess.run(["git", "init"], cwd=tmp_path, check=True)
+    # ✅ Init actual Git repo first
+    repo = Repo.init(tmp_path)
     (tmp_path / "test.als").write_text("Ableton data")
-    subprocess.run(["git", "add", "."], cwd=tmp_path)
-    subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path)
+    repo.index.add(["test.als"])
+    repo.index.commit("init")
 
-    app = DAWGitApp(project_path=str(tmp_path), build_ui=False)
+    # ✅ Launch DAWGitApp after repo exists
+    app = DAWGitApp(project_path=tmp_path, build_ui=False)
 
-    # Patch dialog to auto-fill remote URL and confirm
-    monkeypatch.setattr("PyQt6.QtWidgets.QInputDialog.getText", lambda *a, **kw: ("https://github.com/your-user/your-test-repo.git", True))
+    # ✅ Stub UI elements to prevent attr errors
+    from PyQt6.QtWidgets import QLabel
+    app.branch_label = QLabel()
+    app.commit_label = QLabel()
+    app.update_status_label = lambda: None
 
-    # Run remote connect
+    app.init_git()
+    assert app.repo is not None
+
+    # ✅ Patch dialog input
+    monkeypatch.setattr(
+        "PyQt6.QtWidgets.QInputDialog.getText",
+        lambda *a, **kw: ("https://github.com/test/test.git", True)
+    )
+
+    # 🚀 Attempt remote connect
     app.connect_to_remote_repo()
 
+    # ✅ Check
     assert "origin" in [r.name for r in app.repo.remotes]
+
 
 
 def test_remote_push_failure_shows_warning(qtbot, tmp_path, monkeypatch):

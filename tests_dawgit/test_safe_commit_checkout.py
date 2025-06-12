@@ -5,9 +5,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 import pytest
 from git import Repo
 from daw_git_gui import DAWGitApp
+from PyQt6.QtWidgets import QLabel
+
 
 def test_untracked_file_warning_on_checkout(tmp_path):
-    from daw_git_gui import DAWGitApp
 
     # Step 1: Init repo with valid .als file
     repo = Repo.init(tmp_path)
@@ -27,6 +28,10 @@ def test_untracked_file_warning_on_checkout(tmp_path):
 
     # Step 4: Launch app and try checkout
     app = DAWGitApp(project_path=tmp_path, build_ui=False)
+
+    app.branch_label = QLabel()
+    app.commit_label = QLabel()
+    app.update_status_label = lambda: None
     app.init_git()
 
     old_commit_sha = list(repo.iter_commits("HEAD", max_count=2))[1].hexsha

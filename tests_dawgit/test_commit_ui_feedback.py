@@ -10,6 +10,8 @@ from pathlib import Path
 from git import Repo
 from daw_git_gui import DAWGitApp
 from PyQt6.QtWidgets import QMessageBox
+from ui_strings import BRANCH_LABEL_PREFIX
+
 
 def test_empty_commit_message_blocked(qtbot, app, monkeypatch):
     """Should show a warning and block commit if message is empty."""
@@ -69,7 +71,7 @@ def test_commit_updates_branch_and_commit_labels(qtbot, app):
 
     app.commit_changes("Test label update")
 
-    assert "Branch:" in app.branch_label.text()
+    assert BRANCH_LABEL_PREFIX in app.branch_label.text()
     assert len(app.commit_label.text().split("Commit:")[1].strip()) >= 6
 
 

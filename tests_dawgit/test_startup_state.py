@@ -147,3 +147,36 @@ def test_session_label_updates_on_return_to_latest(app):
     label_text = app.branch_label.text().lower()
     assert "version line" in label_text
     assert "take" in label_text
+
+
+def test_head_and_ui_branch_match(app):
+    """
+    AT-HOTFIX-001 — Ensure UI branch label matches actual Git HEAD branch on startup.
+    """
+    repo = app.repo
+    if repo.head.is_detached:
+        pytest.skip("HEAD is detached, cannot assert branch name")
+
+    current_branch = repo.active_branch.name.lower()
+    label_text = app.branch_label.text().lower()
+    assert current_branch in label_text, f"Expected branch '{current_branch}' in label: {label_text}"
+
+def test_head_commit_shows_in_ui(app):
+    """
+    AT-HOTFIX-002 — Ensure HEAD commit SHA appears in UI commit label tooltip or text.
+    """
+    current_sha = app.repo.head.commit.hexsha[:7]
+    tooltip = app.commit_label.toolTip() or ""
+    label = app.commit_label.text() or ""
+    assert current_sha in tooltip or current_sha in label, (
+        f"Expected HEAD SHA '{current_sha}' in UI. Got label='{label}' tooltip='{tooltip}'"
+    )
+
+def test_session_status_label_updates_on_load(app):
+    """
+    AT-HOTFIX-003 — Ensure session status label is not default or unknown after project load.
+    """
+    status_text = app.status_label.text()
+    assert "Version Line" in status_text and "Take" in status_text, (
+        f"Expected session info in status label, got: {status_text}"
+    )

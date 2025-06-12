@@ -233,6 +233,14 @@ class DAWGitApp(QMainWindow):
     def __init__(self, project_path=None, build_ui=True):
         super().__init__()
 
+        if not build_ui:
+            # ✅ Patch for headless test mode: create dummy label references
+            self.commit_label = type("Stub", (), {"setText": lambda *_: None, "setToolTip": lambda *_: None})()
+            self.project_label = type("Stub", (), {"setText": lambda *_: None})()
+            self.snapshot_page = type("StubPage", (), {"status_label": type("Stub", (), {"setText": lambda *_: None})()})()
+            self.update_status_label = lambda: None
+            self.update_session_label = lambda: None
+
         self.settings_path = Path.home() / ".dawgit_settings"
         self.repo = None
         self.current_commit_id = None
@@ -339,7 +347,8 @@ class DAWGitApp(QMainWindow):
                 if hasattr(self, "status_label"):
                     self.snapshot_page.status_label.setText(INVALID_REPO_MSG)
 
-            self.repo_mgr = GitProjectManager(project_path)  # always available
+            # self.repo_mgr = GitProjectManager(project_path)  # always available
+            self.repo_mgr = GitProjectManager(project_path, app=self)
             self.repo_mgr.init_repo()  # ✅ ensure repo is initialized for tests
 
         elif build_ui:
@@ -763,8 +772,7 @@ class DAWGitApp(QMainWindow):
 
     def init_git(self):
         print("[DEBUG] Calling GitProjectManager.init_repo()")
-
-        self.git = GitProjectManager(self.project_path)
+        self.git = GitProjectManager(self.project_path, app=self)  # ✅ Only call once
         result = self.git.init_repo()
 
         if result["status"] == "ok":
@@ -772,8 +780,13 @@ class DAWGitApp(QMainWindow):
             self.save_last_project_path()
             self.load_commit_roles()
 
-            if hasattr(self, "update_status_label"):
-                self.update_status_label()
+            if self.repo and self.repo.head.is_valid():
+                if hasattr(self, "branch_label"):
+                    self.update_branch_label()
+                if hasattr(self, "commit_label"):
+                    self.update_commit_label()
+                if hasattr(self, "status_label"):
+                    self.update_status_label()
 
             if hasattr(self, "history_table") and self.repo.head.is_valid():
                 self.current_commit_id = self.repo.head.commit.hexsha
@@ -1531,14 +1544,20 @@ class DAWGitApp(QMainWindow):
 
 
     def update_branch_label(self):
-        if self.repo.head.is_valid():
+        if self.repo and self.repo.head.is_valid():
             try:
                 branch = self.repo.active_branch.name
             except TypeError:
-                branch = str(self.repo.head.ref) if self.repo.head.ref else "detached"
-            self.branch_label.setText(f"Branch: {branch}")
+                if self.repo.head.is_detached:
+                    branch = "detached"
+                else:
+                    branch = "unknown"
+            if hasattr(self, "branch_label"):
+                self.branch_label.setText(f"🪄 Version Line: {branch}")
         else:
-            self.branch_label.setText(CURRENT_BRANCH_UNKNOWN)
+            if hasattr(self, "branch_label"):
+                self.branch_label.setText(CURRENT_BRANCH_UNKNOWN)
+
 
     def update_commit_label(self):
         if self.repo.head.is_valid():
@@ -2665,8 +2684,9 @@ class DAWGitApp(QMainWindow):
                     take_label = msg if len(msg) < 60 else "(Unnamed Take)"
                 except Exception:
                     take_label = "(Unknown)"
-
-            self.branch_label.setText(f"Version Line: {branch_name.upper()} • Current take: {take_label}")
+            
+            if hasattr(self, "branch_label"):
+                self.branch_label.setText(f"Version Line: {branch_name.upper()} • Current take: {take_label}")
 
         else:
             self._show_warning(result.get("message", "Failed to switch session."))

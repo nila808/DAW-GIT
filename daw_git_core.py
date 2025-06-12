@@ -19,7 +19,7 @@ def sanitize_git_input(user_input: str, allow_spaces=False):
 
 
 class GitProjectManager:
-    def __init__(self, project_path):
+    def __init__(self, project_path, app):
         if project_path is None:
             self.project_path = None
             self.repo = None
@@ -27,6 +27,7 @@ class GitProjectManager:
             return  # ✅ Exit early — invalid path
 
         self.project_path = Path(project_path)
+        self.app = app  # ✅ Add this to access labels
         self.repo = None
         self.env_path = "/usr/local/bin:/opt/homebrew/bin:" + os.environ["PATH"]
         self.init_repo()
@@ -112,6 +113,20 @@ class GitProjectManager:
                 print("✅ New Git repo initialized.")
                 self.repo.index.add([str(f.relative_to(self.project_path)) for f in daw_files])
                 self.repo.index.commit("Initial commit")
+                
+            # ✅ UI label sync
+            if self.app:
+                short_sha = self.repo.head.commit.hexsha[:7]
+                self.app.commit_label.setText(f"🎧 Editing: {short_sha}")
+                self.app.commit_label.setToolTip(short_sha)
+
+                if not self.repo.head.is_detached:
+                    self.app.branch_label.setText(f"🎼 {self.repo.active_branch.name}")
+                else:
+                    self.app.branch_label.setText("🎼 Detached Take")
+
+                if hasattr(self.app, "update_session_label"):
+                    self.app.update_session_label()
 
         except Exception as e:
             print(f"❌ Failed to initialize Git repo: {e}")
